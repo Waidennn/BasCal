@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Material Viewer - BasCal</title>
+    <link rel="stylesheet" href="flex-calc-design-system.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        body {
+            background: var(--gray-50);
+        }
+
+        .viewer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-6);
+        }
+
+        .viewer-header {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .material-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gray-900);
+        }
+
+        .material-meta {
+            display: flex;
+            gap: var(--space-4);
+            color: var(--gray-500);
+            font-size: 14px;
+            margin-top: var(--space-2);
+        }
+
+        .viewer-content {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            box-shadow: var(--shadow-sm);
+            min-height: 600px;
+        }
+
+        /* TTS Controls */
+        .tts-controls {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .tts-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tts-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .tts-btn:active {
+            transform: translateY(0);
+        }
+
+        .tts-status {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* PDF Viewer */
+        .pdf-viewer {
+            width: 100%;
+            height: 800px;
+            border: none;
+        }
+
+        /* Image Viewer */
+        .image-viewer {
+            text-align: center;
+        }
+
+        .image-viewer img {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--radius-lg);
+        }
+
+        /* Video Player */
+        .video-player {
+            width: 100%;
+            max-width: 100%;
+            border-radius: var(--radius-lg);
+        }
+
+        /* Document Viewer (for extracted text) */
+        .doc-viewer {
+            font-family: 'Georgia', serif;
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--gray-800);
+        }
+
+        .doc-viewer h1, .doc-viewer h2, .doc-viewer h3 {
+            color: var(--gray-900);
+            margin-top: var(--space-6);
+            margin-bottom: var(--space-3);
+        }
+
+        .doc-viewer p {
+            margin-bottom: var(--space-4);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: var(--space-20);
+        }
+
+        .spinner {
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto var(--space-5);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+		
+/* ========================================
+   RESPONSIVENESS & MOBILE OPTIMIZATION
+   ======================================== */
+
+@media (max-width: 768px) {
+    .viewer-container {
+        padding: var(--space-3);
+    }
+
+    .viewer-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-4);
+        padding: var(--space-4);
+    }
+
+    .material-title {
+        font-size: 18px;
+    }
+
+    .viewer-content {
+        padding: var(--space-4);
+        min-height: 400px;
+    }
+
+    /* PDF is tricky on mobile, so we adjust height */
+    .pdf-viewer {
+        height: 500px;
+    }
+
+    /* Floating TTS Controls adjustment for mobile */
+    .tts-controls {
+        bottom: 16px;
+        right: 16px;
+        left: 16px; /* Full width on mobile */
+        padding: 12px;
+        justify-content: center;
+    }
+
+    .tts-status {
+        display: none; /* Hide text status to save space */
+    }
+}
+
+/* Smart PDF Alert for Mobile */
+.mobile-pdf-warning {
+    display: none;
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    color: #856404;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+    .mobile-pdf-warning {
+        display: block; /* Show only on phones */
+    }
+    
+    /* Hide iframe on very small screens if it causes issues */
+    .pdf-viewer.mobile-hidden {
+        display: none;
+    }
+}
+
+/* Hamburger Button Style */
+.mobile-menu-toggle {
+    display: none; /* Hidden by default on desktop */
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: var(--gray-900);
+    padding: 8px;
+}
+
+/* Mobile Nav Drawer Style */
+.mobile-nav {
+    display: block;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: white;
+    z-index: 999;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.mobile-nav.active {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        display: none; /* Hide desktop links */
+    }
+    .mobile-menu-toggle {
+        display: block; /* Show hamburger on mobile */
+    }
+}
+    </style>
+</head>
+<body>
+    <!-- ========================================
+         DUAL NAVBAR - Student & Teacher
+         Will show appropriate one based on role
+         ======================================== -->
+    
+    <!-- STUDENT NAVBAR -->
+<nav class="navbar" id="studentNavbar" style="display: none;">
+    <div class="nav-content">
+        <a href="student-dashboard.html" class="logo">
+            <div class="logo-icon">📊</div>
+            <div class="logo-text">BasCal</div>
+        </a>
+        <div class="nav-links">
+            <a href="student-dashboard.html" class="nav-link">Dashboard</a>
+            <a href="module-browser.html" class="nav-link">Modules</a>
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+    </div>
+</nav>
+
+<nav class="navbar" id="teacherNavbar" style="display: none;">
+    <div class="nav-content">
+        <a href="teacher-dashboard.html" class="logo">
+            <div class="logo-icon">📐</div>
+            <div class="logo-text">BasCal</div>
+        </a>
+        <div class="nav-links">
+            <a href="teacher-dashboard.html" class="nav-link">Dashboard</a>
+            <a href="manage-modules.html" class="nav-link">Manage Modules</a>
+            <a href="analytics-teacher.html" class="nav-link">Analytics</a>
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+    </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav-content" id="mobileNavLinks">
+        </div>
+</div>
+    <div class="viewer-container">
+        <!-- Header -->
+        <div class="viewer-header">
+            <div>
+                <div class="material-title" id="materialTitle">Loading...</div>
+                <div class="material-meta">
+                    <span id="fileType"></span>
+                    <span id="fileSize"></span>
+                    <span id="uploadDate"></span>
+                </div>
+            </div>
+            <div>
+                <button onclick="goBack()" class="btn btn-ghost">
+                    ← Back to Module
+                </button>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="viewer-content" id="viewerContent">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p style="color: var(--gray-600); font-weight: 600;">Loading material...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TTS Controls (shows for text-based content) -->
+    <div class="tts-controls" id="ttsControls" style="display: none;">
+        <button class="tts-btn" id="ttsPlayBtn" onclick="playTTS()" title="Play">
+            ▶️
+        </button>
+        <button class="tts-btn" id="ttsPauseBtn" onclick="pauseTTS()" style="display: none;" title="Pause">
+            ⏸️
+        </button>
+        <button class="tts-btn" id="ttsStopBtn" onclick="stopTTS()" title="Stop">
+            ⏹️
+        </button>
+        <div class="tts-status" id="ttsStatus">Ready</div>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.location.origin;
+        let materialData = null;
+        let ttsUtterance = null;
+        let ttsEnabled = false;
+
+        // Get material ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const materialId = urlParams.get('id');
+
+        // 🎯 ROLE DETECTION - Get user role from token
+        let userRole = 'student'; // default
+        let userName = 'User';
+        
+        function getUserFromToken() {
+            try {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const rawRole = payload.role || 'student';
+                    
+                    // 🔧 NORMALIZE ROLE: 'educator' and 'teacher' are treated the same
+                    userRole = (rawRole === 'educator' || rawRole === 'teacher') ? 'teacher' : rawRole;
+                    userName = payload.username || payload.name || 'User';
+                    
+                    console.log('🔐 User Role:', rawRole, '(normalized to:', userRole + ') | Name:', userName);
+                }
+            } catch (error) {
+                console.error('Error decoding token:', error);
+            }
+        }
+
+        // 🔧 DYNAMIC NAVIGATION - Show/hide correct navbar based on role
+        function updateNavigation() {
+			const isTeacher = userRole === 'teacher';
+			const mobileLinks = document.getElementById('mobileNavLinks');
+    
+			if (isTeacher) {
+				document.getElementById('teacherNavbar').style.display = 'block';
+				document.getElementById('studentNavbar').style.display = 'none';
+        
+				// Mobile Links for Teacher
+				mobileLinks.innerHTML = `
+					<a href="teacher-dashboard.html" class="nav-link">Dashboard</a>
+					<a href="manage-modules.html" class="nav-link">Manage Modules</a>
+					<a href="analytics-teacher.html" class="nav-link">Analytics</a>
+					<button onclick="logout()" class="logout-btn" style="width: 100%; margin-top: 10px;">Logout</button>
+				`;
+			} else {
+				document.getElementById('studentNavbar').style.display = 'block';
+				document.getElementById('teacherNavbar').style.display = 'none';
+        
+				// Mobile Links for Student
+				mobileLinks.innerHTML = `
+					<a href="student-dashboard.html" class="nav-link">Dashboard</a>
+					<a href="module-browser.html" class="nav-link">Modules</a>
+					<button onclick="logout()" class="logout-btn" style="width: 100%; margin-top: 10px;">Logout</button>
+				`;
+			}
+		}
+
+        // Initialize role detection
+        getUserFromToken();
+
+        // Load material on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateNavigation();
+            loadMaterial();
+        });
+
+        async function loadMaterial() {
+            if (!materialId) {
+                alert('Invalid material link');
+                window.close();
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(
+                    `${API_BASE_URL}/api/materials/${materialId}`,
+                    {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to load material');
+
+                const data = await response.json();
+                materialData = data.material || data; // Handle both formats
+                renderMaterial(materialData);
+
+            } catch (error) {
+                console.error('Load material error:', error);
+                document.getElementById('viewerContent').innerHTML = `
+                    <div style="text-align: center; padding: var(--space-20);">
+                        <div style="font-size: 64px; margin-bottom: var(--space-5);">❌</div>
+                        <h3>Failed to load material</h3>
+                        <p style="color: var(--gray-500);">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderMaterial(material) {
+            // Update header
+            document.getElementById('materialTitle').textContent = material.title;
+            document.getElementById('fileType').textContent = `📂 ${material.file_type.toUpperCase()}`;
+            document.getElementById('fileSize').textContent = `📏 ${formatFileSize(material.file_size)}`;
+            document.getElementById('uploadDate').textContent = 
+                `📅 ${new Date(material.uploaded_at).toLocaleDateString()}`;
+
+            // Render content based on file type
+            const contentDiv = document.getElementById('viewerContent');
+            
+            const fileType = material.file_type.toLowerCase();
+            
+            if (fileType.includes("pdf")) {
+                renderPDF(material, contentDiv);
+            } else if (fileType.includes("image") || fileType.includes("jpeg") || fileType.includes("jpg") || fileType.includes("png") || fileType.includes("gif")) {
+                renderImage(material, contentDiv);
+            } else if (fileType.includes("video") || fileType.includes("mp4")) {
+                renderVideo(material, contentDiv);
+            } else if (fileType.includes("audio") || fileType.includes("mp3") || fileType.includes("wav")) {
+                renderAudio(material, contentDiv);
+            } else if (fileType.includes("document") || fileType.includes("word") || fileType.includes("text")) {
+                renderDocument(material, contentDiv);
+            } else {
+                renderDownload(material, contentDiv);
+            }
+
+            // Track view
+            trackView(materialId);
+        }
+
+        function renderPDF(material, container) {
+            container.innerHTML = `
+                <iframe class="pdf-viewer" 
+                        src="${material.file_url}#toolbar=1&navpanes=1&scrollbar=1"
+                        title="${material.title}">
+                </iframe>
+                <div style="margin-top: 16px; padding: 12px; background: #f0f4ff; border-radius: 8px; text-align: center;">
+                    <button onclick="extractAndReadPDF()" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                        🔊 Extract Text & Enable TTS
+                    </button>
+                    <div id="extractionStatus" style="margin-top: 8px; color: #666; font-size: 14px;"></div>
+                </div>
+            `;
+        }
+
+        function renderImage(material, container) {
+            container.innerHTML = `
+                <div class="image-viewer">
+                    <img src="${material.file_url}" alt="${material.title}">
+                    ${material.description ? `
+                        <p style="margin-top: var(--space-4); color: var(--gray-600);">
+                            ${material.description}
+                        </p>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function renderVideo(material, container) {
+            container.innerHTML = `
+                <video class="video-player" controls>
+                    <source src="${material.file_url}" type="video/mp4">
+                    Your browser does not support video playback.
+                </video>
+                ${material.description ? `
+                    <p style="margin-top: var(--space-4); color: var(--gray-600);">
+                        ${material.description}
+                    </p>
+                ` : ''}
+            `;
+        }
+
+        function renderAudio(material, container) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: var(--space-10);">
+                    <div style="font-size: 80px; margin-bottom: var(--space-5);">🎵</div>
+                    <h3 style="margin-bottom: var(--space-5);">${material.title}</h3>
+                    <audio controls style="width: 100%; max-width: 600px;">
+                        <source src="${material.file_url}" type="audio/mpeg">
+                        Your browser does not support audio playback.
+                    </audio>
+                    ${material.description ? `
+                        <p style="margin-top: var(--space-4); color: var(--gray-600);">
+                            ${material.description}
+                        </p>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function renderDocument(material, container) {
+            // For documents, show extracted text with TTS support
+            container.innerHTML = `
+                <div class="doc-viewer">
+                    ${material.content || material.extracted_text || '<p>No text content available</p>'}
+                </div>
+            `;
+
+            // Setup TTS
+            const text = container.textContent;
+            if (text) {
+                setupTTS(text);
+            }
+        }
+
+        function renderDownload(material, container) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: var(--space-20);">
+                    <div style="font-size: 80px; margin-bottom: var(--space-5);">📎</div>
+                    <h3 style="margin-bottom: var(--space-3);">${material.title}</h3>
+                    <p style="color: var(--gray-600); margin-bottom: var(--space-6);">
+                        This file type cannot be previewed. Download to view.
+                    </p>
+                    <a href="${material.file_url}" download class="btn btn-primary">
+                        <span>⬇️</span> Download File
+                    </a>
+                </div>
+            `;
+        }
+
+        // TTS Functions
+        function setupTTS(text) {
+            if (!('speechSynthesis' in window)) {
+                console.log('TTS not supported');
+                return;
+            }
+			
+			window.speechSynthesis.cancel();
+			
+            ttsEnabled = true;
+            ttsUtterance = new SpeechSynthesisUtterance(text);
+            ttsUtterance.rate = 1.0;
+            ttsUtterance.pitch = 1.0;
+            ttsUtterance.volume = 1.0;
+
+            ttsUtterance.onstart = () => {
+                document.getElementById('ttsPlayBtn').style.display = 'none';
+                document.getElementById('ttsPauseBtn').style.display = 'flex';
+                document.getElementById('ttsStatus').textContent = 'Playing...';
+            };
+
+            ttsUtterance.onend = () => {
+                document.getElementById('ttsPlayBtn').style.display = 'flex';
+                document.getElementById('ttsPauseBtn').style.display = 'none';
+                document.getElementById('ttsStatus').textContent = 'Finished';
+            };
+
+            document.getElementById('ttsControls').style.display = 'flex';
+        }
+
+        function playTTS() {
+            if (!ttsUtterance) return;
+            
+            if (window.speechSynthesis.paused) {
+                window.speechSynthesis.resume();
+            } else {
+                window.speechSynthesis.speak(ttsUtterance);
+            }
+        }
+
+        function pauseTTS() {
+            window.speechSynthesis.pause();
+            document.getElementById('ttsPlayBtn').style.display = 'flex';
+            document.getElementById('ttsPauseBtn').style.display = 'none';
+            document.getElementById('ttsStatus').textContent = 'Paused';
+        }
+
+        function stopTTS() {
+            window.speechSynthesis.cancel();
+            document.getElementById('ttsPlayBtn').style.display = 'flex';
+            document.getElementById('ttsPauseBtn').style.display = 'none';
+            document.getElementById('ttsStatus').textContent = 'Stopped';
+        }
+
+        // Track material view
+        async function trackView(materialId) {
+            try {
+                const token = localStorage.getItem('token');
+                await fetch(`${API_BASE_URL}/api/student/materials/${materialId}/view`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            } catch (error) {
+                console.error('Track view error:', error);
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'auth.html';
+        }
+
+        // 🔙 SMART BACK BUTTON - Navigate to correct page based on role
+        function goBack() {
+            // Try to get module_id from URL params or referrer
+            const urlParams = new URLSearchParams(window.location.search);
+            const moduleId = urlParams.get('module_id') || urlParams.get('moduleId');
+            
+            if (userRole === 'teacher') {
+                // Teacher: go back to module-view-teacher.html or manage-modules.html
+                if (moduleId) {
+                    window.location.href = `module-view-teacher.html?id=${moduleId}`;
+                } else {
+                    window.location.href = 'manage-modules.html';
+                }
+            } else {
+                // Student: go back to module-content.html or module-browser.html
+                if (moduleId) {
+                    window.location.href = `module-content.html?id=${moduleId}`;
+                } else {
+                    window.location.href = 'module-browser.html';
+                }
+            }
+        }
+        // PDF Text Extraction for TTS
+        let currentPDFUrl = null;
+
+        async function extractAndReadPDF() {
+			if (!materialData || !materialData.file_url) {
+				alert('No PDF loaded');
+				return;
+			}
+
+			const statusDiv = document.getElementById('extractionStatus');
+			const pdfFrame = document.getElementById('pdfFrame'); // Siguraduhin na may ID ang iframe mo
+			const isMobile = window.innerWidth <= 768; // Detection para sa mobile devices
+
+			statusDiv.textContent = '⏳ Extracting text from PDF...';
+
+			// 📱 MOBILE OPTIMIZATION:
+			// Kung phone ang gamit, itatago natin ang PDF viewer para lumuwag ang RAM
+			// at hindi mag-conflict ang browser resource sa TTS.
+			if (isMobile && pdfFrame) {
+				pdfFrame.style.display = 'none';
+				statusDiv.innerHTML = '⏳ <strong>Mobile Mode:</strong> Hiding PDF viewer to prioritize Speech Engine...';
+			}
+
+			try {
+				// Set PDF.js worker
+				pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+				// Load PDF
+				const loadingTask = pdfjsLib.getDocument(materialData.file_url);
+				const pdf = await loadingTask.promise;
+
+				let fullText = '';
+
+				// Extract text from all pages
+				for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+					const page = await pdf.getPage(pageNum);
+					const textContent = await page.getTextContent();
+					const pageText = textContent.items.map(item => item.str).join(' ');
+					fullText += pageText + '\n\n';
+				}
+
+				if (fullText.trim().length === 0) {
+					statusDiv.textContent = '❌ No text found in PDF (might be scanned images)';
+					if (pdfFrame) pdfFrame.style.display = 'block'; // Ibalik ang view kung walang ma-extract
+					return;
+				}
+
+				// 🧠 UI UPDATE PARA SA TTS:
+				// Ipakita ang extracted text sa viewerContent para "may nakikita" ang system habang nagbabasa
+				if (isMobile) {
+					document.getElementById('viewerContent').innerHTML = `
+						<div class="doc-viewer" style="padding: 20px; background: white; border-radius: 12px; max-height: 500px; overflow-y: auto;">
+							<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+								<p style="color: var(--primary); font-weight: 800; margin: 0;">🔊 Audio Reading Mode</p>
+								<button onclick="location.reload()" style="background: var(--gray-100); border: none; padding: 4px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+									✕ Close
+								</button>
+							</div>
+							<hr style="margin-bottom: 15px; opacity: 0.2;">
+							<div id="ttsTextArea" style="font-size: 16px; line-height: 1.6;">${fullText}</div>
+						</div>
+					`;
+				}
+
+				// Setup TTS with extracted text
+				setupTTS(fullText);
+				statusDiv.textContent = `✅ Text extracted! ${fullText.length} characters. TTS ready!`;
+
+			} catch (error) {
+				console.error('PDF extraction error:', error);
+				statusDiv.textContent = '❌ Failed to extract text: ' + error.message;
+				if (pdfFrame) pdfFrame.style.display = 'block'; // Ibalik ang view kung nag-error
+			}
+		}
+		
+		// Function para sa Hamburger Toggle
+		function toggleMobileMenu() {
+			const mobileNav = document.getElementById('mobileNav');
+			if (mobileNav) {
+				mobileNav.classList.toggle('active');
+				console.log('📱 Mobile menu toggled');
+			}
+		}
+
+		// Optimization: Isasara ang menu kapag nag-click sa labas nito
+		document.addEventListener('click', (e) => {
+			const mobileNav = document.getElementById('mobileNav');
+			const toggleButtons = document.querySelectorAll('.mobile-menu-toggle');
+			
+			// I-check kung ang click ay nasa labas ng menu at hindi sa toggle button
+			let isClickOnToggle = false;
+			toggleButtons.forEach(btn => {
+				if (btn.contains(e.target)) isClickOnToggle = true;
+			});
+
+			if (mobileNav && mobileNav.classList.contains('active') && !mobileNav.contains(e.target) && !isClickOnToggle) {
+				mobileNav.classList.remove('active');
+			}
+		});
+    </script>
+</body>
+</html>

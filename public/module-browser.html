@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BasCal - Module Browser</title>
+    <link rel="stylesheet" href="flex-calc-design-system.css">
+    <style>
+        .filter-bar {
+            background: white;
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            margin-bottom: var(--space-8);
+            display: flex;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gray-700);
+        }
+
+        .filter-btn {
+            padding: var(--space-2) var(--space-4);
+            border: 2px solid var(--gray-300);
+            background: white;
+            color: var(--gray-600);
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .filter-btn.active {
+            background: var(--gradient-primary);
+            border-color: transparent;
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: var(--space-3) var(--space-4) var(--space-3) var(--space-12);
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: 15px;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: var(--space-4);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            font-size: 18px;
+        }
+
+        .modules-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+			gap: 28px;
+			padding: 20px 0;
+		}
+
+        .module-card {
+			background: white;
+			border-radius: 28px; /* Mas rounded katulate ng manage-modules */
+			border: 1px solid var(--gray-200);
+			overflow: hidden;
+			transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+			display: flex;
+			flex-direction: column;
+			box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+			cursor: pointer;
+			height: 100%;
+		}
+
+        .module-card:hover {
+			transform: translateY(-12px);
+			box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+			border-color: var(--primary);
+		}
+
+        /* Locked State */
+		.module-card.locked {
+			opacity: 0.8;
+			filter: grayscale(0.5);
+			cursor: not-allowed;
+		}
+
+        .module-card.locked:hover {
+			transform: none;
+			box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+		}
+
+        .module-header {
+			height: 140px;
+			background: var(--gradient-primary);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			position: relative;
+			padding: 0; /* Reset padding */
+		}
+
+        .module-card.locked .module-header {
+			background: linear-gradient(135deg, var(--gray-400) 0%, var(--gray-500) 100%);
+		}
+
+        .module-icon-large {
+			font-size: 56px;
+			text-shadow: 0 4px 12px rgba(0,0,0,0.1);
+		}
+
+        .module-status-badge {
+			position: absolute;
+			top: 16px;
+			right: 16px;
+			padding: 6px 14px;
+			border-radius: 12px;
+			font-size: 11px;
+			font-weight: 800;
+			text-transform: uppercase;
+			background: rgba(255, 255, 255, 0.9);
+			color: var(--primary);
+			box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+		}
+
+        .module-body {
+			padding: 28px;
+			display: flex;
+			flex-direction: column;
+			flex-grow: 1;
+		}
+
+        .module-title {
+			font-size: 22px;
+			font-weight: 800;
+			color: #0f172a;
+			margin-bottom: 12px;
+			line-height: 1.2;
+		}
+
+        .module-description {
+            font-size: 14px;
+            color: var(--gray-600);
+            margin-bottom: var(--space-4);
+            line-height: 1.6;
+        }
+
+        .module-meta {
+            display: flex;
+            gap: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: 13px;
+            color: var(--gray-500);
+            font-weight: 600;
+        }
+
+        .meta-icon {
+            font-size: 16px;
+        }
+
+        .module-progress {
+            margin-bottom: var(--space-4);
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gray-700);
+            margin-bottom: var(--space-2);
+        }
+
+        .module-footer {
+            display: flex;
+            gap: var(--space-3);
+        }
+
+        .btn-start {
+            flex: 1;
+            padding: var(--space-3);
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-start:disabled {
+            background: var(--gray-300);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-info {
+            padding: var(--space-3);
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-info:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .gate-notice {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid var(--warning);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            margin-bottom: var(--space-8);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .gate-icon {
+            font-size: 32px;
+        }
+
+        .gate-text {
+            flex: 1;
+        }
+
+        .gate-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--warning);
+            margin-bottom: var(--space-1);
+        }
+
+        .gate-description {
+            font-size: 14px;
+            color: var(--gray-700);
+        }
+		
+		/* ========================================
+		MODULE BROWSER RESPONSIVE TWEAKS
+		======================================== */
+
+		/* 1. Filter Bar Mobile Optimization */
+		@media (max-width: 768px) {
+			.filter-bar {
+				padding: var(--space-4);
+				gap: var(--space-2);
+				justify-content: center; /* Center buttons sa mobile */
+			}
+
+			.filter-label {
+				width: 100%; /* I-push ang buttons sa bagong line */
+				text-align: center;
+				margin-bottom: var(--space-2);
+			}
+
+			.search-box {
+				min-width: 100% !important; /* Full width search sa mobile */
+				margin-top: var(--space-2);
+			}
+    
+			.filter-btn {
+				flex: 1 1 auto; /* Hayaan ang buttons na mag-adjust ng laki */
+				text-align: center;
+				font-size: 13px;
+				padding: var(--space-2) var(--space-3);
+			}
+		}
+
+		/* 2. Grid Column Auto-scaling */
+		.modules-grid {
+			display: grid;
+			/* Gagamit tayo ng auto-fit para kusa siyang mag-adjust kahit walang media query */
+			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+			gap: var(--space-6);
+		}
+
+		/* 3. Gate Notice Adjustments */
+		@media (max-width: 640px) {
+			.gate-notice {
+				flex-direction: column;
+				text-align: center;
+				padding: var(--space-5);
+			}
+    
+			.gate-icon {
+				margin-bottom: var(--space-2);
+			}
+		}
+
+		/* 4. Card Content spacing on small screens */
+		@media (max-width: 480px) {
+			.module-body {
+				padding: var(--space-4);
+			}
+    
+			.module-title {
+				font-size: 16px;
+			}
+
+			.module-meta {
+				flex-wrap: wrap; /* Para hindi mag-overlap ang icons */
+				gap: var(--space-2);
+			}
+		}
+
+		/* 5. Sticky Filter Bar (Optional but good for UX) */
+		.filter-bar {
+			position: sticky;
+			top: 80px; /* Adjust base sa height ng navbar */
+			z-index: 10;
+		}
+		
+		/* ========================================
+		UNIFORM NAVBAR & BASE STYLES
+		======================================== */
+		.navbar {
+			background: white;
+			border-bottom: 1px solid #e2e8f0;
+			position: sticky;
+			top: 0;
+			z-index: 1000;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		}
+
+		.nav-container {
+			max-width: 1400px;
+			margin: 0 auto;
+			padding: 0 24px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			height: 64px;
+		}
+
+		.nav-logo {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			text-decoration: none;
+			color: #1e293b;
+			font-weight: 800;
+			font-size: 20px;
+		}
+
+		.nav-logo-icon {
+			font-size: 28px;
+		}
+
+		.nav-links {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.nav-link {
+			padding: 8px 16px;
+			border-radius: 8px;
+			text-decoration: none;
+			color: #64748b;
+			font-weight: 600;
+			font-size: 14px;
+			transition: all 0.2s;
+		}
+
+		.nav-link:hover {
+			background: #f1f5f9;
+			color: #1e293b;
+		}
+
+		.nav-link.active {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+		}
+
+		.nav-user {
+			display: flex;
+			align-items: center;
+			gap: 16px;
+		}
+
+		.user-menu {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			padding: 8px 12px;
+			border-radius: 12px;
+			background: #f8fafc;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+
+		.user-avatar {
+			width: 36px;
+			height: 36px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: 800;
+			font-size: 14px;
+		}
+
+		.logout-btn {
+			padding: 8px 16px;
+			border: none;
+			border-radius: 8px;
+			background: #ef4444;
+			color: white;
+			font-weight: 700;
+			font-size: 14px;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+
+		/* Mobile Specifics */
+		.mobile-menu-toggle {
+			display: none;
+			background: none;
+			border: none;
+			font-size: 24px;
+			cursor: pointer;
+			padding: 8px;
+			color: #1e293b;
+		}
+
+		.mobile-nav {
+			display: block;
+			position: fixed;
+			top: 64px;
+			left: 0;
+			right: 0;
+			background: white;
+			border-bottom: 1px solid #e2e8f0;
+			max-height: 0;
+			overflow: hidden;
+			transition: max-height 0.3s ease;
+			z-index: 999;
+		}
+
+		.mobile-nav.active {
+			max-height: 400px;
+		}
+
+		@media (max-width: 968px) {
+			.nav-links, .nav-user { display: none; }
+			.mobile-menu-toggle { display: block; }
+		}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+    <div class="nav-container">
+        <a href="student-dashboard.html" class="nav-logo">
+            <span class="nav-logo-icon">📐</span>
+            <span>BasCal</span>
+        </a>
+
+        <div class="nav-links">
+            <a href="student-dashboard.html" class="nav-link">Dashboard</a>
+            <a href="module-browser.html" class="nav-link active">Modules</a>
+            <a href="analytics-student.html" class="nav-link">Analytics</a>
+        </div>
+
+        <div class="nav-user">
+            <div class="user-menu">
+                <div class="user-avatar" id="userAvatar">ST</div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">Student</div>
+                    <div class="user-role">Student</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+    </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav-content" style="padding: 16px;">
+        <a href="student-dashboard.html" class="nav-link">Dashboard</a>
+        <a href="module-browser.html" class="nav-link active">Modules</a>
+        <a href="analytics-student.html" class="nav-link">Analytics</a>
+        <hr style="margin: 12px 0; border: none; border-top: 1px solid #eee;">
+        <button class="logout-btn" style="width: 100%;" onclick="logout()">Logout</button>
+    </div>
+</div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Module Browser</h1>
+            <p class="page-subtitle">Explore all available learning modules and track your progress</p>
+        </div>
+
+        <!-- Gate Notice -->
+        <div class="gate-notice" id="gateNotice" style="display: none;">
+            <div class="gate-icon">🔒</div>
+            <div class="gate-text">
+                <div class="gate-title">Gated Modules Ahead</div>
+                <div class="gate-description">
+                    Complete conceptual understanding modules to unlock procedural fluency content. 
+                    Current score: <strong id="conceptualScore">0%</strong> | Required: <strong>70%</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <span class="filter-label">Category:</span>
+            <button class="filter-btn active" onclick="filterModules('all')">All</button>
+            <button class="filter-btn" onclick="filterModules('conceptual')">Conceptual</button>
+            <button class="filter-btn" onclick="filterModules('procedural')">Procedural</button>
+            <button class="filter-btn" onclick="filterModules('strategic')">Strategic</button>
+            <button class="filter-btn" onclick="filterModules('adaptive')">Adaptive</button>
+            <button class="filter-btn" onclick="filterModules('productive')">Productive</button>
+            
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Search modules..." 
+                       id="searchInput" oninput="searchModules()">
+            </div>
+        </div>
+
+        <!-- Modules Grid -->
+        <div class="modules-grid" id="modulesGrid">
+            <div class="loading" style="grid-column: 1 / -1;">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 16px;">Loading modules...</p>
+            </div>
+        </div>
+    </div>
+
+	<script>
+		// Configuration
+		const API_BASE = 'https://farah-ungroupable-millicent.ngrok-free.dev';
+		const token = localStorage.getItem('token');
+		let allModules = [];
+		let currentFilter = 'all';
+
+		// Check authentication
+		if (!token) {
+			window.location.href = 'auth.html';
+		}
+	
+		// Load user info
+		function loadUserInfo() {
+			try {
+				const user = JSON.parse(localStorage.getItem('user'));
+				if (user) {
+					const firstName = user.firstName || 'Student';
+					document.getElementById('userName').textContent = firstName;
+                
+					const userAvatarEl = document.getElementById('userAvatar');
+					if (userAvatarEl) {
+						userAvatarEl.textContent = (user.firstName?.[0] || 'S') + (user.lastName?.[0] || 'T');
+					}
+				}
+			} catch (error) {
+				console.error('Error loading user info:', error);
+			}
+		}
+
+		// ✅ LOAD MODULES FUNCTION
+		async function loadModules() {
+			try {
+				console.log('📚 Fetching modules...');
+            
+				const response = await fetch(`${API_BASE}/api/student/modules-with-gating`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+						'Content-Type': 'application/json'
+					}
+				});
+
+				if (!response.ok) throw new Error('Failed to load modules');
+
+				const data = await response.json();
+				console.log('✅ Modules data:', data);
+            
+				// Flatten grouped modules for display
+				allModules = [];
+				const strandOrder = ['conceptual', 'procedural', 'strategic', 'adaptive', 'productive'];
+            
+				strandOrder.forEach(strand => {
+					if (data.modules[strand]) {
+						data.modules[strand].forEach(module => {
+							allModules.push({
+								module_id: module.module_id,
+								module_name: module.module_name,
+								category: strand,
+								description: module.description,
+								icon: getStrandIcon(strand),
+								score: module.score || 0,
+								attempts: module.attempts || 0,
+								status: module.access_status === 'locked' ? 'locked' : 
+									module.progress_status === 'completed' ? 'completed' :
+									module.progress_status === 'in_progress' ? 'in_progress' : 'unlocked',
+								difficulty_level: module.difficulty_level,
+								is_gated: module.is_gated
+							});
+						});
+					}
+				});
+            
+				console.log('📊 Processed modules:', allModules.length);
+				displayModules(allModules);
+
+				// Show gate notice
+				const conceptualScore = parseFloat(data.strandScores?.conceptual) || 0;
+				showGateNotice(conceptualScore);
+
+			} catch (error) {
+				console.error('❌ Error loading modules:', error);
+			}
+		}
+
+		// Helper function for icons
+		function getStrandIcon(category) {
+			const icons = {
+				'conceptual': '📊',
+				'procedural': '⚙️',
+				'strategic': '🎯',
+				'adaptive': '🧩',
+				'productive': '💡'
+			};
+			return icons[category] || '📚';
+		}
+
+		// ✅ DISPLAY MODULES (SINGLE VERSION)
+function displayModules(modules) {
+    const grid = document.getElementById('modulesGrid');
+    
+    if (modules.length === 0) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><p>No modules found</p></div>`;
+        return;
+    }
+
+    grid.innerHTML = modules.map(module => {
+        const isLocked = module.status === 'locked';
+        const statusClass = isLocked ? 'locked' : '';
+        const statusText = (module.status || 'locked').replace('_', ' ').toUpperCase();
+        const progressPercent = module.score || 0;
+        const btnText = isLocked ? '🔒 Locked' : 
+                      module.status === 'completed' ? '✅ Review' : '▶️ Continue';
+
+        return `
+            <div class="module-card ${statusClass}" onclick="openModule(${module.module_id}, '${module.status}')">
+                <div class="module-header">
+                    <div class="module-icon-large">${module.icon}</div>
+                    <div class="module-status-badge">${statusText}</div>
+                </div>
+            
+                <div class="module-body" style="padding: 28px; flex-grow: 1; display: flex; flex-direction: column;">
+                    <span style="font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block;">
+                        ${module.category}
+                    </span>
+                    <h3 class="module-title" style="font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 12px;">${module.module_name}</h3>
+                    <p class="module-description" style="color: #64748b; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+                        ${module.description || 'Master this essential calculus concept.'}
+                    </p>
+                
+                    <div style="margin-top: auto;">
+                        ${!isLocked ? `
+                        <div class="module-progress" style="margin-bottom: 20px;">
+                            <div class="progress-label" style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 8px;">
+                                <span>Mastery Progress</span>
+                                <span>${Math.round(progressPercent)}%</span>
+                            </div>
+                            <div class="progress-bar" style="height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden;">
+                                <div class="progress-fill" style="width: ${progressPercent}%; height: 100%; background: var(--gradient-primary); transition: width 0.6s ease;"></div>
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <button class="btn-start" ${isLocked ? 'disabled' : ''} 
+                                style="width: 100%; padding: 14px; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s;
+                                background: ${isLocked ? '#e2e8f0' : 'var(--gradient-primary)'};
+                                color: ${isLocked ? '#94a3b8' : 'white'};
+                                box-shadow: ${isLocked ? 'none' : '0 8px 16px rgba(99, 102, 241, 0.2)'};">
+                            ${btnText}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+		// Filter modules
+		function filterModules(category) {
+			currentFilter = category;
+        
+			document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+			event.target.classList.add('active');
+
+			const filtered = category === 'all' ? allModules : allModules.filter(m => m.category === category);
+			displayModules(filtered);
+		}
+
+		// Search modules
+		function searchModules() {
+			const query = document.getElementById('searchInput').value.toLowerCase();
+        
+			let filtered = currentFilter === 'all' ? allModules : allModules.filter(m => m.category === currentFilter);
+        
+			if (query) {
+				filtered = filtered.filter(m => 
+					m.module_name.toLowerCase().includes(query) ||
+					(m.description && m.description.toLowerCase().includes(query))
+				);
+			}
+        
+			displayModules(filtered);
+		}
+
+		// Show gate notice
+		function showGateNotice(conceptualScore) {
+			const notice = document.getElementById('gateNotice');
+			const scoreEl = document.getElementById('conceptualScore');
+        
+			if (conceptualScore < 70) {
+				notice.style.display = 'flex';
+				scoreEl.textContent = Math.round(conceptualScore);
+			} else {
+				notice.style.display = 'none';
+			}
+		}
+
+		// Open module
+		function openModule(moduleId, status) {
+			if (status === 'locked') {
+				alert('🔒 This module is locked. Complete prerequisite modules first!');
+				return;
+			}
+			window.location.href = `module-content.html?id=${moduleId}`;
+		}
+
+		// Logout
+		function logout() {
+			localStorage.removeItem('token');
+			localStorage.removeItem('user');
+			window.location.href = 'auth.html';
+		}
+
+		// Navbar scroll effect
+		window.addEventListener('scroll', () => {
+			const navbar = document.getElementById('navbar');
+			if (window.scrollY > 10) {
+				navbar.classList.add('scrolled');
+			} else {
+				navbar.classList.remove('scrolled');
+			}
+		});
+
+		// Initialize
+		loadUserInfo();
+		loadModules();
+		
+		function toggleMobileMenu() {
+			const mobileNav = document.getElementById('mobileNav');
+			mobileNav.classList.toggle('active');
+		}
+
+		// Para sigurado na updated ang user name sa navbar
+		function loadUserInfo() {
+			const userStr = localStorage.getItem('user');
+			if (userStr) {
+				const user = JSON.parse(userStr);
+				const name = user.firstName || 'Student';
+				document.getElementById('userName').textContent = name;
+				document.getElementById('userAvatar').textContent = name[0].toUpperCase();
+			}
+		}
+	</script>
+
+</body>
+</html>

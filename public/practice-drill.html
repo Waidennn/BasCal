@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Mode - FlexCalc</title>
+    <link rel="stylesheet" href="flex-calc-design-system.css">
+    
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .practice-header {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .practice-info h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .practice-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .practice-timer {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .timer-display {
+            font-size: 32px;
+            font-weight: 800;
+            color: #667eea;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-display.warning {
+            color: #f59e0b;
+            animation: pulse 1s infinite;
+        }
+
+        .timer-display.danger {
+            color: #ef4444;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .question-nav {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .question-dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .question-dot:hover {
+            background: #e2e8f0;
+            transform: scale(1.1);
+        }
+
+        .question-dot.answered {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .question-dot.current {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.15);
+        }
+
+        /* Question Card */
+        .question-card {
+            background: white;
+            border-radius: 16px;
+            padding: 36px 40px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .question-number {
+            font-size: 14px;
+            font-weight: 700;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .question-difficulty {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .question-difficulty.easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .question-difficulty.medium {
+            background: #fef3c7;
+            color: #78350f;
+        }
+
+        .question-difficulty.hard {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .question-text {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #1e293b;
+            margin-bottom: 32px;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .option-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .option-card:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            transform: translateX(4px);
+        }
+
+        .option-card.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+
+        .option-letter {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            color: #667eea;
+            flex-shrink: 0;
+        }
+
+        .option-card.selected .option-letter {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .option-text {
+            flex: 1;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: space-between;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        /* Results Screen */
+        .results-screen {
+			display: none;
+			background: white;
+			border-radius: 16px;
+			padding: 48px;
+			text-align: center;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			max-width: 720px;
+			margin: 0 auto;
+		}
+
+        .results-icon {
+            font-size: 96px;
+            margin-bottom: 24px;
+        }
+
+        .results-title {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .results-score {
+            font-size: 64px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 32px;
+        }
+
+        .results-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-box {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* Feedback Section */
+        .feedback-section {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .feedback-section.show {
+            display: block;
+        }
+
+        .feedback-section.correct {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border: 2px solid #10b981;
+        }
+
+        .feedback-section.incorrect {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border: 2px solid #ef4444;
+        }
+
+        .feedback-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .feedback-icon {
+            font-size: 32px;
+        }
+
+        .feedback-title {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .feedback-section.correct .feedback-title {
+            color: #065f46;
+        }
+
+        .feedback-section.incorrect .feedback-title {
+            color: #991b1b;
+        }
+
+        .feedback-correct-answer {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .feedback-correct-answer.correct {
+            border-left: 4px solid #10b981;
+        }
+
+        .feedback-correct-answer.incorrect {
+            border-left: 4px solid #ef4444;
+        }
+
+        .feedback-explanation {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+
+        .feedback-explanation strong {
+            color: #1e293b;
+        }
+
+        /* Option states */
+        .option-card.correct {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #10b981;
+            color: white;
+        }
+
+        .option-card.incorrect {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-color: #ef4444;
+            color: white;
+        }
+
+        .option-card.correct .option-letter,
+        .option-card.incorrect .option-letter {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .option-card.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .results-actions {
+			display: flex;
+			gap: 16px;
+			justify-content: center;
+			margin-top: 32px;
+		}
+		
+		@media (max-width: 640px) {
+		.results-screen {
+			padding: 24px;
+			border-radius: 12px;
+		}
+
+		.results-actions {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.results-actions button {
+			width: 100%;
+		}
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #f1f5f9;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .practice-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 16px;
+            }
+
+            .progress-container {
+                padding: 16px;
+            }
+
+            .question-card {
+                padding: 24px 20px;
+            }
+
+            .question-text {
+                font-size: 16px;
+            }
+
+            .results-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+			
+			.action-buttons {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-top: 32px;
+				gap: 24px;
+			}
+
+			.action-left,
+			.action-right {
+				display: flex;
+				gap: 12px;
+			}
+
+			.action-right {
+				margin-left: auto;
+			}
+			
+			.feedback-section {
+				margin-top: 32px;
+				padding: 24px;
+			}
+
+			.feedback-correct-answer {
+				margin-bottom: 16px;
+			}
+
+			.feedback-explanation {
+				margin-top: 12px;
+			}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="practice-header">
+            <div class="practice-info">
+                <h1 id="practiceTitle">🎯 Practice Mode</h1>
+                <div class="practice-meta">
+                    <div class="meta-item">
+                        <span>📚</span>
+                        <span id="practiceMode">Quick Drill</span>
+                    </div>
+                    <div class="meta-item" id="strandInfo" style="display: none;">
+                        <span>🎯</span>
+                        <span id="strandType">Conceptual</span>
+                    </div>
+                </div>
+            </div>
+            <div class="practice-timer" id="timerContainer" style="display: none;">
+                <div>
+                    <div style="font-size: 12px; color: #64748b; font-weight: 700;">TIME LEFT</div>
+                    <div class="timer-display" id="timerDisplay">15:00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-container">
+            <div class="progress-header">
+                <span class="progress-text">Progress</span>
+                <span class="progress-text" id="progressText">0/10 Questions</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="question-nav" id="questionNav">
+                <!-- Question dots will be generated here -->
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="question-card loading">
+            <div class="loading-spinner"></div>
+            <p style="color: #64748b;">Loading practice questions...</p>
+        </div>
+
+        <!-- Question Screen -->
+        <div id="questionScreen" style="display: none;">
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number" id="questionNumber">Question 1 of 10</span>
+                    <span class="question-difficulty medium" id="questionDifficulty">Medium</span>
+                </div>
+                
+                <div class="question-text" id="questionText">
+                    <!-- Question will be rendered here -->
+                </div>
+
+                <div class="options-grid" id="optionsGrid">
+                    <!-- Options will be generated here -->
+                </div>
+
+                <!-- Feedback Section -->
+                <div class="feedback-section" id="feedbackSection">
+                    <div class="feedback-header">
+                        <div class="feedback-icon" id="feedbackIcon">✓</div>
+                        <div class="feedback-title" id="feedbackTitle">Correct!</div>
+                    </div>
+                    <div class="feedback-correct-answer" id="feedbackCorrectAnswer">
+                        <!-- Correct answer shown here -->
+                    </div>
+                    <div class="feedback-explanation" id="feedbackExplanation">
+                        <!-- Explanation shown here -->
+                    </div>
+                </div>
+            </div>
+
+			<div class="action-buttons">
+				<div class="action-left">
+					<button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()">← Previous</button>
+				</div>
+
+				<div class="action-right">
+					<button class="btn btn-primary" id="checkBtn" onclick="checkAnswer()">✓ Check Answer</button>
+					<button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Next →</button>
+					<button class="btn btn-success" id="submitBtn" onclick="submitPractice()">✓ Submit Practice</button>
+				</div>
+			</div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="results-screen">
+            <div class="results-icon">🎉</div>
+            <h2 class="results-title">Practice Complete!</h2>
+            <div class="results-score" id="finalScore">0%</div>
+            
+            <div class="results-stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="correctCount">0</div>
+                    <div class="stat-label">Correct</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="incorrectCount">0</div>
+                    <div class="stat-label">Incorrect</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="timeSpent">0:00</div>
+                    <div class="stat-label">Time Spent</div>
+                </div>
+            </div>
+
+            <div class="results-actions">
+                <button class="btn btn-secondary" onclick="window.location.href='student-dashboard.html'">
+                    ← Back to Dashboard
+                </button>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    🔄 Practice Again
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ✅ FIXED: Configurable API URL (matches other pages)
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000'
+            : 'https://farah-ungroupable-millicent.ngrok-free.dev';
+        const token = localStorage.getItem('token');
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const practiceMode = urlParams.get('mode') || 'quick';
+        const strandType = urlParams.get('strand') || null;
+
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let answers = {};
+        let correctAnswers = {}; // ✅ Store correct answers
+        let checkedQuestions = {}; // ✅ Track which questions have been checked
+        let startTime = Date.now();
+        let timerInterval = null;
+        let timeLimit = null;
+
+        // Initialize
+        if (!token) {
+            alert('Not authenticated. Please login.');
+            window.location.href = 'auth.html';
+        } else {
+            initializePractice();
+        }
+
+        async function initializePractice() {
+            // Set practice mode title and config
+            const modeConfig = {
+                'quick': { 
+                    title: '⚡ Quick Drill', 
+                    count: 10, 
+                    time: null 
+                },
+                'timed': { 
+                    title: '⏱️ Timed Challenge', 
+                    count: 20, 
+                    time: 15 * 60 
+                },
+                'adaptive': { 
+                    title: '💪 Weak Areas Practice', 
+                    count: 15, 
+                    time: null 
+                },
+                'strand': { 
+                    title: '🎯 Strand Focus', 
+                    count: 12, 
+                    time: null 
+                }
+            };
+
+            const config = strandType ? modeConfig['strand'] : modeConfig[practiceMode];
+            document.getElementById('practiceTitle').textContent = config.title;
+            document.getElementById('practiceMode').textContent = config.title;
+
+            if (strandType) {
+                document.getElementById('strandInfo').style.display = 'flex';
+                const strandNames = {
+                    'conceptual': '🔵 Conceptual Understanding',
+                    'procedural': '🟢 Procedural Fluency',
+                    'strategic': '🟡 Strategic Competence',
+                    'adaptive': '🟠 Adaptive Reasoning',
+                    'productive': '🔴 Productive Disposition'
+                };
+                document.getElementById('strandType').textContent = strandNames[strandType];
+            }
+
+            if (config.time) {
+                timeLimit = config.time;
+                document.getElementById('timerContainer').style.display = 'block';
+                startTimer();
+            }
+
+            await loadPracticeQuestions(config.count);
+        }
+
+        async function loadPracticeQuestions(count) {
+            try {
+                // Build query parameters
+                let endpoint = `${API_BASE}/api/student/practice/generate`;
+                const params = new URLSearchParams({
+                    count: count,
+                    mode: practiceMode,
+                    practice_mode: 'true' // ✅ Tell backend this is practice (include answers & explanations)
+                });
+
+                if (strandType) {
+                    params.append('strand', strandType);
+                }
+
+                const response = await fetch(`${endpoint}?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load practice questions');
+
+                const data = await response.json();
+                questions = data.questions || [];
+
+                if (questions.length === 0) {
+                    throw new Error('No questions available');
+                }
+
+                // ✅ Extract correct answers (questions still have them for practice mode)
+                questions.forEach((q, index) => {
+                    correctAnswers[index] = q.correct_option.toLowerCase();
+                });
+
+                initializeQuestionNav();
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('questionScreen').style.display = 'block';
+                displayQuestion();
+
+            } catch (error) {
+                console.error('Error loading practice:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <p style="color: #ef4444; font-weight: 600;">Failed to load practice questions.</p>
+                    <button class="btn btn-secondary" onclick="window.location.href='student-dashboard.html'" style="margin-top: 16px;">
+                        Back to Dashboard
+                    </button>
+                `;
+            }
+        }
+
+        function initializeQuestionNav() {
+            const nav = document.getElementById('questionNav');
+            nav.innerHTML = questions.map((q, i) => `
+                <div class="question-dot ${i === 0 ? 'current' : ''}" 
+                     onclick="goToQuestion(${i})"
+                     id="dot-${i}">
+                    ${i + 1}
+                </div>
+            `).join('');
+        }
+
+        function displayQuestion() {
+            const question = questions[currentQuestionIndex];
+            
+            document.getElementById('questionNumber').textContent = 
+                `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+            
+            document.getElementById('questionDifficulty').textContent = question.difficulty || 'Medium';
+            document.getElementById('questionDifficulty').className = 
+                `question-difficulty ${(question.difficulty || 'medium').toLowerCase()}`;
+            
+            document.getElementById('questionText').innerHTML = renderMathText(question.question_text);
+
+            // Render options
+            const optionsGrid = document.getElementById('optionsGrid');
+            const options = ['A', 'B', 'C', 'D'];
+            const correctAnswer = correctAnswers[currentQuestionIndex];
+            const selectedAnswer = answers[currentQuestionIndex];
+            const isChecked = checkedQuestions[currentQuestionIndex];
+            
+            optionsGrid.innerHTML = options.map(letter => {
+                let classes = ['option-card'];
+                if (selectedAnswer === letter) classes.push('selected');
+                if (isChecked) {
+                    classes.push('disabled');
+                    if (letter.toLowerCase() === correctAnswer) classes.push('correct');
+                    if (letter.toLowerCase() === selectedAnswer.toLowerCase() && letter.toLowerCase() !== correctAnswer) classes.push('incorrect');
+                }
+                return `
+                    <div class="${classes.join(' ')}" 
+                         onclick="selectOption('${letter}')">
+                        <div class="option-letter">${letter}</div>
+                        <div class="option-text">${renderMathText(question[`option_${letter.toLowerCase()}`] || '')}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // ✅ Restore feedback if question was already checked
+            if (isChecked) {
+                const feedbackSection = document.getElementById('feedbackSection');
+                const feedbackIcon = document.getElementById('feedbackIcon');
+                const feedbackTitle = document.getElementById('feedbackTitle');
+                const feedbackCorrectAnswer = document.getElementById('feedbackCorrectAnswer');
+                const feedbackExplanation = document.getElementById('feedbackExplanation');
+                
+                const isCorrect = selectedAnswer.toLowerCase() === correctAnswer;
+                
+                if (isCorrect) {
+                    feedbackSection.className = 'feedback-section correct show';
+                    feedbackIcon.textContent = '✓';
+                    feedbackTitle.textContent = 'Correct!';
+                    feedbackCorrectAnswer.className = 'feedback-correct-answer correct';
+                    feedbackCorrectAnswer.innerHTML = `<strong>Your answer:</strong> ${renderMathText(question[`option_${correctAnswer}`])}`;
+                } else {
+                    feedbackSection.className = 'feedback-section incorrect show';
+                    feedbackIcon.textContent = '✗';
+                    feedbackTitle.textContent = 'Not quite!';
+                    feedbackCorrectAnswer.className = 'feedback-correct-answer incorrect';
+                    feedbackCorrectAnswer.innerHTML = `
+                        <strong>Your answer:</strong> ${renderMathText(question[`option_${selectedAnswer}`])}<br>
+                        <strong>Correct answer:</strong> ${renderMathText(question[`option_${correctAnswer}`])}
+                    `;
+                }
+                
+                if (question.explanation) {
+                    feedbackExplanation.innerHTML = `<strong>Explanation:</strong> ${renderMathText(question.explanation)}`;
+                } else {
+                    feedbackExplanation.innerHTML = '';
+                
+                // ✅ Render KaTeX in restored feedback
+                setTimeout(() => safeRenderKatex(feedbackSection), 100);
+                }
+            } else {
+                // Hide feedback for unchecked questions
+                document.getElementById('feedbackSection').classList.remove('show');
+            }
+
+            // Update navigation
+            updateNavigation();
+            updateProgress();
+            
+            // ✅ Render KaTeX after DOM update
+            setTimeout(() => safeRenderKatex(), 50);
+        }
+
+        // ✅ PROPER KATEX RENDERING (from quiz-take.html)
+        function renderMathText(text) {
+            if (!text) return '';
+            
+            // Split text by math delimiters
+            const parts = [];
+            let currentIndex = 0;
+            let inMath = false;
+            let mathStart = -1;
+            
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] === '$') {
+                    if (text[i + 1] === '$') {
+                        // Display math $$...$$
+                        if (!inMath) {
+                            // Save non-math text before this
+                            if (i > currentIndex) {
+                                parts.push({ type: 'text', content: text.substring(currentIndex, i) });
+                            }
+                            mathStart = i;
+                            inMath = true;
+                        } else {
+                            // End of display math
+                            parts.push({ type: 'math', content: text.substring(mathStart, i + 2) });
+                            currentIndex = i + 2;
+                            inMath = false;
+                        }
+                        i++; // Skip next $
+                    } else {
+                        // Inline math $...$
+                        if (!inMath) {
+                            if (i > currentIndex) {
+                                parts.push({ type: 'text', content: text.substring(currentIndex, i) });
+                            }
+                            mathStart = i;
+                            inMath = true;
+                        } else {
+                            parts.push({ type: 'math', content: text.substring(mathStart, i + 1) });
+                            currentIndex = i + 1;
+                            inMath = false;
+                        }
+                    }
+                }
+            }
+            
+            // Add remaining text
+            if (currentIndex < text.length) {
+                parts.push({ type: 'text', content: text.substring(currentIndex) });
+            }
+            
+            // Escape non-math parts, keep math parts as-is
+            return parts.map(part => {
+                if (part.type === 'math') {
+                    return part.content; // Keep math as-is
+                } else {
+                    // Escape HTML but preserve common symbols
+                    return escapeHtml(part.content);
+                }
+            }).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ✅ KATEX SAFE RENDER FUNCTION
+        function safeRenderKatex(root = document.body) {
+            if (typeof renderMathInElement !== "function") return;
+
+            renderMathInElement(root, {
+                delimiters: [
+                    { left: "$$", right: "$$", display: true },
+                    { left: "$", right: "$", display: false },
+                    { left: "\\(", right: "\\)", display: false },
+                    { left: "\\[", right: "\\]", display: true }
+                ],
+                throwOnError: false,
+                trust: true
+            });
+        }
+
+        function selectOption(letter) {
+            // Don't allow selection if already checked
+            if (checkedQuestions[currentQuestionIndex]) return;
+            
+            answers[currentQuestionIndex] = letter;
+            
+            // Update visual selection
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+
+            // Update question dot
+            document.getElementById(`dot-${currentQuestionIndex}`).classList.add('answered');
+            
+            // ✅ Show "Check Answer" button
+            document.getElementById('checkBtn').style.display = 'flex';
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            updateProgress();
+        }
+
+        function checkAnswer() {
+            const selectedAnswer = answers[currentQuestionIndex];
+            const correctAnswer = correctAnswers[currentQuestionIndex];
+            const question = questions[currentQuestionIndex];
+            
+            // Mark as checked
+            checkedQuestions[currentQuestionIndex] = true;
+            
+            // Disable all options
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.add('disabled');
+            });
+            
+            // Highlight correct and incorrect
+            const options = ['a', 'b', 'c', 'd'];
+            options.forEach(opt => {
+                const card = document.querySelector(`.option-card[onclick*="'${opt.toUpperCase()}'"]`);
+                if (card) {
+                    if (opt === correctAnswer.toLowerCase()) {
+                        card.classList.add('correct');
+                    } else if (opt === selectedAnswer.toLowerCase() && opt !== correctAnswer.toLowerCase()) {
+                        card.classList.add('incorrect');
+                    }
+                }
+            });
+            
+            // Show feedback
+            const feedbackSection = document.getElementById('feedbackSection');
+            const feedbackIcon = document.getElementById('feedbackIcon');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const feedbackCorrectAnswer = document.getElementById('feedbackCorrectAnswer');
+            const feedbackExplanation = document.getElementById('feedbackExplanation');
+            
+            const isCorrect = selectedAnswer.toLowerCase() === correctAnswer;
+            
+            if (isCorrect) {
+                feedbackSection.className = 'feedback-section correct show';
+                feedbackIcon.textContent = '';
+                feedbackTitle.textContent = 'Correct!';
+                feedbackCorrectAnswer.className = 'feedback-correct-answer correct';
+                feedbackCorrectAnswer.innerHTML = `<strong>Your answer:</strong> ${renderMathText(question[`option_${correctAnswer}`])}`;
+            } else {
+                feedbackSection.className = 'feedback-section incorrect show';
+                feedbackIcon.textContent = '';
+                feedbackTitle.textContent = 'Not quite!';
+                feedbackCorrectAnswer.className = 'feedback-correct-answer incorrect';
+                feedbackCorrectAnswer.innerHTML = `
+                    <strong>Your answer:</strong> ${renderMathText(question[`option_${selectedAnswer}`])}<br>
+                    <strong>Correct answer:</strong> ${renderMathText(question[`option_${correctAnswer}`])}
+                `;
+            }
+            
+            // Show explanation
+            if (question.explanation) {
+                feedbackExplanation.innerHTML = `<strong>Explanation:</strong> ${renderMathText(question.explanation)}`;
+            } else {
+                feedbackExplanation.innerHTML = '';
+                
+                // ✅ Render KaTeX in restored feedback
+                setTimeout(() => safeRenderKatex(feedbackSection), 100);
+            }
+            
+            // Render KaTeX in feedback
+            setTimeout(() => { safeRenderKatex(feedbackSection); safeRenderKatex(); }, 150);
+            
+            // Hide Check button, show Next button
+            document.getElementById('checkBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'flex';
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            // Hide feedback when moving to next question
+            document.getElementById('feedbackSection').classList.remove('show');
+            
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function goToQuestion(index) {
+            // Hide feedback when jumping to a question
+            document.getElementById('feedbackSection').classList.remove('show');
+            currentQuestionIndex = index;
+            displayQuestion();
+        }
+
+        function updateNavigation() {
+            // Update question dots
+            document.querySelectorAll('.question-dot').forEach((dot, i) => {
+                dot.classList.toggle('current', i === currentQuestionIndex);
+            });
+
+            // Update buttons based on state
+            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+            
+            const isLastQuestion = currentQuestionIndex === questions.length - 1;
+            const isChecked = checkedQuestions[currentQuestionIndex];
+            const hasAnswer = answers[currentQuestionIndex] !== undefined;
+            
+            // Show/hide buttons based on state
+            if (isChecked) {
+                // Already checked - show Next or Submit
+                document.getElementById('checkBtn').style.display = 'none';
+                document.getElementById('nextBtn').style.display = isLastQuestion ? 'none' : 'flex';
+                document.getElementById('submitBtn').style.display = isLastQuestion ? 'flex' : 'none';
+            } else if (hasAnswer) {
+                // Has answer but not checked - show Check button
+                document.getElementById('checkBtn').style.display = 'flex';
+                document.getElementById('nextBtn').style.display = 'none';
+                document.getElementById('submitBtn').style.display = 'none';
+            } else {
+                // No answer yet - show Next or Submit (can skip)
+                document.getElementById('checkBtn').style.display = 'none';
+                document.getElementById('nextBtn').style.display = isLastQuestion ? 'none' : 'flex';
+                document.getElementById('submitBtn').style.display = isLastQuestion ? 'flex' : 'none';
+            }
+        }
+
+        function updateProgress() {
+            const answeredCount = Object.keys(answers).length;
+            const total = questions.length;
+            const percentage = (answeredCount / total) * 100;
+
+            document.getElementById('progressText').textContent = `${answeredCount}/${total} Questions`;
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+        }
+
+        function startTimer() {
+            const updateTimer = () => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const remaining = Math.max(0, timeLimit - elapsed);
+                
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                const timerEl = document.getElementById('timerDisplay');
+                timerEl.textContent = display;
+
+                // Warning states
+                if (remaining < 60) {
+                    timerEl.className = 'timer-display danger';
+                } else if (remaining < 180) {
+                    timerEl.className = 'timer-display warning';
+                }
+
+                if (remaining === 0) {
+                    clearInterval(timerInterval);
+                    submitPractice();
+                }
+            };
+
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        async function submitPractice() {
+            if (timerInterval) clearInterval(timerInterval);
+
+            const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+            
+            // ✅ SECURITY FIX: Send answers to backend for verification
+            // Don't calculate score on frontend - backend will verify
+            const questionIds = questions.map(q => q.question_id);
+            const answersObject = {};
+            Object.keys(answers).forEach(index => {
+                const questionId = questions[index].question_id;
+                answersObject[questionId] = answers[index];
+            });
+
+            // Save practice attempt - backend will calculate real score
+            try {
+                const response = await fetch(`${API_BASE}/api/student/practice/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mode: practiceMode,
+                        strand: strandType,
+                        answers: answersObject,
+                        question_ids: questionIds,
+                        time_spent: elapsedTime
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to submit practice');
+                }
+
+                const result = await response.json();
+                
+                // Display results with verified score from backend
+                showResults(result.correct_count, result.score, elapsedTime);
+
+            } catch (error) {
+                console.error('Error saving practice:', error);
+                // Still show results even if save failed
+                alert('Practice completed but failed to save. Your progress was not recorded.');
+                
+                // Calculate local score just for display (not saved)
+                let correctCount = 0;
+                questions.forEach((q, i) => {
+                    // This is just for display, actual score comes from backend
+                    if (answers[i]) correctCount++;
+                });
+                showResults(correctCount, 0, elapsedTime);
+            }
+        }
+
+        function showResults(correct, score, timeSpent) {
+            document.getElementById('questionScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
+
+            const minutes = Math.floor(timeSpent / 60);
+            const seconds = timeSpent % 60;
+
+            document.getElementById('finalScore').textContent = `${score}%`;
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('incorrectCount').textContent = questions.length - correct;
+            document.getElementById('timeSpent').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            // Change icon based on score
+            const icon = document.querySelector('.results-icon');
+            if (score >= 90) {
+                icon.textContent = '🏆';
+            } else if (score >= 70) {
+                icon.textContent = '🎉';
+            } else if (score >= 50) {
+                icon.textContent = '👍';
+            } else {
+                icon.textContent = '💪';
+            }
+        }
+
+        /* ============================================================
+            KATEX INITIALIZATION - AUTO-RENDER ON LOAD
+            ============================================================ */
+        
+        // Initial render on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            safeRenderKatex();
+        });
+
+        // Dynamic content observer for questions and options
+        let katexRenderTimeout;
+        const katexObserver = new MutationObserver((mutations) => {
+            clearTimeout(katexRenderTimeout);
+            katexRenderTimeout = setTimeout(() => {
+                mutations.forEach((m) => {
+                    m.addedNodes.forEach((node) => {
+                        if (node.nodeType === 1) {
+                            safeRenderKatex(node);
+                        }
+                    });
+                });
+            }, 100); // Debounce by 100ms
+        });
+        katexObserver.observe(document.body, { childList: true, subtree: true });
+    </script>
+</body>
+</html>

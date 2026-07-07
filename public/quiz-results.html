@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Results - FlexCalc</title>
+    <link rel="stylesheet" href="flex-calc-design-system.css">
+    
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: var(--space-6);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .results-header {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .score-display {
+            text-align: center;
+            padding: var(--space-8);
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto var(--space-4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            font-weight: 800;
+            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .score-circle.passed {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .score-circle.failed {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin-top: var(--space-6);
+        }
+
+        .stat-card {
+            background: var(--gray-50);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray-600);
+            font-weight: 600;
+        }
+
+        .review-section {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .review-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: var(--space-6);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .review-question {
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            margin-bottom: var(--space-4);
+            border-left: 4px solid var(--gray-300);
+        }
+
+        .review-question.correct {
+            border-left-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .review-question.incorrect {
+            border-left-color: var(--danger);
+            background: #fef2f2;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-4);
+        }
+
+        .question-text {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .question-status {
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-full);
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            margin-left: var(--space-3);
+        }
+
+        .question-status.correct {
+            background: var(--success);
+            color: white;
+        }
+
+        .question-status.incorrect {
+            background: var(--danger);
+            color: white;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: var(--space-3);
+            margin-bottom: var(--space-4);
+        }
+
+        .option {
+            padding: var(--space-3);
+            border-radius: var(--radius-md);
+            background: white;
+            border: 2px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .option.selected {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .option.correct {
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .option.selected.incorrect {
+            border-color: var(--danger);
+            background: #fef2f2;
+        }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .option.correct .option-letter {
+            background: var(--success);
+            color: white;
+        }
+
+        .option.selected .option-letter {
+            background: var(--primary);
+            color: white;
+        }
+
+        .option.selected.incorrect .option-letter {
+            background: var(--danger);
+            color: white;
+        }
+
+        .explanation-box {
+            background: #fff7ed;
+            border-left: 4px solid #f59e0b;
+            padding: var(--space-4);
+            border-radius: var(--radius-md);
+            margin-top: var(--space-4);
+        }
+
+        .explanation-title {
+            font-weight: 700;
+            color: #f59e0b;
+            margin-bottom: var(--space-2);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .explanation-text {
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--space-3);
+            margin-top: var(--space-6);
+        }
+
+        .loading {
+            text-align: center;
+            padding: var(--space-12);
+            color: white;
+            font-size: 18px;
+        }
+
+        .error-message {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: var(--space-4);
+        }
+
+        .back-button {
+            position: fixed;
+            top: var(--space-4);
+            left: var(--space-4);
+            background: white;
+            border: none;
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .back-button:hover {
+            background: var(--gray-50);
+            transform: translateX(-2px);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="goBack()">
+        ← Back to Quizzes
+    </button>
+
+    <div class="container">
+        <div id="loadingState" class="loading">
+            <div style="font-size: 48px; margin-bottom: var(--space-4);">📊</div>
+            Loading your results...
+        </div>
+
+        <div id="errorState" style="display: none;">
+            <div class="error-message">
+                <div class="error-icon">😕</div>
+                <h2 style="margin-bottom: var(--space-2);">Unable to Load Results</h2>
+                <p id="errorText" style="color: var(--gray-600); margin-bottom: var(--space-4);"></p>
+                <button class="btn btn-primary" onclick="goBack()">Back to Quizzes</button>
+            </div>
+        </div>
+
+        <div id="resultsState" style="display: none;">
+            <!-- Results Header -->
+            <div class="results-header">
+                <div style="text-align: center; margin-bottom: var(--space-4);">
+                    <div style="font-size: 14px; color: var(--gray-500); font-weight: 600; margin-bottom: var(--space-2);" id="moduleName"></div>
+                    <h1 style="margin: 0; font-size: 28px;" id="quizTitle"></h1>
+                </div>
+
+                <div class="score-display">
+                    <div class="score-circle" id="scoreCircle">
+                        <span id="scorePercentage">0%</span>
+                    </div>
+                    <div id="scoreMessage" style="font-size: 24px; font-weight: 700; margin-bottom: var(--space-2);"></div>
+                    <div id="scoreSubtitle" style="color: var(--gray-600);"></div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="correctCount">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="incorrectCount">0</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="pointsDisplay">0/0</div>
+                        <div class="stat-label">Points Earned</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="timeDisplay">0:00</div>
+                        <div class="stat-label">Time Taken</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review Section -->
+            <div class="review-section">
+                <h2 class="review-title">
+                    📖 Review Your Answers
+                </h2>
+                <div id="reviewContainer"></div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="goBack()">
+                        Back to Quizzes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://farah-ungroupable-millicent.ngrok-free.dev';
+        const token = localStorage.getItem('token');
+        const urlParams = new URLSearchParams(window.location.search);
+        const assignmentId = urlParams.get('assignmentId');
+
+        // Load results on page load
+        window.addEventListener('DOMContentLoaded', loadResults);
+
+        async function loadResults() {
+            if (!token) {
+                showError('Please log in to view results');
+                return;
+            }
+
+            if (!assignmentId) {
+                showError('No assignment ID provided');
+                return;
+            }
+
+            try {
+                console.log('📊 Loading results for assignment:', assignmentId);
+
+                const response = await fetch(`${API_BASE_URL}/api/student/assignments/${assignmentId}/results`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to load results');
+                }
+
+                const data = await response.json();
+                console.log('✅ Results loaded:', data);
+
+                displayResults(data);
+
+            } catch (error) {
+                console.error('❌ Load results error:', error);
+                showError(error.message);
+            }
+        }
+
+        function displayResults(data) {
+            // Hide loading, show results
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('resultsState').style.display = 'block';
+
+            // Display quiz info
+            document.getElementById('moduleName').textContent = data.assignment.module_name || '';
+            document.getElementById('quizTitle').textContent = data.assignment.assignment_title || data.assignment.quiz_title;
+
+            // Display score
+            const score = Math.round(data.score.scorepercentage);
+            const passed = data.score.passed;
+
+            document.getElementById('scorePercentage').textContent = `${score}%`;
+            
+            const scoreCircle = document.getElementById('scoreCircle');
+            scoreCircle.className = 'score-circle ' + (passed ? 'passed' : 'failed');
+
+            if (passed) {
+                document.getElementById('scoreMessage').textContent = '🎉 Congratulations!';
+                document.getElementById('scoreMessage').style.color = 'var(--success)';
+                document.getElementById('scoreSubtitle').textContent = 'You passed this quiz!';
+            } else {
+                document.getElementById('scoreMessage').textContent = '💪 Keep Trying!';
+                document.getElementById('scoreMessage').style.color = 'var(--danger)';
+                document.getElementById('scoreSubtitle').textContent = 'You can retake this quiz to improve';
+            }
+
+            // Display stats
+            document.getElementById('correctCount').textContent = data.score.correctanswers;
+            document.getElementById('incorrectCount').textContent = data.score.totalquestions - data.score.correctanswers;
+            document.getElementById('pointsDisplay').textContent = `${data.score.pointsearned}/${data.score.maxpoints}`;
+            
+            const timeTaken = data.attempt.time_taken_seconds || 0;
+            const minutes = Math.floor(timeTaken / 60);
+            const seconds = timeTaken % 60;
+            document.getElementById('timeDisplay').textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
+
+            // Display review
+            displayReview(data.results || data.answers || data.data?.results || []);
+        }
+
+        function displayReview(results) {
+            const container = document.getElementById('reviewContainer');
+            
+            if (results.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--gray-500); padding: var(--space-8);">No review data available</p>';
+                return;
+            }
+
+            container.innerHTML = results.map((r, index) => {
+                const isCorrect = r.iscorrect || r.is_correct;
+                const selectedOption = r.selectedoption || r.selected_option;
+                const correctOption = r.correctoption || r.correct_option;
+                const questionText = r.questiontext || r.question_text || r.question;
+                const explanation = r.explanation || 'No explanation provided';
+
+                return `
+                    <div class="review-question ${isCorrect ? 'correct' : 'incorrect'}">
+                        <div class="question-header">
+                            <div class="question-text">
+                                <strong>Question ${index + 1}:</strong>
+                                ${renderMath(questionText)}
+                            </div>
+                            <span class="question-status ${isCorrect ? 'correct' : 'incorrect'}">
+                                ${isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                            </span>
+                        </div>
+
+                        <div class="options-grid">
+                            ${['A', 'B', 'C', 'D'].map(letter => {
+                                const isSelected = selectedOption === letter;
+                                const isCorrectOption = correctOption === letter;
+                                let optionClass = 'option';
+                                if (isCorrectOption) optionClass += ' correct';
+                                if (isSelected && !isCorrectOption) optionClass += ' selected incorrect';
+                                if (isSelected && isCorrectOption) optionClass += ' selected';
+
+                                return `
+                                    <div class="${optionClass}">
+                                        <div class="option-letter">${letter}</div>
+                                        <div>${renderMath(r.options[letter] || '')}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+
+                        <div class="explanation-box">
+                            <div class="explanation-title">
+                                💡 Explanation
+                            </div>
+                            <div class="explanation-text">
+                                ${renderMath(explanation)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Render KaTeX
+            setTimeout(() => {
+                renderKaTeX();
+            }, 100);
+        }
+
+        function renderMath(text) {
+            if (!text) return '';
+            // Convert dollar signs to KaTeX-friendly format
+            return text;
+        }
+
+        function renderKaTeX() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorText').textContent = message;
+        }
+
+        function goBack() {
+            window.location.href = 'student-quizzes.html';
+        }
+    </script>
+</body>
+</html>

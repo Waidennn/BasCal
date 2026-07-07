@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BasCal - Batangas State University</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * { 
+            font-family: 'Inter', sans-serif; 
+        }
+
+        .deped-blue {
+            background: linear-gradient(135deg, #0038A8 0%, #004AAD 100%);
+        }
+
+        .welcome-bg {
+            background: linear-gradient(135deg, rgba(0, 56, 168, 0.85) 0%, rgba(0, 74, 173, 0.85) 100%),
+                        url('uploads/materials/frontpage.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .professional-shadow {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-focus:focus {
+            outline: none;
+            border-color: #0038A8;
+            box-shadow: 0 0 0 3px rgba(0, 56, 168, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0038A8 0%, #004AAD 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 56, 168, 0.4);
+        }
+
+        .tab-active {
+            background: #0038A8;
+            color: white;
+        }
+
+        .tab-inactive {
+            background: white;
+            color: #6B7280;
+            border: 1px solid #E5E7EB;
+        }
+
+        .tab-inactive:hover {
+            background: #F9FAFB;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="h-full bg-white">
+
+    <section class="welcome-bg min-h-screen flex items-center px-6 py-16">
+        <div class="max-w-7xl w-full mx-auto">
+            <div class="grid grid-cols-12 gap-8">
+
+                <div class="col-span-12 md:col-span-5 lg:col-span-4">
+
+                    <div class="mb-8">
+                        <div class="inline-block mb-6">
+                            <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border-2 border-white/30">
+                                <i class="fas fa-graduation-cap text-5xl text-white"></i>
+                            </div>
+                        </div>
+                        <h2 class="text-4xl font-bold text-white mb-3">
+                            Welcome to Web-Based Interactive Learning Material in Basic Calculus
+                        </h2>
+                        <p class="text-lg text-blue-100">
+                            Mathematical Proficiency
+                        </p>
+                    </div>
+
+                    <!-- Login/Register -->
+                    <div class="glass-card rounded-2xl professional-shadow overflow-hidden">
+
+                        <!-- Tab Switcher -->
+                        <div class="flex gap-0 p-1 bg-gray-50 border-b border-gray-200">
+                            <button id="loginTab" onclick="switchTab('login')" 
+                                    class="flex-1 py-3 rounded-lg font-semibold text-sm transition-all tab-active">
+                                Sign In
+                            </button>
+                            <button id="registerTab" onclick="switchTab('register')" 
+                                    class="flex-1 py-3 rounded-lg font-semibold text-sm transition-all tab-inactive">
+                                Create Account
+                            </button>
+                        </div>
+
+                        <!-- Login Form -->
+                        <div id="loginForm" class="p-8">
+                            <form onsubmit="handleLogin(event)">
+                                <div class="space-y-5">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                                        <input type="email" id="loginEmail" required
+                                               placeholder="your.email@example.com"
+                                               class="input-focus w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 transition-all">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                                        <input type="password" id="loginPassword" required
+                                               placeholder="Enter your password"
+                                               class="input-focus w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 transition-all">
+                                    </div>
+
+                                    <button type="submit" 
+                                            class="btn-primary w-full text-white py-3 rounded-lg font-bold text-sm">
+                                        <i class="fas fa-sign-in-alt mr-2"></i>Sign In to BasCal
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Register Form -->
+                        <div id="registerForm" class="hidden p-8">
+                            <form onsubmit="handleRegister(event)">
+                                <div class="space-y-4">
+                                    <!-- Role Selection -->
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Account Type</label>
+                                        <select id="registerRole" onchange="toggleRoleFields()" required
+                                                class="input-focus w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 transition-all">
+                                            <option value="">Select your role</option>
+                                            <option value="student">🎓 Student</option>
+                                            <option value="teacher">👨‍🏫 Educator / Teacher</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
+                                            <input type="text" id="registerFirstName" required
+                                                   placeholder="Juan"
+                                                   class="input-focus w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
+                                            <input type="text" id="registerLastName" required
+                                                   placeholder="Dela Cruz"
+                                                   class="input-focus w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 transition-all">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                                        <input type="email" id="registerEmail" required
+                                               placeholder="your.email@example.com"
+                                               class="input-focus w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 transition-all">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                                        <input type="password" id="registerPassword" required minlength="8"
+                                               placeholder="Minimum 8 characters"
+                                               class="input-focus w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 transition-all">
+                                        <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
+                                    </div>
+
+                                    <!-- Student-specific fields -->
+                                    <div id="studentFields" class="hidden space-y-3 pt-2 border-t border-gray-100">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">Grade Level</label>
+                                            <input type="text" id="registerGradeLevel" placeholder="e.g., Grade 11 STEM"
+                                                   class="input-focus w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">School Name</label>
+                                            <input type="text" id="registerSchool" placeholder="Your school name"
+                                                   class="input-focus w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 transition-all">
+                                        </div>
+                                    </div>
+
+                                    <!-- Teacher fields -->
+                                    <div id="teacherFields" class="hidden space-y-3 pt-2 border-t border-gray-100">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                                Teacher Registration Code
+                                                <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text" id="teacherCode" placeholder="e.g., DEPED-MATH-2025"
+                                                   class="input-focus w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 transition-all">
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                <i class="fas fa-info-circle mr-1"></i>
+                                                Contact your department head for the registration code
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">Department</label>
+                                            <input type="text" id="registerDepartment" placeholder="e.g., Mathematics"
+                                                   class="input-focus w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">Institution</label>
+                                            <input type="text" id="registerInstitution" placeholder="Your institution"
+                                                   class="input-focus w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-lg text-gray-900 transition-all">
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" 
+                                            class="btn-primary w-full text-white py-3 rounded-lg font-bold text-sm">
+                                        <i class="fas fa-user-plus mr-2"></i>Create Account
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Error Notifier -->
+                    <div id="errorMessage" class="hidden bg-white border-l-4 border-red-500 rounded-r-lg p-4 mt-4 shadow-lg">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                            <span id="errorText" class="text-red-700 text-sm font-medium"></span>
+                        </div>
+                    </div>
+
+                    <!-- Success Message -->
+                    <div id="successMessage" class="hidden bg-white border-l-4 border-green-500 rounded-r-lg p-4 mt-4 shadow-lg">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-check-circle text-green-600"></i>
+                            <span id="successText" class="text-green-700 text-sm font-medium"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hidden md:block md:col-span-7 lg:col-span-8">
+                    <!-- Space for left, picture of sir stating 'Welcome' -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="deped-blue text-white py-12">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <!-- About -->
+                <div>
+                    <h4 class="font-bold text-lg mb-4">About Web-Based Interactive Learning Material in Basic Calculus</h4>
+                    <p class="text-blue-100 text-sm leading-relaxed">
+                        A research-based educational platform.
+                    </p>
+                </div>
+
+                <!-- Research Framework -->
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Five-Strand Mathematical Prociency</h4>
+                    <ul class="space-y-2 text-blue-100 text-sm">
+                        <li><i class="fas fa-check-circle mr-2"></i>Conceptual Understanding</li>
+                        <li><i class="fas fa-check-circle mr-2"></i>Procedural Fluency</li>
+                        <li><i class="fas fa-check-circle mr-2"></i>Strategic Competence</li>
+                        <li><i class="fas fa-check-circle mr-2"></i>Adaptive Reasoning</li>
+                        <li><i class="fas fa-check-circle mr-2"></i>Productive Disposition</li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Support</h4>
+                    <div class="space-y-3 text-blue-100 text-sm">
+                        <p><i class="fas fa-envelope mr-2"></i>raynan.tobeo@g.batstate-u.edu.ph</p>
+                        <p><i class="fas fa-university mr-2"></i>Batangas State University</p>
+                        <p><i class="fas fa-graduation-cap mr-2"></i>STEM Education Initiative</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-blue-700 pt-6 text-center">
+                <p class="text-blue-100 text-sm mb-2">
+                    <i class="fas fa-flask mr-2"></i>Thesis Project of Raynan Tobeo | Batangas State University
+                </p>
+                <p class="text-blue-200 text-xs">
+                    © 2026 BasCal: Web-Based Interactive Learning Material in Basic Calculus
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API_URL = 'https://farah-ungroupable-millicent.ngrok-free.dev';
+
+        function switchTab(tab) {
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+
+            errorMessage.classList.add('hidden');
+            successMessage.classList.add('hidden');
+
+            if (tab === 'login') {
+                loginTab.className = 'flex-1 py-3 rounded-lg font-semibold text-sm transition-all tab-active';
+                registerTab.className = 'flex-1 py-3 rounded-lg font-semibold text-sm transition-all tab-inactive';
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            } else {
+                registerTab.className = 'flex-1 py-3 rounded-lg font-semibold text-sm transition-all tab-active';
+                loginTab.className = 'flex-1 py-3 rounded-lg font-semibold text-sm transition-all tab-inactive';
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            }
+        }
+
+        function toggleRoleFields() {
+            const role = document.getElementById('registerRole').value;
+            const studentFields = document.getElementById('studentFields');
+            const teacherFields = document.getElementById('teacherFields');
+            const teacherCodeInput = document.getElementById('teacherCode');
+
+            if (role === 'student') {
+                studentFields.classList.remove('hidden');
+                teacherFields.classList.add('hidden');
+                teacherCodeInput.required = false;
+            } else if (role === 'teacher') {
+                teacherFields.classList.remove('hidden');
+                studentFields.classList.add('hidden');
+                teacherCodeInput.required = true;
+            } else {
+                studentFields.classList.add('hidden');
+                teacherFields.classList.add('hidden');
+                teacherCodeInput.required = false;
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+            successText.textContent = message;
+            successDiv.classList.remove('hidden');
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+					localStorage.setItem('userRole', data.user.role);
+                    window.location.href = data.user.role === 'student' ? 'student-dashboard.html' : 'teacher-dashboard.html';
+                } else {
+                    showError(data.message || 'Login failed. Please check your credentials.');
+                }
+            } catch (error) {
+                showError('Network error. Please check your connection.');
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            const role = document.getElementById('registerRole').value;
+            const firstName = document.getElementById('registerFirstName').value;
+            const lastName = document.getElementById('registerLastName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+
+            const payload = { role, firstName, lastName, email, password };
+
+            if (role === 'student') {
+                payload.gradeLevel = document.getElementById('registerGradeLevel').value;
+                payload.school = document.getElementById('registerSchool').value;
+            } else if (role === 'teacher') {
+                const teacherCode = document.getElementById('teacherCode').value;
+                if (!teacherCode) {
+                    showError('Teacher registration code is required');
+                    return;
+                }
+                payload.teacherCode = teacherCode;
+                payload.department = document.getElementById('registerDepartment').value;
+                payload.institution = document.getElementById('registerInstitution').value;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSuccess('Account created successfully! Redirecting to login...');
+                    setTimeout(() => {
+                        switchTab('login');
+                        document.getElementById('loginEmail').value = email;
+                    }, 2000);
+                } else {
+                    showError(data.message || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                showError('Network error. Please check your connection.');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,2456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - BasCal</title>
+    <link rel="stylesheet" href="flex-calc-design-system.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* ========================================
+           RESPONSIVE NAVBAR & BASE STYLES
+           ======================================== */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        .nav-logo-icon {
+            font-size: 28px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .user-menu:hover {
+            background: #f1f5f9;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #1e293b;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #ef4444;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            color: #1e293b;
+        }
+
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .mobile-nav.active {
+            max-height: 400px;
+        }
+
+        .mobile-nav-content {
+            padding: 16px;
+        }
+
+        .mobile-nav .nav-link {
+            display: block;
+            padding: 12px 16px;
+            margin-bottom: 4px;
+        }
+
+        .mobile-nav .user-menu {
+            margin: 12px 0;
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .mobile-nav .logout-btn {
+            width: 100%;
+            padding: 12px;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-6);
+        }
+
+        /* ========================================
+           RESPONSIVE BREAKPOINTS
+           ======================================== */
+
+        /* Tablet & Mobile */
+        @media (max-width: 968px) {
+            .nav-links,
+            .nav-user {
+                display: none;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .mobile-nav {
+                display: block;
+            }
+
+            .dashboard-container {
+                padding: var(--space-4);
+            }
+
+            .welcome-hero {
+                padding: var(--space-6);
+            }
+
+            .welcome-title {
+                font-size: 32px !important;
+            }
+
+            .welcome-subtitle {
+                font-size: 16px !important;
+            }
+
+            .welcome-stats {
+                flex-direction: column;
+                gap: var(--space-4);
+            }
+
+            .welcome-stat-value {
+                font-size: 24px !important;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr !important;
+            }
+
+            .strands-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+
+        /* Mobile Portrait */
+        @media (max-width: 640px) {
+            .nav-container {
+                padding: 0 16px;
+            }
+
+            .nav-logo {
+                font-size: 18px;
+            }
+
+            .welcome-title {
+                font-size: 24px !important;
+            }
+
+            .welcome-subtitle {
+                font-size: 14px !important;
+            }
+
+            .welcome-stat-value {
+                font-size: 20px !important;
+            }
+
+            .quick-actions {
+                gap: var(--space-3);
+            }
+
+            .quick-action-icon {
+                font-size: 32px !important;
+            }
+
+            .strands-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .strand-mini-circle {
+                width: 80px !important;
+                height: 80px !important;
+            }
+
+            .strand-mini-percent {
+                font-size: 16px !important;
+            }
+        }
+
+        /* Additional Student Dashboard Styles */
+
+        /* Welcome Hero Section */
+        .welcome-hero {
+            background: var(--gradient-primary);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-10);
+            margin-bottom: var(--space-8);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .welcome-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .welcome-hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-title {
+            font-size: 42px;
+            font-weight: 900;
+            margin-bottom: var(--space-3);
+            line-height: 1.1;
+        }
+
+        .welcome-subtitle {
+            font-size: 20px;
+            opacity: 0.95;
+            font-weight: 400;
+            margin-bottom: var(--space-6);
+        }
+
+        .welcome-stats {
+            display: flex;
+            gap: var(--space-8);
+            margin-top: var(--space-6);
+        }
+
+        .welcome-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .welcome-stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: var(--space-1);
+        }
+
+        .welcome-stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+
+        /* Enrollment Info Card */
+        .enrollment-info {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--primary);
+        }
+
+        .enrollment-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            margin-bottom: var(--space-4);
+        }
+
+        .enrollment-icon {
+            font-size: 32px;
+        }
+
+        .enrollment-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gray-900);
+        }
+
+        .enrollment-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .enrollment-detail {
+            background: var(--gray-50);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+        }
+
+        .enrollment-detail-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--gray-500);
+            margin-bottom: var(--space-2);
+        }
+
+        .enrollment-detail-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .enrollment-detail-value .icon {
+            margin-right: var(--space-2);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin-bottom: var(--space-8);
+        }
+
+        .quick-action-btn {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            padding: var(--space-5);
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            text-decoration: none;
+            color: var(--gray-900);
+        }
+
+        .quick-action-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .quick-action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .quick-action-icon.success {
+            background: var(--gradient-success);
+        }
+
+        .quick-action-icon.warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .quick-action-icon.info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .quick-action-content {
+            flex: 1;
+        }
+
+        .quick-action-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: var(--space-1);
+        }
+
+        .quick-action-desc {
+            font-size: 13px;
+            color: var(--gray-500);
+            font-weight: 500;
+        }
+
+        /* Learning Path Section */
+        .learning-path {
+            background: white;
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-6);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .section-title-icon {
+            font-size: 28px;
+        }
+
+        /* Module Progress Card */
+        .module-progress-card {
+            background: var(--gray-50);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            margin-bottom: var(--space-4);
+            border: 2px solid transparent;
+            transition: all var(--transition-normal);
+            cursor: pointer;
+        }
+
+        .module-progress-card:hover {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .module-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-4);
+        }
+
+        .module-progress-info {
+            flex: 1;
+        }
+
+        .module-progress-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+
+        .module-progress-meta {
+            display: flex;
+            gap: var(--space-4);
+            font-size: 13px;
+            color: var(--gray-500);
+            font-weight: 600;
+        }
+
+        .module-progress-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .module-progress-score {
+            font-size: 32px;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .module-progress-bar-container {
+            margin-bottom: var(--space-3);
+        }
+
+        .module-progress-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: var(--space-2);
+            color: var(--gray-700);
+        }
+
+        .module-progress-actions {
+            display: flex;
+            gap: var(--space-3);
+        }
+
+        .module-progress-btn {
+            padding: var(--space-2) var(--space-5);
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .module-progress-btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .module-progress-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .module-progress-btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .module-progress-btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Five Strands Mini View */
+        .strands-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: var(--space-3);
+            margin-top: var(--space-4);
+        }
+
+        .strand-mini-card {
+            text-align: center;
+            padding: var(--space-3);
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+            transition: all var(--transition-fast);
+        }
+
+        .strand-mini-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .strand-mini-name {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            margin-bottom: var(--space-2);
+            letter-spacing: 0.05em;
+        }
+
+        .strand-mini-circle {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .strand-mini-inner {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .strand-mini-percent {
+            font-size: 14px;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Achievement Section */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .achievement-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-4);
+            text-align: center;
+            border: 2px solid var(--gray-200);
+            transition: all var(--transition-normal);
+        }
+
+        .achievement-card.earned {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .achievement-icon {
+            font-size: 48px;
+            margin-bottom: var(--space-2);
+            filter: grayscale(100%);
+            opacity: 0.4;
+        }
+
+        .achievement-card.earned .achievement-icon {
+            filter: none;
+            opacity: 1;
+        }
+
+        .achievement-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gray-700);
+            margin-bottom: var(--space-1);
+        }
+
+        .achievement-desc {
+            font-size: 11px;
+            color: var(--gray-500);
+        }
+
+        /* Recent Activity */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .activity-item {
+            display: flex;
+            gap: var(--space-4);
+            padding: var(--space-4);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+            transition: all var(--transition-fast);
+        }
+
+        .activity-item:hover {
+            background: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.quiz {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .activity-icon.module {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .activity-icon.achievement {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-1);
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        /* Empty State */
+        .empty-modules {
+            text-align: center;
+            padding: var(--space-12);
+            color: var(--gray-500);
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: var(--space-4);
+            opacity: 0.4;
+        }
+
+        .empty-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: var(--space-2);
+        }
+
+        .empty-desc {
+            font-size: 15px;
+            margin-bottom: var(--space-6);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .welcome-hero {
+                padding: var(--space-6);
+            }
+
+            .welcome-title {
+                font-size: 32px;
+            }
+
+            .welcome-stats {
+                flex-wrap: wrap;
+                gap: var(--space-4);
+            }
+
+            .strands-mini-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Class Enrollment Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-2xl);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            margin-bottom: var(--space-6);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+
+        .modal-subtitle {
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+
+        .form-group {
+            margin-bottom: var(--space-5);
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gray-700);
+            margin-bottom: var(--space-2);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: var(--space-3) var(--space-4);
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all var(--transition-fast);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: var(--space-3);
+            margin-top: var(--space-6);
+        }
+
+        .btn-modal {
+            flex: 1;
+            padding: var(--space-3) var(--space-5);
+            border-radius: var(--radius-lg);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            border: none;
+        }
+
+        .btn-modal-cancel {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        .btn-modal-cancel:hover {
+            background: var(--gray-300);
+        }
+
+        .btn-modal-submit {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-modal-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .no-class-banner {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .banner-icon {
+            font-size: 48px;
+        }
+
+        .banner-content {
+            flex: 1;
+        }
+
+        .banner-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #92400e;
+            margin-bottom: var(--space-2);
+        }
+
+        .banner-text {
+            font-size: 14px;
+            color: #92400e;
+            margin-bottom: var(--space-4);
+        }
+
+        .view-all-btn {
+            margin-top: var(--space-4);
+            width: 100%;
+            padding: var(--space-3);
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .view-all-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* ========================================
+           PRACTICE MODE MODAL STYLES
+           ======================================== */
+        
+        #practiceModal,
+        #strandSelectionModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #practiceModal.active,
+        #strandSelectionModal.active {
+            opacity: 1;
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            position: relative;
+            background: white;
+            border-radius: 16px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .practice-modal {
+            max-width: 900px;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 32px;
+            color: #64748b;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .practice-intro {
+            font-size: 16px;
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+
+        .practice-types {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .practice-type-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .practice-type-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .practice-type-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .practice-type-card h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .practice-type-card p {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .practice-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .practice-badge.recommended {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .practice-note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #78350f;
+            line-height: 1.6;
+        }
+
+        .practice-note strong {
+            font-weight: 800;
+        }
+
+        /* Strand Selection */
+        .strand-selection-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .strand-select-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .strand-select-card:hover {
+            border-color: #667eea;
+            background: #f8fafc;
+            transform: translateX(8px);
+        }
+
+        .strand-icon {
+            font-size: 28px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 640px) {
+            .practice-types {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-height: 85vh;
+            }
+
+            .modal-header h2 {
+                font-size: 20px;
+            }
+
+            .practice-type-icon {
+                font-size: 32px;
+            }
+
+            .practice-type-card h3 {
+                font-size: 16px;
+            }
+
+            .practice-type-card p {
+                font-size: 13px;
+            }
+			
+			/* ========================================
+			ENHANCED RESPONSIVE ADJUSTMENTS
+			======================================== */
+
+			/* 1. Main Layout Responsiveness */
+			.dashboard-container > div[style*="grid-template-columns: 2fr 1fr"] {
+			/* Pinapalitan ang inline style para maging responsive */
+			display: grid !important;
+			grid-template-columns: 2fr 1fr !important;
+			gap: var(--space-8);
+		}
+
+		@media (max-width: 1024px) {
+			.dashboard-container > div[style*="grid-template-columns: 2fr 1fr"] {
+				grid-template-columns: 1fr !important; /* Stack columns on tablets/mobile */
+				gap: var(--space-6);
+			}
+		}
+
+		/* 2. Achievement Grid flexibility */
+		.achievements-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+			gap: var(--space-3);
+		}
+
+		/* 3. Module Card Mobile Optimization */
+		@media (max-width: 640px) {
+			.module-progress-header {
+				flex-direction: column;
+				gap: var(--space-2);
+			}
+    
+			.module-progress-score {
+				align-self: flex-start;
+				font-size: 24px !important;
+			}
+
+			.module-progress-actions {
+				flex-direction: column; /* Stack buttons sa mobile */
+			}
+
+			.module-progress-btn {
+				width: 100%;
+				justify-content: center;
+			}
+		}
+
+		/* 4. Smooth Mobile Nav Transition */
+		.mobile-nav {
+			display: block; /* Override default none */
+			position: fixed;
+			top: 64px;
+			left: 0;
+			right: 0;
+			background: white;
+			z-index: 999;
+			visibility: hidden;
+			opacity: 0;
+			transform: translateY(-10px);
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			pointer-events: none;
+		}
+
+		.mobile-nav.active {
+			visibility: visible;
+			opacity: 1;
+			transform: translateY(0);
+			pointer-events: auto;
+			max-height: 100vh;
+		}
+        }
+    </style>
+</head>
+<body>
+    <!-- ========================================
+         RESPONSIVE NAVBAR
+         ======================================== -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Logo -->
+            <a href="student-dashboard.html" class="nav-logo">
+                <span class="nav-logo-icon">📐</span>
+                <span>BasCal</span>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <div class="nav-links">
+                <a href="student-dashboard.html" class="nav-link active">Dashboard</a>
+                <a href="module-browser.html" class="nav-link">Modules</a>
+                <a href="analytics-student.html" class="nav-link">Analytics</a>
+            </div>
+
+            <!-- Desktop User Menu -->
+            <div class="nav-user">
+                <div class="user-menu">
+                    <div class="user-avatar" id="userAvatar">ST</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Student</div>
+                        <div class="user-role">Student</div>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                ☰
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation Menu -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-content">
+            <a href="student-dashboard.html" class="nav-link active">Dashboard</a>
+            <a href="module-browser.html" class="nav-link">Modules</a>
+            <a href="analytics-student.html" class="nav-link">Analytics</a>
+            
+            <div class="user-menu">
+                <div class="user-avatar" id="mobileUserAvatar">ST</div>
+                <div class="user-info">
+                    <div class="user-name" id="mobileUserName">Student</div>
+                    <div class="user-role">Student</div>
+                </div>
+            </div>
+            
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MAIN CONTENT
+         ======================================== -->
+    <div class="dashboard-container">
+        <!-- Welcome Hero Section -->
+        <div class="welcome-hero">
+            <div class="welcome-hero-content">
+                <div class="welcome-title">Welcome back, <span id="studentName">Student</span>! 👋</div>
+                <div class="welcome-subtitle">Continue your learning journey and master mathematical proficiency</div>
+
+                <div class="welcome-stats">
+                    <div class="welcome-stat">
+                        <div class="welcome-stat-value" id="heroModules">0</div>
+                        <div class="welcome-stat-label">Active Modules</div>
+                    </div>
+                    <div class="welcome-stat">
+                        <div class="welcome-stat-value" id="heroCompleted">0</div>
+                        <div class="welcome-stat-label">Completed</div>
+                    </div>
+                    <div class="welcome-stat">
+                        <div class="welcome-stat-value" id="heroScore">--%</div>
+                        <div class="welcome-stat-label">Average Score</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <!-- Enrollment Info -->
+            <div id="enrollmentInfo" class="enrollment-info" style="display: none;">
+                <div class="enrollment-header">
+                    <div class="enrollment-icon">🎓</div>
+                    <div class="enrollment-title">My Enrollment</div>
+                </div>
+                <div class="enrollment-details">
+                    <div class="enrollment-detail">
+                        <div class="enrollment-detail-label">Teacher</div>
+                        <div class="enrollment-detail-value" id="profName">
+                            <span class="icon">👨‍🏫</span>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                    <div class="enrollment-detail">
+                        <div class="enrollment-detail-label">Class Section</div>
+                        <div class="enrollment-detail-value" id="classSection">
+                            <span class="icon">📚</span>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                    <div class="enrollment-detail">
+                        <div class="enrollment-detail-label">Class Code</div>
+                        <div class="enrollment-detail-value" id="classCodeDisplay">
+                            <span class="icon">🔑</span>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="module-browser.html" class="quick-action-btn">
+                <div class="quick-action-icon">
+                    📚
+                </div>
+                <div class="quick-action-content">
+                    <div class="quick-action-title">Browse Modules</div>
+                    <div class="quick-action-desc">Explore new content</div>
+                </div>
+            </a>
+
+            <a href="#continue-learning" class="quick-action-btn" onclick="continueLearning(event)">
+                <div class="quick-action-icon success">
+                    ▶️
+                </div>
+                <div class="quick-action-content">
+                    <div class="quick-action-title">Continue Learning</div>
+                    <div class="quick-action-desc">Resume where you left</div>
+                </div>
+            </a>
+
+            <a href="analytics-student.html" class="quick-action-btn">
+                <div class="quick-action-icon warning">
+                    📊
+                </div>
+                <div class="quick-action-content">
+                    <div class="quick-action-title">View Analytics</div>
+                    <div class="quick-action-desc">Track your progress</div>
+                </div>
+            </a>
+
+            <a href="#practice" class="quick-action-btn" onclick="startPractice(event)">
+                <div class="quick-action-icon info">
+                    💪
+                </div>
+                <div class="quick-action-content">
+                    <div class="quick-action-title">Practice Mode</div>
+                    <div class="quick-action-desc">Take random quizzes</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-8); margin-bottom: var(--space-8);">
+            <!-- Left Column: Learning Path -->
+            <div>
+                <!-- Current Modules -->
+                <div class="learning-path">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span class="section-title-icon"></span>
+                            My Learning Path
+                        </div>
+                        <button class="btn btn-secondary" onclick="window.location.href='module-browser.html'">
+                            See all Module
+                        </button>
+                    </div>
+
+                    <div id="modulesContainer">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <p style="margin-top: var(--space-4);">Loading your modules...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Five Strands Progress -->
+                <div class="card" id="strandsCard" style="display: none; margin-top: var(--space-6);">
+                    <div class="card-header">
+                        <div class="card-title">Five Strands Proficiency</div>
+                        <a href="analytics-student.html" class="btn btn-ghost" style="padding: var(--space-2) var(--space-4);">
+                            View Details →
+                        </a>
+                    </div>
+                    <div class="strands-mini-grid" id="strandsGrid">
+                        <!-- Strands will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Sidebar -->
+            <div>
+                <!-- Achievements -->
+                <div class="card" style="margin-bottom: var(--space-6);">
+                    <div class="card-header">
+                        <div class="card-title">Achievements</div>
+                    </div>
+                    <div class="achievements-grid">
+                        <div class="achievement-card earned">
+                            <div class="achievement-icon">🎓</div>
+                            <div class="achievement-name">First Steps</div>
+                            <div class="achievement-desc">Completed first module</div>
+                        </div>
+                        <div class="achievement-card">
+                            <div class="achievement-icon">⭐</div>
+                            <div class="achievement-name">Perfect Score</div>
+                            <div class="achievement-desc">Get 100% on quiz</div>
+                        </div>
+                        <div class="achievement-card">
+                            <div class="achievement-icon">🔥</div>
+                            <div class="achievement-name">On Fire</div>
+                            <div class="achievement-desc">7-day streak</div>
+                        </div>
+                        <div class="achievement-card">
+                            <div class="achievement-icon">💯</div>
+                            <div class="achievement-name">Master</div>
+                            <div class="achievement-desc">Complete 10 modules</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">⚡ Recent Activity</div>
+                    </div>
+                    <div class="activity-list" id="activityList">
+                        <div class="empty-state" style="padding: var(--space-6);">
+                            <p style="font-size: 14px;">No recent activity yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Class Enrollment Modal -->
+    <div class="modal" id="enrollmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Join a Class</h2>
+                <p class="modal-subtitle">Enter the class code provided by your teacher</p>
+            </div>
+            <form id="enrollmentForm" onsubmit="joinClass(event)">
+                <div class="form-group">
+                    <label class="form-label" for="classCode">Class Code</label>
+                    <input 
+                        type="text" 
+                        id="classCode" 
+                        class="form-input" 
+                        placeholder="FC-XX-XXXX"
+                        required
+                        maxlength="20"
+                        autocomplete="off"
+                    >
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-modal btn-modal-cancel" onclick="closeEnrollmentModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-modal btn-modal-submit">
+                        Join Class
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://farah-ungroupable-millicent.ngrok-free.dev';
+        let currentUser = null;
+        let enrolledModules = [];
+        let userClass = null;
+		
+		
+
+        // Initialize dashboard
+        async function initDashboard() {
+            try {
+                // Check token
+                const token = localStorage.getItem('token');
+                const userStr = localStorage.getItem('user');
+
+                if (!token || !userStr) {
+                    window.location.href = 'auth.html';
+                    return;
+                }
+
+                currentUser = JSON.parse(userStr);
+
+                // Update user info
+                document.getElementById('userName').textContent = currentUser.firstName || 'Student';
+                document.getElementById('studentName').textContent = currentUser.firstName || 'Student';
+                document.getElementById('userAvatar').textContent = (currentUser.firstName || 'S')[0].toUpperCase();
+
+                // Check class enrollment
+                await checkClassEnrollment();
+
+                // Load data
+                await Promise.all([
+                    loadEnrolledModules(),
+                    loadStrandsProgress(),
+                    loadRecentActivity(),
+					loadAchievements()
+                ]);
+
+            } catch (error) {
+                console.error('Failed to initialize dashboard:', error);
+                showError('Failed to load dashboard data');
+            }
+        }
+
+        // Check if student is enrolled in a class
+        async function checkClassEnrollment() {
+			console.log('🔍 Checking class enrollment...');
+			try {
+				const token = localStorage.getItem('token');
+				const response = await fetch(`${API_BASE}/api/student/class`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+						'Content-Type': 'application/json'
+					}
+				});
+
+				if (response.ok) {
+					const data = await response.json();
+					if (data.class) {
+						userClass = data.class;
+						displayEnrollmentInfo(data.class);
+						return; // Exit if enrolled
+					}
+				} 
+        
+				// If status is 404 or data.class is missing, it's a normal "not enrolled" state
+				console.log('ℹ️ Student not currently enrolled in a class.');
+				showEnrollmentBanner();
+        
+			} catch (error) {
+				console.error('❌ System error checking enrollment:', error);
+				// Still show banner so the student can join a class
+				showEnrollmentBanner();
+			}
+		}
+
+        // ✅ Display enrollment information
+        function displayEnrollmentInfo(classData) {
+            console.log('📊 Displaying enrollment info:', classData);
+            
+            const enrollmentInfo = document.getElementById('enrollmentInfo');
+            const profName = document.getElementById('profName');
+            const classSection = document.getElementById('classSection');
+            const classCodeDisplay = document.getElementById('classCodeDisplay');
+
+            if (!enrollmentInfo || !profName || !classSection || !classCodeDisplay) {
+                console.error('❌ Enrollment elements not found!');
+                return;
+            }
+
+            // Display professor name
+            const teacherName = `${classData.teacher_first_name} ${classData.teacher_last_name}`;
+            profName.innerHTML = `<span class="icon">👨‍🏫</span><span>Tr. ${teacherName}</span>`;
+            
+            // Display class section
+            const sectionInfo = classData.section 
+                ? `${classData.grade_level} - ${classData.section}`
+                : classData.class_name;
+            classSection.innerHTML = `<span class="icon">📚</span><span>${sectionInfo}</span>`;
+            
+            // Display class code
+            classCodeDisplay.innerHTML = `<span class="icon">🔑</span><span>${classData.class_code}</span>`;
+
+            enrollmentInfo.style.display = 'block';
+            console.log('✅ Enrollment info displayed');
+        }
+
+        // Show banner to join class
+        function showEnrollmentBanner() {
+			// Change '.container' to '.dashboard-container' to match your HTML
+			const container = document.querySelector('.dashboard-container'); 
+    
+			// Add a safety check to prevent further crashes
+			if (!container) {
+				console.error('❌ Could not find .dashboard-container element');
+				return;
+			}
+
+			const banner = document.createElement('div');
+			banner.className = 'no-class-banner';
+			banner.innerHTML = `
+				<div class="banner-icon">🎓</div>
+				<div class="banner-content">
+					<div class="banner-title">Join Your Class!</div>
+					<div class="banner-text">Enter your class code to access quizzes and connect with your teacher.</div>
+					<button class="btn btn-primary" onclick="openEnrollmentModal()">
+						Enter Class Code
+					</button>
+				</div>
+			`;
+    
+			const welcomeHero = container.querySelector('.welcome-hero');
+			if (welcomeHero) {
+				welcomeHero.after(banner);
+			} else {
+				container.prepend(banner);
+			}
+		}
+
+        // Open enrollment modal
+        function openEnrollmentModal() {
+            document.getElementById('enrollmentModal').classList.add('active');
+            document.getElementById('classCode').focus();
+        }
+
+        // Close enrollment modal
+        function closeEnrollmentModal() {
+            document.getElementById('enrollmentModal').classList.remove('active');
+            document.getElementById('enrollmentForm').reset();
+        }
+
+        // Join class
+        async function joinClass(event) {
+            event.preventDefault();
+            
+            const classCode = document.getElementById('classCode').value.trim().toUpperCase();
+            const token = localStorage.getItem('token');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/student/join-class`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ class_code: classCode })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(`✅ Successfully joined ${data.class.class_name}!`);
+                    closeEnrollmentModal();
+                    
+                    // Remove banner and reload
+                    const banner = document.querySelector('.no-class-banner');
+                    if (banner) banner.remove();
+                    
+                    userClass = data.class;
+                } else {
+                    alert(`${data.error || 'Failed to join class. Please check the code.'}`);
+                }
+            } catch (error) {
+                console.error('Error joining class:', error);
+                alert('Failed to join class. Please try again.');
+            }
+        }
+
+        // Load enrolled modules
+        async function loadEnrolledModules() {
+			console.log('🔍 Loading enrolled modules...');
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_BASE}/api/student/dashboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+				
+				console.log('📊 Dashboard response status:', res.status);
+
+                if (!res.ok) {
+                    if (res.status === 401) {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        window.location.href = 'auth.html';
+                        return;
+                    }
+                    throw new Error('Failed to fetch modules');
+                }
+
+                const data = await res.json();
+				console.log('📊 Dashboard data received:', data); 
+				
+                enrolledModules = data.modules || [];
+                renderModules();
+                updateHeroStats();
+
+            } catch (error) {
+                console.error('Failed to load modules:', error);
+                document.getElementById('modulesContainer').innerHTML = `
+                    <div class="error-state">
+                        <p>Failed to load modules. Please try refreshing the page.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Render modules (limit to 3)
+        function renderModules() {
+            const container = document.getElementById('modulesContainer');
+
+            if (enrolledModules.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-modules">
+                        <div class="empty-icon"></div>
+                        <div class="empty-title">No Modules Yet</div>
+                        <div class="empty-desc">Start your learning journey by enrolling in a module</div>
+                        <button class="btn btn-primary" onclick="window.location.href='module-browser.html'">
+                            Browse Modules
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Show only first 3 modules
+            const displayModules = enrolledModules.slice(0, 3);
+            const hasMore = enrolledModules.length > 3;
+
+            container.innerHTML = displayModules.map(module => {
+                const progress = module.progress || 0;
+                const statusClass = progress === 100 ? 'completed' : progress > 0 ? 'in_progress' : 'unlocked';
+                const statusText = progress === 100 ? 'Completed' : progress > 0 ? 'In Progress' : 'Not Started';
+                const statusBadgeClass = progress === 100 ? 'badge-success' : progress > 0 ? 'badge-warning' : 'badge-primary';
+
+                return `
+                    <div class="module-progress-card" onclick="openModule(${module.module_id})">
+                        <div class="module-progress-header">
+                            <div class="module-progress-info">
+                                <div class="module-progress-title">${escapeHtml(module.module_name || module.name)}</div>
+                                <div class="module-progress-meta">
+                                    <span>${module.total_quizzes || 0} Quizzes</span>
+                                    <span class="badge ${statusBadgeClass}">${statusText}</span>
+                                </div>
+                            </div>
+                            <div class="module-progress-score">${Math.round(module.average_score || module.score || 0)}%</div>
+                        </div>
+
+                        <div class="module-progress-bar-container">
+                            <div class="module-progress-bar-label">
+                                <span>Progress</span>
+                                <span>${Math.round(progress)}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="module-progress-actions">
+                            <button class="module-progress-btn module-progress-btn-primary" onclick="continueModule(event, ${module.module_id})">
+                                ${progress > 0 ? 'Continue' : 'Start'} Learning
+                            </button>
+                            <button class="module-progress-btn module-progress-btn-secondary" onclick="viewModuleDetails(event, ${module.module_id})">
+                                Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Add "View All" button if there are more than 3 modules
+            if (hasMore) {
+                container.innerHTML += `
+                    <button class="view-all-btn" onclick="window.location.href='module-browser.html'">
+                        View All ${enrolledModules.length} Modules
+                    </button>
+                `;
+            }
+        }
+
+        // Update hero stats
+        // Update hero stats
+		function updateHeroStats() {
+			console.log('📊 Updating hero stats with modules:', enrolledModules);
+    
+			const total = enrolledModules.length;
+    
+			// ✅ FIXED: Count completed based on status OR score >= 70
+			const completed = enrolledModules.filter(m => 
+				m.status === 'completed' || (m.score && m.score >= 70)
+			).length;
+    
+			// ✅ FIXED: Use correct field name (averagescore not average_score)
+			const modulesWithScores = enrolledModules.filter(m => m.score != null && m.score > 0);
+			const avgScore = modulesWithScores.length > 0
+				? Math.round(modulesWithScores.reduce((sum, m) => sum + Number(m.score || 0), 0) / modulesWithScores.length)
+				: 0;
+
+			console.log(`📊 Stats: ${total} total, ${completed} completed, ${avgScore}% avg`);
+
+			document.getElementById('heroModules').textContent = total;
+			document.getElementById('heroCompleted').textContent = completed;
+			document.getElementById('heroScore').textContent = avgScore + '%';
+		}
+
+        // Load strands progress
+        async function loadStrandsProgress() {
+            try {
+                const token = localStorage.getItem('token');
+                // ✅ FIX: Use correct endpoint that returns strand data
+                const res = await fetch(`${API_BASE}/api/student/strand-progress`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!res.ok) throw new Error('Failed to fetch strands');
+
+                const data = await res.json();
+                console.log('✅ Strand data:', data);
+                
+                // ✅ FIX: Handle proper data structure
+                const strands = data.strandProgress || [];
+                if (strands.length > 0) {
+                    renderStrands(strands);
+                }
+
+            } catch (error) {
+                console.error('Failed to load strands:', error);
+                // Show placeholder if strands fail to load
+                const strandsGrid = document.getElementById('strandsGrid');
+                if (strandsGrid) {
+                    strandsGrid.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #64748b;">
+                            <div style="font-size: 32px; margin-bottom: 8px;">📊</div>
+                            <div>Complete modules to see your proficiency strands</div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Render strands
+        // Render strands
+		function renderStrands(strands) {
+			console.log('🎨 Rendering strands:', strands);
+			console.log('🎨 First strand:', strands[0]);
+    
+			const strandsGrid = document.getElementById('strandsGrid');
+			const strandsCard = document.getElementById('strandsCard');
+    
+			if (!strands || strands.length === 0) return;
+    
+			strandsCard.style.display = 'block';
+    
+			const strandNames = {
+				conceptual: 'Conceptual Understanding',
+				procedural: 'Procedural Fluency',
+				strategic: 'Strategic Competence',
+				adaptive: 'Adaptive Reasoning',
+				productive: 'Productive Disposition'
+			};
+    
+			const strandIcons = {
+				conceptual: '🧠',
+				procedural: '📐',
+				strategic: '🎯',
+				adaptive: '🔄',
+				productive: '🎨'
+			};
+    
+			strandsGrid.innerHTML = strands.map(strand => {
+				// ✅ CRITICAL: Use camelCase field names (not snake_case!)
+				const percentage = Math.round(strand.averagescore || 0);
+				const color = getStrandColor(percentage);
+				const name = strandNames[strand.strandtype] || strand.strandtype;
+				const icon = strandIcons[strand.strandtype] || '📊';
+        
+				return `
+					<div class="strand-mini-card">
+						<div class="strand-mini-name">${icon} ${name}</div>
+						<div class="strand-mini-circle" style="background: conic-gradient(${color} ${percentage * 3.6}deg, var(--gray-200) ${percentage * 3.6}deg)">
+							<div class="strand-mini-inner">
+								<div class="strand-mini-percent">${percentage}%</div>
+							</div>
+						</div>
+						<div class="strand-mini-meta" style="margin-top: 8px; font-size: 12px; color: #64748b; text-align: center;">
+							${strand.completedmodules || 0}/${strand.totalmodules || 0} modules
+						</div>
+					</div>
+        `;
+			}).join('');
+		}
+
+
+        // Get strand color based on score
+        function getStrandColor(score) {
+            if (score >= 80) return 'var(--success)';
+            if (score >= 60) return 'var(--info)';
+            if (score >= 40) return 'var(--warning)';
+            return 'var(--danger)';
+        }
+
+        // Load recent activity
+        async function loadRecentActivity() {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_BASE}/api/student/recent-activity?limit=5`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!res.ok) throw new Error('Failed to fetch activity');
+
+                const activities = await res.json();
+                renderActivity(activities);
+
+            } catch (error) {
+                console.error('Failed to load activity:', error);
+            }
+        }
+
+        // Render activity
+        function renderActivity(activities) {
+            const container = document.getElementById('activityList');
+
+            if (activities.length === 0) return;
+
+            container.innerHTML = activities.map(activity => {
+                const iconClass = activity.type === 'quiz' ? 'quiz' : 
+                                 activity.type === 'module' ? 'module' : 'achievement';
+                const icon = activity.type === 'quiz' ? '📝' : 
+                            activity.type === 'module' ? '📚' : '🏆';
+
+                return `
+                    <div class="activity-item">
+                        <div class="activity-icon ${iconClass}">${icon}</div>
+                        <div class="activity-content">
+                            <div class="activity-title">${escapeHtml(activity.title)}</div>
+                            <div class="activity-time">${formatTimeAgo(activity.timestamp)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Continue learning - opens last active module
+        function continueLearning(e) {
+            e.preventDefault();
+
+            if (enrolledModules.length === 0) {
+                window.location.href = 'module-browser.html';
+                return;
+            }
+
+            // Find module in progress or first module
+            const inProgress = enrolledModules.find(m => m.progress > 0 && m.progress < 100);
+            const targetModule = inProgress || enrolledModules[0];
+
+            window.location.href = `module-content.html?id=${targetModule.module_id}`;
+        }
+
+        // Start practice mode
+        function startPractice(e) {
+            e.preventDefault();
+            
+            // Show practice mode modal
+            const modal = document.createElement('div');
+            modal.id = 'practiceModal';
+            modal.innerHTML = `
+                <div class="modal-overlay" onclick="closePracticeModal()"></div>
+                <div class="modal-content practice-modal">
+                    <div class="modal-header">
+                        <h2>🎯 Practice Mode</h2>
+                        <button onclick="closePracticeModal()" class="modal-close">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="practice-intro">Choose your practice type to sharpen your calculus skills!</p>
+                        
+                        <div class="practice-types">
+                            <!-- Quick Drills -->
+                            <div class="practice-type-card" onclick="startQuickDrill()">
+                                <div class="practice-type-icon">⚡</div>
+                                <h3>Quick Drills</h3>
+                                <p>5-10 rapid-fire problems to test your speed and accuracy</p>
+                                <div class="practice-badge">5-10 min</div>
+                            </div>
+
+                            <!-- Strand Focus -->
+                            <div class="practice-type-card" onclick="startStrandPractice()">
+                                <div class="practice-type-icon">🎯</div>
+                                <h3>Strand Focus</h3>
+                                <p>Practice specific proficiency strands (Conceptual, Procedural, etc.)</p>
+                                <div class="practice-badge">10-15 min</div>
+                            </div>
+
+                            <!-- Timed Challenge -->
+                            <div class="practice-type-card" onclick="startTimedChallenge()">
+                                <div class="practice-type-icon">⏱️</div>
+                                <h3>Timed Challenge</h3>
+                                <p>Race against the clock! 20 questions in 15 minutes</p>
+                                <div class="practice-badge">15 min</div>
+                            </div>
+
+                            <!-- Weak Areas -->
+                            <div class="practice-type-card" onclick="startWeakAreasPractice()">
+                                <div class="practice-type-icon">💪</div>
+                                <h3>Improve Weak Areas</h3>
+                                <p>AI-recommended questions based on your performance</p>
+                                <div class="practice-badge recommended">Recommended</div>
+                            </div>
+                        </div>
+
+                        <div class="practice-note">
+                            <strong>Note:</strong> Practice mode scores don't affect your official grades, 
+                            but progress is tracked for analytics!
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function closePracticeModal() {
+            const modal = document.getElementById('practiceModal');
+            if (modal) {
+                modal.classList.remove('active');
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
+
+        // Practice Mode Functions
+        function startQuickDrill() {
+            closePracticeModal();
+            window.location.href = 'practice-drill.html?mode=quick';
+        }
+
+        function startStrandPractice() {
+            closePracticeModal();
+            // Show strand selection
+            const modal = document.createElement('div');
+            modal.id = 'strandSelectionModal';
+            modal.innerHTML = `
+                <div class="modal-overlay" onclick="closeStrandModal()"></div>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Choose a Proficiency Strand</h2>
+                        <button onclick="closeStrandModal()" class="modal-close">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="strand-selection-grid">
+                            <div class="strand-select-card" onclick="window.location.href='practice-drill.html?strand=conceptual'">
+                                <span class="strand-icon">🔵</span>
+                                <span>Conceptual Understanding</span>
+                            </div>
+                            <div class="strand-select-card" onclick="window.location.href='practice-drill.html?strand=procedural'">
+                                <span class="strand-icon">🟢</span>
+                                <span>Procedural Fluency</span>
+                            </div>
+                            <div class="strand-select-card" onclick="window.location.href='practice-drill.html?strand=strategic'">
+                                <span class="strand-icon">🟡</span>
+                                <span>Strategic Competence</span>
+                            </div>
+                            <div class="strand-select-card" onclick="window.location.href='practice-drill.html?strand=adaptive'">
+                                <span class="strand-icon">🟠</span>
+                                <span>Adaptive Reasoning</span>
+                            </div>
+                            <div class="strand-select-card" onclick="window.location.href='practice-drill.html?strand=productive'">
+                                <span class="strand-icon">🔴</span>
+                                <span>Productive Disposition</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function closeStrandModal() {
+            const modal = document.getElementById('strandSelectionModal');
+            if (modal) {
+                modal.classList.remove('active');
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
+
+        function startTimedChallenge() {
+            closePracticeModal();
+            window.location.href = 'practice-drill.html?mode=timed';
+        }
+
+        function startWeakAreasPractice() {
+            closePracticeModal();
+            window.location.href = 'practice-drill.html?mode=adaptive';
+        }
+
+        // Open module
+        function openModule(moduleId) {
+            window.location.href = `module-content.html?id=${moduleId}`;
+        }
+
+        // Continue module
+        function continueModule(e, moduleId) {
+            e.stopPropagation();
+            window.location.href = `module-content.html?id=${moduleId}`;
+        }
+
+        // View module details
+        function viewModuleDetails(e, moduleId) {
+            e.stopPropagation();
+            window.location.href = `module-content.html?id=${moduleId}`;
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                const token = localStorage.getItem('token');
+                await fetch(`${API_BASE}/api/auth/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            } catch (error) {
+                console.error('Logout failed:', error);
+            } finally {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'auth.html';
+            }
+        }
+
+        // Utility functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTimeAgo(timestamp) {
+            const now = new Date();
+            const then = new Date(timestamp);
+            const seconds = Math.floor((now - then) / 1000);
+
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
+            return Math.floor(seconds / 86400) + ' days ago';
+        }
+
+        function showError(message) {
+            console.error(message);
+            // TODO: Implement toast notification
+        }
+
+        // Initialize on page load
+        // ========================================
+        // MOBILE MENU TOGGLE
+        // ========================================
+        function toggleMobileMenu() {
+            const mobileNav = document.getElementById('mobileNav');
+            mobileNav.classList.toggle('active');
+        }
+
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('.mobile-nav .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('mobileNav').classList.remove('active');
+            });
+        });
+
+        // ========================================
+        // LOGOUT FUNCTION
+        // ========================================
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = 'auth.html';
+        }
+
+        // ========================================
+        // LOAD USER INFO
+        // ========================================
+        function loadUserInfo() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const userName = payload.firstName || 'Student';
+                    const initials = userName.substring(0, 2).toUpperCase();
+                    
+                    // Desktop
+                    document.getElementById('userName').textContent = userName;
+                    document.getElementById('userAvatar').textContent = initials;
+                    document.getElementById('studentName').textContent = userName;
+                    
+                    // Mobile
+                    document.getElementById('mobileUserName').textContent = userName;
+                    document.getElementById('mobileUserAvatar').textContent = initials;
+                } catch (error) {
+                    console.error('Error parsing token:', error);
+                }
+            }
+        }
+		
+		function renderAchievements(achievements, stats) {
+			const grid = document.querySelector('.achievements-grid');
+    
+			if (!grid) {
+				console.warn('Achievements grid not found');
+				return;
+			}
+
+			if (achievements.length === 0) {
+				grid.innerHTML = `
+					<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #64748b;">
+						<div style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">No Achievements Yet</div>
+						<div style="font-size: 14px;">Complete quizzes to unlock achievements!</div>
+					</div>
+				`;
+				return;
+			}
+
+			const displayAchievements = achievements.slice(0, 8);
+
+			grid.innerHTML = displayAchievements.map(achievement => {
+				const isEarned = achievement.is_unlocked === 1;
+				const earnedClass = isEarned ? 'earned' : '';
+
+				return `
+					<div class="achievement-card ${earnedClass}" title="${achievement.description}">
+						<div class="achievement-name">${achievement.title}</div>
+						<div class="achievement-desc">${achievement.description}</div>
+						${isEarned ? `<div style="font-size: 10px; color: #10b981; font-weight: 700; margin-top: 8px;">✓ UNLOCKED</div>` : ''}
+					</div>
+				`;
+			}).join('');
+
+			// Update header stats
+			const achievementCard = grid.closest('.card');
+			if (achievementCard && stats) {
+				const titleElement = achievementCard.querySelector('.card-title');
+				if (titleElement) {
+						titleElement.innerHTML = `
+						Achievements 
+						<span style="font-size: 14px; font-weight: 600; color: #10b981; margin-left: 8px;">
+							${stats.totalUnlocked}/${stats.totalAvailable}
+						</span>
+					`;
+				}
+			}
+
+			console.log(`🏆 Rendered ${displayAchievements.length} achievements (${stats.totalUnlocked} unlocked)`);
+		}
+
+
+		
+		// Load achievements
+		async function loadAchievements() {
+			try {
+				const token = localStorage.getItem('token');
+        
+				// First, check for new achievements
+				await fetch(`${API_BASE}/api/student/check-achievements`, {
+					method: 'POST',
+					headers: {
+						'Authorization': `Bearer ${token}`,
+						'Content-Type': 'application/json'
+					}
+				});
+
+				// Then get all achievements
+				const res = await fetch(`${API_BASE}/api/student/achievements`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+						'Content-Type': 'application/json'
+					}
+				});
+
+				if (!res.ok) throw new Error('Failed to fetch achievements');
+
+				const data = await res.json();
+				console.log('🏆 Achievements loaded:', data);
+
+				renderAchievements(data.achievements, data.stats);
+
+			} catch (error) {
+				console.error('❌ Failed to load achievements:', error);
+				// Show default achievements on error
+				renderAchievements([], { totalUnlocked: 0, totalAvailable: 0 });
+			}
+		}
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserInfo();
+            initDashboard();
+        });
+    </script>
+</body>
+</html>

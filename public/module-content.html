@@ -1,0 +1,2862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Content - BasCal</title>
+    <link rel="stylesheet" href="flex-calc-design-system.css">
+    
+    <!-- ========================================
+         KATEX FOR MATH RENDERING
+         ======================================== -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    
+    <style>
+        /* ========== ORIGINAL MODULE CONTENT STYLES ========== */
+        .module-content-layout {
+			display: grid;
+			grid-template-columns: 320px 1fr; /* Slightly wider sidebar for readability */
+			gap: var(--space-8);
+			margin-top: var(--space-6);
+			align-items: start;
+		}
+
+        /* Sidebar */
+        .lessons-sidebar {
+			background: white;
+			border-radius: var(--radius-2xl);
+			padding: var(--space-6);
+			box-shadow: var(--shadow-md);
+			border: 1px solid var(--gray-200);
+			position: sticky;
+			top: 90px;
+			max-height: calc(100vh - 120px);
+			overflow-y: auto;
+		}
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: var(--space-4);
+        }
+
+        .lesson-item {
+            padding: var(--space-3);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-2);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .lesson-item:hover {
+            background: var(--gray-50);
+        }
+
+        .lesson-item.active {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .lesson-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .lesson-item.active .lesson-number {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .lesson-item.completed .lesson-number {
+            background: var(--success);
+            color: white;
+        }
+
+        .lesson-info {
+            flex: 1;
+        }
+
+        .lesson-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .lesson-duration {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Main Content */
+        .lesson-content {
+			background: white;
+			border-radius: var(--radius-2xl);
+			padding: var(--space-10);
+			box-shadow: var(--shadow-md);
+			border: 1px solid var(--gray-200);
+			min-height: 600px;
+		}
+
+        .lesson-header {
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-6);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .lesson-category {
+            display: inline-block;
+            padding: var(--space-1) var(--space-3);
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: var(--space-3);
+        }
+
+        .lesson-main-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: var(--space-3);
+        }
+
+        .lesson-description {
+            font-size: 16px;
+            color: var(--gray-600);
+            line-height: 1.6;
+        }
+
+        /* Video Container */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Content Sections */
+        .content-section {
+            margin-bottom: var(--space-8);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .section-icon {
+            font-size: 28px;
+        }
+
+        .content-text {
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--gray-700);
+            margin-bottom: var(--space-4);
+        }
+
+        .content-text h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin: var(--space-6) 0 var(--space-3) 0;
+        }
+
+        .content-text h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin: var(--space-4) 0 var(--space-2) 0;
+        }
+
+        .content-text p {
+            margin-bottom: var(--space-4);
+        }
+
+        .content-text ul,
+        .content-text ol {
+            margin-left: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+
+        .content-text li {
+            margin-bottom: var(--space-2);
+        }
+
+        /* Materials Section */
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .material-card {
+            background: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .material-card:hover {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .material-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .material-info {
+            flex: 1;
+        }
+
+        .material-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 2px;
+        }
+
+        .material-meta {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        /* Quiz Section */
+        .quiz-prompt {
+			background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+			border: 2px dashed var(--primary);
+			padding: var(--space-8);
+			margin-top: var(--space-10);
+			border-radius: var(--radius-2xl);
+			text-align: center;
+		}
+
+        .quiz-icon {
+            font-size: 64px;
+            margin-bottom: var(--space-4);
+        }
+
+        .quiz-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+
+        .quiz-description {
+            font-size: 16px;
+            color: var(--gray-600);
+            margin-bottom: var(--space-4);
+        }
+
+        .btn-start-quiz {
+			margin-top: var(--space-4);
+			padding: var(--space-4) var(--space-10);
+		}
+
+        .btn-start-quiz:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Navigation Buttons */
+        .lesson-navigation {
+			display: flex;
+			justify-content: space-between;
+			gap: var(--space-4);
+			padding-top: var(--space-8);
+			border-top: 2px solid var(--gray-100);
+			margin-top: var(--space-10);
+		}
+
+        .btn-nav {
+			min-width: 140px;
+			justify-content: center;
+			padding: var(--space-3) var(--space-6);
+			border-radius: var(--radius-lg);
+			font-weight: 700;
+			transition: all 0.2s ease;
+		}
+
+        .btn-prev {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-prev:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-next {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* ========== NEW: INTERACTIVE RESOURCES SECTION ========== */
+        .interactive-resources-section {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            margin-top: var(--space-8);
+        }
+
+        .resources-header {
+            text-align: center;
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-4);
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .resources-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+
+        .resources-subtitle {
+            font-size: 16px;
+            color: var(--gray-500);
+            font-weight: 500;
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+
+        .resource-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-5);
+            box-shadow: var(--shadow-sm);
+            border: 2px solid var(--gray-200);
+            transition: all var(--transition-normal);
+            cursor: pointer;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .resource-thumbnail {
+            width: 100%;
+            height: 140px;
+            background: var(--gray-100);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            position: relative;
+        }
+
+        .resource-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .resource-type-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .badge-phet_simulation { background: var(--danger); color: white; }
+        .badge-desmos { background: var(--success); color: white; }
+        .badge-game { background: var(--warning); color: white; }
+        .badge-interactive_tool { background: var(--secondary); color: white; }
+        .badge-external_link { background: var(--info); color: white; }
+
+        .resource-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+            line-height: 1.3;
+        }
+
+        .resource-description {
+            font-size: 13px;
+            color: var(--gray-600);
+            margin-bottom: var(--space-3);
+            line-height: 1.5;
+        }
+
+        .resource-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: var(--space-2);
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .resource-time {
+            font-size: 12px;
+            color: var(--gray-500);
+            font-weight: 600;
+        }
+
+        /* Dynamic Feedback - ✅ STICKY FOOTER */
+        .feedback-section {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			background: white;
+			border-top: 1px solid #e2e8f0;
+			box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+			z-index: 1001; /* Mas mataas sa lahat para laging visible */
+			max-height: 65px; /* Collapsed height para sa header lang */
+			transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+			overflow: hidden;
+		}
+		
+		.feedback-section.expanded {
+			max-height: 400px; /* Mas mataas na para makita ang tips */
+		}
+		
+		.feedback-content-scroll {
+			padding: 0 24px 24px 24px;
+			max-height: 335px;
+			overflow-y: auto;
+		}
+		
+		@media (max-width: 640px) {
+    .		feedback-section {
+				left: 12px;
+				right: 12px;
+				bottom: 12px;
+				width: calc(100% - 24px);
+				border: 1px solid #e2e8f0;
+				border-radius: 16px;
+			}
+			
+			body {
+				padding-bottom: 100px !important;
+			}
+			
+			@media (min-width: 641px) {
+			.feedback-section {
+				left: 0;
+				right: 0;
+				width: 100%;
+				border-radius: 0;
+			}
+		}
+		
+			.feedback-section.collapsed {
+				transform: translateX(-50%) translateY(calc(100% - 60px)); /* Saktong height ng header */
+			}
+	
+			body {
+				padding-bottom: 120px; /* Space para hindi matakpan ang content ng floating footer */
+			}
+		}
+
+        /* Collapsed state */
+        .feedback-section.collapsed {
+			transform: translateX(-50%) translateY(calc(100% - 65px));
+		}
+
+        .feedback-section.collapsed:hover {
+            transform: translateY(0);
+        }
+
+        /* Add padding to body to prevent content hiding */
+        body {
+            padding-bottom: 320px;
+        }
+
+        .feedback-header {
+			background: #f8fafc;
+			padding: 16px 24px;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			border-bottom: 1px solid #f1f5f9;
+		}
+
+        .feedback-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px solid var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .feedback-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .feedback-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gray-900);
+        }
+
+        .feedback-card {
+            background: var(--gray-50);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--primary);
+            margin-bottom: var(--space-3);
+            transition: all var(--transition-fast);
+        }
+
+        .feedback-card:hover {
+            background: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .feedback-card.tip { border-left-color: var(--info); }
+        .feedback-card.hint { border-left-color: var(--warning); }
+        .feedback-card.success { border-left-color: var(--success); }
+        .feedback-card.warning { border-left-color: var(--danger); }
+        .feedback-card.challenge { border-left-color: var(--secondary); }
+
+        .feedback-card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-bottom: var(--space-2);
+        }
+
+        .feedback-card-title {
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .feedback-card-content {
+            color: var(--gray-600);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* PhET Redirect */
+        .phet-redirect {
+            background: var(--gray-50);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            text-align: center;
+            border: 2px solid var(--gray-200);
+            margin-top: var(--space-6);
+        }
+
+        .phet-logo {
+            font-size: 56px;
+            margin-bottom: var(--space-3);
+        }
+
+        .phet-button {
+            background: var(--gradient-primary);
+            color: white;
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-lg);
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            transition: all var(--transition-fast);
+            box-shadow: var(--shadow-md);
+        }
+
+        .phet-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Resource Modal */
+        .resource-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-6);
+        }
+
+        .resource-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-2xl);
+            width: 100%;
+            max-width: 1400px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .modal-header {
+            padding: var(--space-4);
+            border-bottom: 2px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            color: white;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        .modal-body {
+            flex: 1;
+            padding: var(--space-4);
+            overflow: hidden;
+        }
+
+        .modal-body iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: var(--radius-lg);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .module-content-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .lessons-sidebar {
+                position: static;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ========== CUSTOM ALERT SYSTEM ========== */
+        .custom-alert-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999999;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .custom-alert-overlay.active {
+            display: flex;
+        }
+
+        .custom-alert-box {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .custom-alert-header {
+            padding: var(--space-6);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .custom-alert-header.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .custom-alert-header.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .custom-alert-header.warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .custom-alert-header.info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .custom-alert-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .custom-alert-title {
+            font-size: 20px;
+            font-weight: 800;
+            flex: 1;
+        }
+
+        .custom-alert-body {
+            padding: var(--space-6);
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--gray-700);
+        }
+
+        .custom-alert-footer {
+            padding: var(--space-4) var(--space-6);
+            display: flex;
+            gap: var(--space-3);
+            justify-content: flex-end;
+            border-top: 2px solid var(--gray-100);
+            background: var(--gray-50);
+        }
+
+        .custom-alert-btn {
+            padding: var(--space-3) var(--space-6);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .custom-alert-btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .custom-alert-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .custom-alert-btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+        }
+
+        .custom-alert-btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+        }
+
+/* Navbar Base - Consistent height at spacing */
+.navbar {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    height: 60px; /* Mas manipis para sa mobile */
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 64px; /* Fixed height para hindi lumalaki */
+}
+
+/* User Menu Spacing Fix */
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Saktong distansya lang */
+    flex-shrink: 0; /* Para hindi siya maipit */
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    white-space: nowrap; /* Para hindi mag-break ang text */
+}
+
+/* ========== TTS CONTROLS ========== */
+.tts-controls {
+    background: #f8fafc;
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    margin-bottom: var(--space-8);
+    display: flex;
+    flex-direction: column; /* Default stack sa mobile */
+    gap: var(--space-5);
+}
+
+@media (min-width: 768px) {
+    .tts-controls {
+        flex-direction: row; /* Row layout sa desktop */
+        align-items: center;
+        flex-wrap: wrap;
+    }
+}
+
+.tts-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    color: #1e40af;
+    font-size: 16px;
+}
+
+.tts-button-group {
+    display: flex;
+    gap: var(--space-3); /* Consistent space between Play/Pause/Stop */
+}
+
+.tts-btn {
+    flex: 1; /* Stretch buttons sa mobile para madaling pindutin */
+    justify-content: center;
+    min-height: 48px; /* Standard touch target height */
+}
+
+.tts-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tts-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.tts-btn-play {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+.tts-btn-pause {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.tts-btn-stop {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.tts-status {
+    flex: 1;
+    min-width: 150px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tts-settings {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.tts-select {
+    padding: 6px 12px;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 13px;
+    background: white;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .tts-controls {
+        flex-direction: column;
+    }
+}
+
+
+    
+/* TTS Floating Modal */
+.tts-floating-modal {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 280px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    display: none;
+    animation: slideUp 0.3s ease-out;
+}
+
+.tts-floating-modal.active {
+    display: block;
+}
+
+.tts-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    cursor: move;
+}
+
+.tts-close-btn {
+    margin-left: auto;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tts-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.tts-modal-content {
+    padding: 16px;
+}
+
+.tts-button-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.tts-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #f3f4f6;
+}
+
+.tts-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: #e5e7eb;
+}
+
+.tts-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.tts-btn-play {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.tts-btn-pause {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.tts-btn-stop {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.tts-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f9fafb;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.tts-settings {
+    display: flex;
+    gap: 8px;
+}
+
+.tts-select {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 12px;
+    background: white;
+}
+
+/* TTS FAB */
+.tts-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+    z-index: 9998;
+    transition: all 0.3s;
+}
+
+.tts-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.tts-fab.hidden {
+    display: none;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+
+        /* Learning Materials Section */
+        .materials-section {
+            margin-top: 48px;
+            padding: 32px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .materials-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .materials-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1a202c;
+        }
+
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .material-card {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .material-card:hover {
+            border-color: #6366f1;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+            transform: translateY(-4px);
+            background: white;
+        }
+
+        .material-card-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .material-card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .material-card-meta {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        /* ========================================
+           RESPONSIVE DESIGN - ALL SCREEN SIZES
+           ======================================== */
+
+        /* Tablet & Mobile (968px and below) */
+        @media (max-width: 968px) {
+            .container {
+                padding: var(--space-4);
+            }
+
+            .module-content-layout {
+				display: grid;
+				grid-template-columns: 300px 1fr; /* Fixed sidebar width */
+				gap: var(--space-8);
+				margin-top: var(--space-6);
+				align-items: start;
+			}
+
+            .lessons-sidebar {
+                position: static;
+                width: 100%;
+                margin-bottom: var(--space-4);
+            }
+
+            .lesson-content {
+                padding: var(--space-6);
+            }
+
+            .tts-button-group {
+                flex-direction: column;
+                gap: var(--space-2);
+            }
+
+            .tts-btn {
+                width: 100%;
+            }
+
+            .tts-settings {
+                flex-direction: column;
+                gap: var(--space-3);
+            }
+
+            .video-container iframe {
+                height: 250px;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-4);
+            }
+
+            .resource-card {
+                padding: var(--space-5);
+            }
+
+            .resource-preview {
+                height: 180px;
+            }
+
+            .materials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .worked-example {
+                padding: var(--space-5);
+            }
+
+            .real-world-card {
+                padding: var(--space-5);
+            }
+
+            .misconception-card {
+                padding: var(--space-5);
+            }
+
+            .concept-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Mobile Portrait (640px and below) */
+        @media (max-width: 640px) {
+            .container {
+                padding: var(--space-3);
+            }
+
+            .lessons-sidebar {
+                padding: var(--space-4);
+            }
+
+            .sidebar-title {
+                font-size: 16px;
+            }
+
+            .lesson-item {
+                padding: var(--space-2);
+                gap: var(--space-2);
+            }
+
+            .lesson-number {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+
+            .lesson-title {
+                font-size: 13px;
+            }
+
+            .lesson-duration {
+                font-size: 11px;
+            }
+
+            .lesson-content {
+                padding: var(--space-4);
+            }
+
+            .lesson-content h1 {
+                font-size: 24px;
+            }
+
+            .lesson-content h2 {
+                font-size: 20px;
+            }
+
+            .lesson-content h3 {
+                font-size: 18px;
+            }
+
+            .lesson-content h4 {
+                font-size: 16px;
+            }
+
+            .tts-controls {
+                padding: var(--space-4);
+            }
+
+            .tts-header {
+                font-size: 14px;
+            }
+
+            .tts-btn {
+                padding: var(--space-2) var(--space-3);
+                font-size: 13px;
+            }
+
+            .video-container iframe {
+                height: 200px;
+            }
+
+            .resources-title {
+                font-size: 24px;
+            }
+
+            .resources-subtitle {
+                font-size: 13px;
+            }
+
+            .resource-card {
+                padding: var(--space-4);
+            }
+
+            .resource-title {
+                font-size: 16px;
+            }
+
+            .resource-description {
+                font-size: 13px;
+            }
+
+            .resource-preview {
+                height: 150px;
+            }
+
+            .materials-title {
+                font-size: 20px;
+            }
+
+            .material-card {
+                padding: var(--space-4);
+            }
+
+            .material-title {
+                font-size: 14px;
+            }
+
+            .worked-example {
+                padding: var(--space-4);
+            }
+
+            .example-title {
+                font-size: 16px;
+            }
+
+            .example-problem {
+                font-size: 14px;
+            }
+
+            .solution-step {
+                padding: var(--space-3);
+                font-size: 13px;
+            }
+
+            .real-world-card {
+                padding: var(--space-4);
+            }
+
+            .real-world-title {
+                font-size: 16px;
+            }
+
+            .misconception-card {
+                padding: var(--space-4);
+            }
+
+            .misconception-text {
+                font-size: 14px;
+            }
+
+            .correction-text {
+                font-size: 14px;
+            }
+
+            .concept-card {
+                padding: var(--space-4);
+            }
+
+            .concept-text {
+                font-size: 14px;
+            }
+
+            .phet-redirect {
+                padding: var(--space-6);
+            }
+
+            .phet-redirect h3 {
+                font-size: 18px;
+            }
+
+            .phet-button {
+                padding: var(--space-3) var(--space-5);
+                font-size: 14px;
+            }
+
+            /* ✅ Mobile styles for sticky Tips section */
+            .feedback-section {
+                padding: var(--space-3) var(--space-4);
+                max-height: 250px;
+            }
+
+            .feedback-section.collapsed {
+                transform: translateY(calc(100% - 50px));
+            }
+
+            body {
+                padding-bottom: 270px;
+            }
+
+            .feedback-title {
+                font-size: 18px;
+            }
+
+            .feedback-card {
+                padding: var(--space-4);
+            }
+
+            .resource-modal .modal-content {
+                width: 95%;
+                max-height: 90vh;
+                padding: var(--space-4);
+            }
+
+            .modal-header h3 {
+                font-size: 18px;
+            }
+
+            .modal-body {
+                padding: var(--space-4);
+            }
+        }
+
+        /* Large Desktop (1400px and above) */
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1600px;
+            }
+
+            .module-content-layout {
+                grid-template-columns: 350px 1fr;
+            }
+
+            .lesson-content {
+                padding: var(--space-10);
+            }
+
+            .resources-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .navbar,
+            .lessons-sidebar,
+            .tts-controls,
+            .phet-redirect,
+            .modal-close {
+                display: none;
+            }
+
+            .module-content-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .lesson-content {
+                padding: 0;
+            }
+
+            body {
+                background: white;
+            }
+        }
+		
+@media (max-width: 1024px) {
+    .module-content-layout {
+        grid-template-columns: 1fr; /* Stack columns sa tablet/mobile */
+        gap: var(--space-6);
+    }
+
+    .lessons-sidebar {
+        position: static; /* Remove sticky on mobile para hindi humarang */
+        width: 100%;
+        max-height: 400px; /* Limit height para hindi masyadong mahaba ang scroll */
+    }
+}
+
+@media (max-width: 768px) {
+    .lesson-content {
+        padding: var(--space-6);
+    }
+
+    .tts-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-4);
+    }
+
+    .tts-button-group .tts-btn {
+        flex: 1; /* Buttons take equal width on mobile */
+    }
+
+    .lesson-main-title {
+        font-size: 24px;
+    }
+
+    .lesson-navigation {
+        flex-direction: column;
+    }
+
+    .btn-nav {
+        width: 100%;
+    }
+}
+
+/* Material Card Spacing */
+.materials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-5);
+}
+
+		@media (max-width: 1024px) {
+            .module-content-layout {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .lessons-sidebar {
+                position: static;
+                max-height: 300px; /* Scrollable na lang siya sa mobile */
+                padding: 15px;
+            }
+        }
+
+
+/* ========================================
+   UNIFORM NAVBAR & MOBILE MENU
+   ======================================== */
+.navbar {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    height: 64px;
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link {
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #1e293b;
+}
+
+.mobile-nav {
+    display: block;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    z-index: 999;
+}
+
+.mobile-nav.active {
+    max-height: 400px; /* Expands the menu */
+}
+
+@media (max-width: 968px) {
+    .nav-links, .nav-user { display: none; }
+    .mobile-menu-toggle { display: block; }
+}
+
+/* Responsive Sidebar Adjustment */
+@media (max-width: 1024px) {
+    .module-content-layout {
+        grid-template-columns: 1fr !important;
+    }
+    .lessons-sidebar {
+        position: static;
+        width: 100%;
+        max-height: 300px;
+    }
+}
+</style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+    <div class="nav-container">
+        <a href="student-dashboard.html" class="nav-logo">
+            <span class="nav-logo-icon">📐</span>
+            <span>BasCal</span>
+        </a>
+
+        <div class="nav-links">
+            <a href="student-dashboard.html" class="nav-link">Dashboard</a>
+            <a href="module-browser.html" class="nav-link active">Modules</a>
+            <a href="analytics-student.html" class="nav-link">Analytics</a>
+        </div>
+
+        <div class="nav-user">
+            <div class="user-menu">
+                <div class="user-avatar" id="userAvatar">ST</div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">Student</div>
+                    <div class="user-role">Student</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+    </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav-content" style="padding: 16px;">
+        <a href="student-dashboard.html" class="nav-link">Dashboard</a>
+        <a href="module-browser.html" class="nav-link active">Modules</a>
+        <a href="analytics-student.html" class="nav-link">Analytics</a>
+        <hr style="margin: 12px 0; border: none; border-top: 1px solid #eee;">
+        <button class="logout-btn" style="width: 100%;" onclick="logout()">Logout</button>
+    </div>
+</div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div style="margin-bottom: var(--space-4);">
+            <a href="module-browser.html" class="btn btn-ghost">← Back to Modules</a>
+        </div>
+
+        <div class="module-content-layout">
+			<div class="lessons-sidebar">
+				<div class="sidebar-title">📚 Lessons</div>
+				<div id="lessonsList">
+					</div>
+			</div>
+
+			<div class="main-column" style="display: flex; flex-direction: column; gap: var(--space-8);">
+				<div class="lesson-content" id="lessonContent">
+					<div style="text-align: center; padding: var(--space-12);">
+						<div style="font-size: 48px; margin-bottom: var(--space-4);">⏳</div>
+						<p>Loading lesson...</p>
+					</div>
+				</div>
+
+				<div id="feedbackSection" class="feedback-section" style="display: none;">
+					<div class="feedback-header" onclick="toggleFeedback()" style="cursor: pointer;">
+						<div class="feedback-icon"><img src="\uploads\materials/sir.png" alt="Teacher"></div>
+						<div style="flex: 1;">
+							<h3 class="feedback-title" style="margin: 0; font-size: 16px;">Smart Tips for You</h3>
+							<small id="feedbackHint" style="color: var(--gray-500);">Click to see suggestions</small>
+						</div>
+						<div id="feedbackChevron">▲</div>
+					</div>
+    
+					<div class="feedback-content-scroll">
+						<div id="feedbackCards" style="padding-top: 16px;">
+							</div>
+					</div>
+				</div>
+
+        <!-- ========================================
+             LEARNING MATERIALS (MOVED UP)
+             ======================================== -->
+        <div class="materials-section" id="materialsSection" style="display: none;">
+            <div class="materials-header">
+                <span style="font-size: 32px;">📚</span>
+                <div class="materials-title">Learning Materials</div>
+            </div>
+            <div id="materialsGrid" class="materials-grid">
+                <!-- Materials load here -->
+            </div>
+        </div>
+
+        <!-- ========================================
+             INTERACTIVE RESOURCES (MOVED DOWN)
+             ======================================== -->
+        <div id="interactiveResourcesSection" class="interactive-resources-section" style="display: none;">
+            <div class="resources-header">
+                <h2 class="resources-title">🎮 Interactive Learning Resources</h2>
+                <p class="resources-subtitle">Hands-on tools tailored for this module</p>
+            </div>
+            <div id="resourcesGrid" class="resources-grid"></div>
+
+            <!-- PhET Redirect -->
+            <div class="phet-redirect">
+                <div class="phet-logo">🔬</div>
+                <h3 style="font-size: 20px; font-weight: 800; margin-bottom: var(--space-2);">
+                    Explore More PhET Simulations
+                </h3>
+                <p style="font-size: 14px; color: var(--gray-600); margin-bottom: var(--space-4);">
+                    Discover 100+ free interactive STEM simulations
+                </p>
+                <a href="https://phet.colorado.edu/en/simulations/filter?subjects=math" 
+                   target="_blank" 
+                   class="phet-button">
+                    <span>🚀</span>
+                    <span>Visit PhET Library</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- NEW: Dynamic Feedback Section -->
+        <div id="feedbackSection" class="feedback-section" style="display: none;">
+            <div class="feedback-header">
+                <div class="feedback-icon">💬</div>
+                <h3 class="feedback-title">Tips for You</h3>
+            </div>
+            <div id="feedbackCards"></div>
+        </div>
+
+    </div>
+
+    <!-- Resource Modal -->
+    <div id="resourceModal" class="resource-modal" onclick="closeResourceModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalResourceTitle">Loading...</h3>
+                <button class="modal-close" onclick="closeResourceModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalResourceBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://farah-ungroupable-millicent.ngrok-free.dev';
+        const token = localStorage.getItem('token');
+        const urlParams = new URLSearchParams(window.location.search);
+        const moduleId = urlParams.get('id') || urlParams.get('moduleId');
+
+        let currentLessonIndex = 0;
+        let moduleData = null;
+        let lessons = [];
+        let resources = [];
+
+        // Initialize
+        if (!token) {
+            alert('Not authenticated. Please login.');
+            window.location.href = 'auth.html';
+        } else if (!moduleId) {
+            alert('No module specified.');
+            window.location.href = 'module-browser.html';
+        } else {
+            loadModuleData();
+        }
+
+        async function loadModuleData() {
+            try {
+                // 🆕🆕🆕 CHECK MODULE GATING before loading content
+                console.log('🔒 Checking module access for Module', moduleId);
+                
+                const gatingResponse = await fetch(
+                    `${API_BASE}/api/student/modules/${moduleId}/check-access`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+                
+                if (gatingResponse.ok) {
+                    const gatingData = await gatingResponse.json();
+                    
+                    if (!gatingData.unlocked) {
+                        console.log('🔒 Module is LOCKED:', gatingData.message);
+                        
+                        // Show locked message in the page
+                        document.querySelector('.lesson-content').innerHTML = `
+                            <div style="text-align: center; padding: 80px 20px;">
+                                <div style="font-size: 80px; margin-bottom: 20px;">🔒</div>
+                                <h2 style="font-size: 32px; font-weight: 800; margin-bottom: 16px; color: #1e293b;">
+                                    Module Locked
+                                </h2>
+                                <p style="font-size: 18px; color: #64748b; margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                                    ${gatingData.message}
+                                </p>
+                                <div style="background: #fef3c7; border: 2px solid #fbbf24; border-radius: 12px; padding: 20px; max-width: 500px; margin: 0 auto 24px;">
+                                    <div style="font-weight: 700; color: #92400e; margin-bottom: 8px;">
+                                        📊 Requirement:
+                                    </div>
+                                    <div style="color: #78350f;">
+                                        Complete <strong>Module ${gatingData.previousModule}</strong> with a score of <strong>70% or higher</strong> to unlock this module.
+                                    </div>
+                                    ${gatingData.previousScore !== undefined ? `
+                                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #fbbf24;">
+                                            Your current score on Module ${gatingData.previousModule}: <strong>${gatingData.previousScore.toFixed(1)}%</strong>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <button onclick="window.location.href='student-dashboard.html'" 
+                                        style="padding: 12px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                               color: white; border: none; border-radius: 8px; font-weight: 700; 
+                                               font-size: 16px; cursor: pointer; transition: transform 0.2s;">
+                                    Go to Dashboard
+                                </button>
+                            </div>
+                        `;
+                        
+                        // Hide sidebar
+                        const sidebar = document.querySelector('.lessons-sidebar');
+                        if (sidebar) sidebar.style.display = 'none';
+                        
+                        return; // Stop loading module content
+                    }
+                    
+                    console.log('✅ Module is UNLOCKED, loading content...');
+                }
+                
+                // Load module content
+                const response = await fetch(`${API_BASE}/api/student/module/${moduleId}/content`, {
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load module');
+
+                const data = await response.json();
+                moduleData = data;
+
+                // Convert to lessons format
+                lessons = [];
+
+                if (data.videos && data.videos.length > 0) {
+                    data.videos.forEach((video, index) => {
+                        lessons.push({
+                            id: `video-${index}`,
+                            title: video.title,
+                            duration: `${video.duration_minutes || video.durationminutes || 10} min`,
+                            videoUrl: video.url,
+                            content: `<h3>${video.title}</h3>${video.description || ''}${video.topics_covered || video.topicscovered ? `<h4>Topics Covered</h4><p>${video.topics_covered || video.topicscovered}</p>` : ''}`
+                        });
+                    });
+                }
+
+                if (data.sections && data.sections.length > 0) {
+                    data.sections.forEach((section) => {
+                        lessons.push({
+                            id: `section-${section.section_number || section.sectionnumber}`,
+                            title: section.title,
+                            duration: `${section.duration_minutes || section.durationminutes || 15} min`,
+                            videoUrl: null,
+                            content: generateSectionContent(data, section)
+                        });
+                    });
+                }
+
+                if (data.savedContent) {
+                    lessons.push({
+                        id: 'saved-content',
+                        title: '📚 Interactive Lesson',
+                        duration: 'Self-paced',
+                        videoUrl: null,
+                        content: data.savedContent
+                    });
+                }
+
+                if (lessons.length === 0) {
+                    lessons.push({
+                        id: 'overview',
+                        title: 'Module Overview',
+                        duration: '10 min',
+                        videoUrl: null,
+                        content: generateOverviewContent(data)
+                    });
+                }
+
+                loadLessons();
+                loadLesson(0);
+
+                // Load new features
+                await loadInteractiveResources();
+                await loadDynamicFeedback();
+
+            } catch (error) {
+                console.error('Error loading module:', error);
+                document.getElementById('lessonContent').innerHTML = `
+                    <div style="text-align: center; padding: var(--space-12);">
+                        <div style="font-size: 64px; margin-bottom: var(--space-4);">⚠️</div>
+                        <h3 style="font-size: 24px; margin-bottom: var(--space-2);">Failed to Load</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function loadLessons() {
+            const container = document.getElementById('lessonsList');
+            container.innerHTML = lessons.map((lesson, index) => `
+                <div class="lesson-item ${index === currentLessonIndex ? 'active' : ''}" 
+                     onclick="loadLesson(${index})">
+                    <div class="lesson-number">${index + 1}</div>
+                    <div class="lesson-info">
+                        <div class="lesson-title">${lesson.title}</div>
+                        <div class="lesson-duration">${lesson.duration}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadLesson(index) {
+            // ✅ Show TTS controls and stop any playing audio
+            showTTSControls();
+            stopTTS();
+            
+            if (index < 0 || index >= lessons.length) return;
+
+            currentLessonIndex = index;
+            const lesson = lessons[index];
+
+            let html = `
+                <div class="lesson-header">
+                    <div class="lesson-category">${moduleData.module.category}</div>
+                    <h1 class="lesson-main-title">${lesson.title}</h1>
+                </div>
+            `;
+
+            if (lesson.videoUrl) {
+                const videoId = extractYouTubeId(lesson.videoUrl);
+                html += `
+                    <div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+                    </div>
+                `;
+            }
+
+            html += `<div class="content-text">${lesson.content}</div>`;
+
+            // Add quiz prompt ONLY on last lesson
+            if (index === lessons.length - 1) {
+                html += `
+                    <div class="quiz-prompt">
+                        <div class="quiz-icon">🎯</div>
+                        <div class="quiz-title">You've Completed All Lessons!</div>
+                        <div class="quiz-description">Ready to test your knowledge? View all available quizzes for this module.</div>
+                        <button class="btn-start-quiz" onclick="goToQuizzes()">View Quizzes</button>
+                    </div>
+                `;
+            }
+
+            // Navigation
+            html += `
+                <div class="lesson-navigation">
+                    <button class="btn-nav btn-prev" onclick="loadLesson(${index - 1})" ${index === 0 ? 'disabled' : ''}>
+                        ← Previous
+                    </button>
+                    <button class="btn-nav btn-next" onclick="loadLesson(${index + 1})" ${index === lessons.length - 1 ? 'disabled' : ''}>
+                        Next →
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('lessonContent').innerHTML = html;
+            loadLessons(); // Update sidebar highlighting
+            
+            // Render math formulas after content loads
+            setTimeout(() => safeRenderKatex(document.getElementById('lessonContent')), 100);
+        }
+
+        function generateSectionContent(data, section) {
+            let html = '<div class="content-section">';
+    
+            // Display section title
+            html += `<h3>${section.title}</h3>`;
+            
+            // Add learning objectives if this is the first section
+            if ((section.section_number === 1 || section.sectionnumber === 1) && data.objectives && data.objectives.length > 0) {
+                html += `<h4>Learning Objectives</h4><ul>`;
+                data.objectives.forEach(obj => {
+                    html += `<li>${obj.objective_text || obj.objectivetext || ''}</li>`;
+                });
+                html += `</ul>`;
+            }
+            
+            // Add key concepts
+            if (data.concepts && data.concepts.length > 0) {
+                html += `<h4>Key Concepts</h4><ul>`;
+                data.concepts.slice(0, 3).forEach(c => {
+                    html += `<li>${c.concept_text || c.concepttext || ''}</li>`;
+                });
+                html += `</ul>`;
+            }
+            
+            // Display explanation (rich text from Quill editor)
+            if (section.explanation) {
+                html += `
+                    <div class="section-title"><span class="section-icon">📖</span> Detailed Explanation</div>
+                    <div class="content-text">${section.explanation}</div>
+                `;
+            }
+            
+            // Add worked examples
+            if (data.examples && data.examples.length > 0) {
+                const example = data.examples[0];
+                // Only show if there's actual problem statement
+                if (example.problem_statement || example.problemstatement) {
+                    html += `<h4>Example Problem</h4>`;
+                    html += `<p><strong>Problem:</strong> ${example.problem_statement || example.problemstatement || ''}</p>`;
+                    if (example.filipino_context || example.filipinocontext) {
+                        html += `<p><em>Filipino Context:</em> ${example.filipino_context || example.filipinocontext}</p>`;
+                    }
+                    if (example.solution) {
+                        html += `<p><strong>Solution:</strong> ${example.solution}</p>`;
+                    }
+                }
+            }
+            
+            // Add misconceptions
+            if (data.misconceptions && data.misconceptions.length > 0) {
+                const misc = data.misconceptions[0];
+                html += `<h4>Common Mistake to Avoid</h4>`;
+                html += `<p><strong>Misconception:</strong> ${misc.misconception_text || misc.misconceptiontext || ''}</p>`;
+                html += `<p><strong>Correction:</strong> ${misc.correction_text || misc.correctiontext || ''}</p>`;
+            }
+            
+            // If no content at all
+            if (!section.explanation && (!data.concepts || data.concepts.length === 0) && 
+                (!data.examples || data.examples.length === 0) && (!data.misconceptions || data.misconceptions.length === 0)) {
+                html += `
+                    <div class="content-text">
+                        <p style="color: var(--gray-500); text-align: center; padding: var(--space-8);">
+                            No content available yet for this lesson.
+                        </p>
+                    </div>
+                `;
+            }
+    
+            html += '</div>';
+            return html;
+        }
+
+        function generateOverviewContent(data) {
+            return `
+                <div class="content-section">
+                    <div class="section-title"><span class="section-icon">📚</span> Module Overview</div>
+                    <div class="content-text">
+                        <p>${data.module.description}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadInteractiveResources() {
+            try {
+                const response = await fetch(`${API_BASE}/api/modules/${moduleId}/interactive-resources`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) return;
+
+                const data = await response.json();
+                resources = data.resources || [];
+
+                if (resources.length === 0) return;
+
+                document.getElementById('interactiveResourcesSection').style.display = 'block';
+                document.getElementById('resourcesGrid').innerHTML = resources.map(resource => `
+                    <div class="resource-card" onclick="openResource(${resource.resource_id})">
+                        <div class="resource-thumbnail">
+                            ${resource.thumbnail_url ? 
+                                `<img src="${resource.thumbnail_url}" alt="${resource.resource_name}">` :
+                                `<span>${getResourceIcon(resource.resource_type)}</span>`
+                            }
+                            <span class="resource-type-badge badge-${resource.resource_type}">
+                                ${resource.resource_type.replace('_', ' ')}
+                            </span>
+                        </div>
+                        <h4 class="resource-name">${resource.resource_name}</h4>
+                        <p class="resource-description">${resource.description || 'Interactive tool'}</p>
+                        <div class="resource-meta">
+                            <span class="resource-time">⏱️ ${resource.estimated_time_minutes || 15} min</span>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading resources:', error);
+            }
+        }
+
+        async function loadDynamicFeedback() {
+            try {
+                const response = await fetch(`${API_BASE}/api/modules/${moduleId}/feedback`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) return;
+
+                const data = await response.json();
+                const feedback = data.feedback || [];
+
+                if (feedback.length === 0) return;
+
+                document.getElementById('feedbackSection').style.display = 'block';
+                document.getElementById('feedbackCards').innerHTML = feedback.map(tip => `
+                    <div class="feedback-card ${tip.feedback_type}">
+                        <div class="feedback-card-header">
+                            <span style="font-size: 20px;">${tip.icon_emoji}</span>
+                            <h4 class="feedback-card-title">${tip.feedback_title || 'Tip'}</h4>
+                        </div>
+                        <p class="feedback-card-content">${tip.feedback_content}</p>
+                    </div>
+                `).join('');
+
+                // ✅ Add toggle functionality to Tips section
+                const feedbackHeader = document.querySelector('.feedback-header');
+                const feedbackSection = document.getElementById('feedbackSection');
+                
+                if (feedbackHeader && feedbackSection) {
+                    // Add collapse/expand indicator
+                    feedbackHeader.innerHTML += '<span style="margin-left: auto; font-size: 20px;" id="toggleIndicator">▼</span>';
+                    
+                    // Toggle on click
+                    feedbackHeader.addEventListener('click', function() {
+                        feedbackSection.classList.toggle('collapsed');
+                        const indicator = document.getElementById('toggleIndicator');
+                        indicator.textContent = feedbackSection.classList.contains('collapsed') ? '▲' : '▼';
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error loading feedback:', error);
+            }
+        }
+
+        function getResourceIcon(type) {
+            const icons = {
+                'phet_simulation': '🔬',
+                'desmos': '📊',
+                'game': '🎮',
+                'interactive_tool': '🛠️',
+                'external_link': '🔗'
+            };
+            return icons[type] || '📚';
+        }
+
+        async function openResource(resourceId) {
+            const resource = resources.find(r => r.resource_id === resourceId);
+            if (!resource) return;
+
+            // Track interaction
+            try {
+                await fetch(`${API_BASE}/api/interactive-resources/${resourceId}/interact`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ interactionType: 'viewed', timeSpent: 0, completionPercentage: 0 })
+                });
+            } catch (e) {}
+
+            const modal = document.getElementById('resourceModal');
+            document.getElementById('modalResourceTitle').textContent = resource.resource_name;
+
+            if (resource.embed_code) {
+                document.getElementById('modalResourceBody').innerHTML = resource.embed_code;
+                modal.classList.add('active');
+            } else {
+                window.open(resource.resource_url, '_blank');
+            }
+        }
+
+        function closeResourceModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('resourceModal').classList.remove('active');
+            document.getElementById('modalResourceBody').innerHTML = '';
+        }
+
+        function extractYouTubeId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        // Redirect to quiz list page
+        function goToQuizzes() {
+            console.log('📝 Redirecting to quiz list page...');
+            window.location.href = 'student-quizzes.html';
+        }
+        
+        // Simple redirect function
+        async function startQuiz() {
+            goToQuizzes();
+        }
+		
+		function toggleFeedback() {
+			const section = document.getElementById('feedbackSection');
+			const chevron = document.getElementById('feedbackChevron');
+			const hint = document.getElementById('feedbackHint');
+    
+			section.classList.toggle('expanded');
+    
+			if (section.classList.contains('expanded')) {
+				chevron.textContent = '▼';
+				hint.textContent = 'Click to collapse';
+			} else {
+				chevron.textContent = '▲';
+				hint.textContent = 'Click to see suggestions';
+			}
+		}
+
+
+    </script>
+    <!-- Custom Alert System -->
+    <div id="customAlertOverlay" class="custom-alert-overlay">
+        <div class="custom-alert-box">
+            <div id="customAlertHeader" class="custom-alert-header">
+                <span id="customAlertIcon" class="custom-alert-icon"></span>
+                <div id="customAlertTitle" class="custom-alert-title"></div>
+            </div>
+            <div id="customAlertBody" class="custom-alert-body"></div>
+            <div class="custom-alert-footer">
+                <button id="customAlertBtn" class="custom-alert-btn custom-alert-btn-primary" onclick="closeCustomAlert()">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Custom Alert Function
+        function customAlert(message, type = 'info', title = null) {
+            const overlay = document.getElementById('customAlertOverlay');
+            const header = document.getElementById('customAlertHeader');
+            const icon = document.getElementById('customAlertIcon');
+            const titleEl = document.getElementById('customAlertTitle');
+            const body = document.getElementById('customAlertBody');
+            
+            // Set type class
+            header.className = 'custom-alert-header ' + type;
+            
+            // Set icon and title based on type
+            const config = {
+                success: { icon: '✅', title: title || 'Success!' },
+                error: { icon: '❌', title: title || 'Error' },
+                warning: { icon: '⚠️', title: title || 'Warning' },
+                info: { icon: 'ℹ️', title: title || 'Information' }
+            };
+            
+            const typeConfig = config[type] || config.info;
+            icon.textContent = typeConfig.icon;
+            titleEl.textContent = typeConfig.title;
+            body.innerHTML = message;
+            
+            overlay.classList.add('active');
+        }
+        
+        function closeCustomAlert() {
+            document.getElementById('customAlertOverlay').classList.remove('active');
+        }
+        
+        // Close on overlay click
+        document.getElementById('customAlertOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCustomAlert();
+            }
+        });
+        
+        // Override default alert
+        window.alert = function(message) {
+            // Detect type from message content
+            let type = 'info';
+            let cleanMessage = message;
+            
+            if (message.includes('✅') || message.toLowerCase().includes('success')) {
+                type = 'success';
+                cleanMessage = message.replace('✅', '').trim();
+            } else if (message.includes('❌') || message.toLowerCase().includes('error') || message.toLowerCase().includes('failed')) {
+                type = 'error';
+                cleanMessage = message.replace('❌', '').trim();
+            } else if (message.includes('⚠️') || message.toLowerCase().includes('warning')) {
+                type = 'warning';
+                cleanMessage = message.replace('⚠️', '').trim();
+            }
+            
+            customAlert(cleanMessage, type);
+        };
+
+// ============================================================
+// TEXT-TO-SPEECH (TTS) FUNCTIONALITY
+// ============================================================
+
+let currentUtterance = null;
+let isPaused = false;
+let availableVoices = [];
+let isPlaying = false;
+
+function initTTS() {
+    console.log('🔊 Initializing TTS...');
+    if ('speechSynthesis' in window) {
+        loadVoices();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+        console.log('✅ TTS Ready');
+    } else {
+        console.warn('❌ TTS not supported');
+    }
+}
+
+function loadVoices() {
+    availableVoices = speechSynthesis.getVoices();
+    const voiceSelect = document.getElementById('ttsVoice');
+    
+    if (!voiceSelect || availableVoices.length === 0) return;
+    
+    const englishVoices = availableVoices.filter(v => v.lang.startsWith('en'));
+    
+    if (englishVoices.length > 0) {
+        voiceSelect.innerHTML = englishVoices.map((voice, idx) => 
+            `<option value="${idx}">${voice.name}</option>`
+        ).join('');
+        console.log(`✅ Loaded ${englishVoices.length} voices`);
+    }
+}
+
+function getLessonText() {
+    const contentDiv = document.querySelector('.content-text');
+    if (!contentDiv) return '';
+    
+    const clone = contentDiv.cloneNode(true);
+    clone.querySelectorAll('script, style').forEach(el => el.remove());
+    
+    let text = clone.textContent || '';
+    text = text.replace(/\s+/g, ' ').trim();
+    text = text.replace(/\./g, '. ');
+    
+    return text;
+}
+
+function playTTS() {
+    console.log('▶️ Play TTS');
+    
+    if (isPaused && currentUtterance) {
+        speechSynthesis.resume();
+        isPaused = false;
+        isPlaying = true;
+        updateTTSUI('playing');
+        return;
+    }
+    
+    const text = getLessonText();
+    if (!text) {
+        alert('No content to read');
+        return;
+    }
+    
+    speechSynthesis.cancel();
+    
+    currentUtterance = new SpeechSynthesisUtterance(text);
+    
+    const voiceIndex = parseInt(document.getElementById('ttsVoice').value) || 0;
+    const englishVoices = availableVoices.filter(v => v.lang.startsWith('en'));
+    if (englishVoices[voiceIndex]) {
+        currentUtterance.voice = englishVoices[voiceIndex];
+    }
+    
+    currentUtterance.rate = parseFloat(document.getElementById('ttsSpeed').value) || 1;
+    currentUtterance.pitch = 1;
+    currentUtterance.volume = 1;
+    
+    currentUtterance.onstart = () => {
+        isPlaying = true;
+        updateTTSUI('playing');
+    };
+    
+    currentUtterance.onend = () => {
+        isPlaying = false;
+        isPaused = false;
+        updateTTSUI('ended');
+    };
+    
+    currentUtterance.onerror = (e) => {
+        console.error('TTS Error:', e);
+        isPlaying = false;
+        updateTTSUI('error');
+    };
+    
+    speechSynthesis.speak(currentUtterance);
+}
+
+function pauseTTS() {
+    console.log('⏸️ Pause TTS');
+    if (speechSynthesis.speaking && !speechSynthesis.paused) {
+        speechSynthesis.pause();
+        isPaused = true;
+        isPlaying = false;
+        updateTTSUI('paused');
+    }
+}
+
+function stopTTS() {
+    console.log('⏹️ Stop TTS');
+    speechSynthesis.cancel();
+    currentUtterance = null;
+    isPaused = false;
+    isPlaying = false;
+    updateTTSUI('stopped');
+}
+
+function updateTTSUI(state) {
+    const playBtn = document.getElementById('ttsPlayBtn');
+    const pauseBtn = document.getElementById('ttsPauseBtn');
+    const stopBtn = document.getElementById('ttsStopBtn');
+    const status = document.getElementById('ttsStatus');
+    
+    if (!playBtn) return;
+    
+    switch(state) {
+        case 'playing':
+            playBtn.style.display = 'none';
+            pauseBtn.style.display = 'flex';
+            stopBtn.disabled = false;
+            status.innerHTML = '<span style="color: #10b981;">🟢</span><span>Playing...</span>';
+            break;
+        case 'paused':
+            playBtn.innerHTML = '<span>▶️</span><span>Resume</span>';
+            playBtn.style.display = 'flex';
+            pauseBtn.style.display = 'none';
+            stopBtn.disabled = false;
+            status.innerHTML = '<span style="color: #f59e0b;">🟡</span><span>Paused</span>';
+            break;
+        case 'stopped':
+        case 'ended':
+            playBtn.innerHTML = '<span>▶️</span><span>Play</span>';
+            playBtn.style.display = 'flex';
+            pauseBtn.style.display = 'none';
+            stopBtn.disabled = true;
+            status.innerHTML = '<span>⚪</span><span>Ready to play</span>';
+            break;
+        case 'error':
+            playBtn.style.display = 'flex';
+            pauseBtn.style.display = 'none';
+            stopBtn.disabled = true;
+            status.innerHTML = '<span style="color: #ef4444;">🔴</span><span>Error</span>';
+            break;
+    }
+}
+
+function updateTTSSpeed() {
+    if (isPlaying || isPaused) {
+        const wasPaused = isPaused;
+        stopTTS();
+        if (!wasPaused) setTimeout(() => playTTS(), 100);
+    }
+}
+
+function updateTTSVoice() {
+    if (isPlaying || isPaused) {
+        const wasPaused = isPaused;
+        stopTTS();
+        if (!wasPaused) setTimeout(() => playTTS(), 100);
+    }
+}
+
+function showTTSControls() {
+    const tts = document.getElementById('ttsControls');
+    if (tts) {
+        tts.style.display = 'flex';
+        console.log('✅ TTS controls shown');
+    } else {
+        console.warn('⚠️ TTS controls div not found! Retrying...');
+        // Retry after a short delay
+        setTimeout(() => {
+            const ttsRetry = document.getElementById('ttsControls');
+            if (ttsRetry) {
+                ttsRetry.style.display = 'flex';
+                console.log('✅ TTS controls shown (retry successful)');
+            } else {
+                console.error('❌ TTS controls div still not found!');
+            }
+        }, 100);
+    }
+}
+
+// Initialize on load
+initTTS();
+
+// Also show TTS on DOM ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📄 DOM loaded, checking TTS controls...');
+        const tts = document.getElementById('ttsControls');
+        if (tts) {
+            console.log('✅ TTS controls found in DOM');
+        } else {
+            console.error('❌ TTS controls NOT found in DOM - check HTML');
+        }
+    });
+} else {
+    console.log('📄 DOM already loaded');
+}
+
+
+    
+function toggleTTSModal() {
+    const modal = document.getElementById('ttsModal');
+    const fab = document.getElementById('ttsFab');
+    
+    if (modal.classList.contains('active')) {
+        modal.classList.remove('active');
+        fab.classList.remove('hidden');
+    } else {
+        modal.classList.add('active');
+        fab.classList.add('hidden');
+    }
+}
+
+// Auto-show modal when lesson loads
+window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('ttsFab').classList.remove('hidden');
+});
+
+
+
+// ========================================
+// LEARNING MATERIALS
+// ========================================
+
+async function loadLessonMaterials() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const moduleId = urlParams.get('id') || urlParams.get('moduleId');
+    
+    if (!moduleId) {
+        console.log('No moduleId for materials');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/api/modules/${moduleId}/materials`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        console.log('📚 Materials loaded:', data.materials?.length || 0);
+        
+        if (data.materials && data.materials.length > 0) {
+            renderLessonMaterials(data.materials);
+        }
+    } catch (error) {
+        console.error('Materials error:', error);
+    }
+}
+
+function renderLessonMaterials(materials) {
+    const section = document.getElementById('materialsSection');
+    const grid = document.getElementById('materialsGrid');
+
+    if (!section || !grid) {
+        console.error('Materials section not found');
+        return;
+    }
+
+    section.style.display = 'block';
+    
+    grid.innerHTML = materials.map(m => {
+        const icon = getMaterialIcon(m.file_type);
+        const size = formatFileSize(m.file_size);
+        const type = getFileTypeLabel(m.file_type);
+
+        return `
+            <div class="material-card" onclick="viewMaterial(${m.material_id})">
+                <div class="material-card-icon">${icon}</div>
+                <div class="material-card-title">${m.title}</div>
+                <div class="material-card-meta">${type} • ${size}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function getMaterialIcon(type) {
+    if (!type) return '📎';
+    type = type.toLowerCase();
+    if (type.includes('pdf')) return '📄';
+    if (type.includes('image')) return '🖼️';
+    if (type.includes('video')) return '🎥';
+    if (type.includes('audio')) return '🎵';
+    if (type.includes('word')) return '📝';
+    if (type.includes('powerpoint')) return '📊';
+    return '📎';
+}
+
+function getFileTypeLabel(type) {
+    if (!type) return 'File';
+    type = type.toLowerCase();
+    if (type.includes('pdf')) return 'PDF';
+    if (type.includes('image')) return 'Image';
+    if (type.includes('video')) return 'Video';
+    if (type.includes('audio')) return 'Audio';
+    if (type.includes('word')) return 'Word';
+    if (type.includes('powerpoint')) return 'PowerPoint';
+    return 'File';
+}
+
+function formatFileSize(bytes) {
+    if (!bytes) return '0 B';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function viewMaterial(id) {
+    window.open(`material-viewer.html?id=${id}`, '_blank');
+}
+
+// Load materials after lesson loads
+setTimeout(() => loadLessonMaterials(), 2000);
+
+/* ============================================================
+    KATEX — MATH RENDERING FOR MODULE CONTENT
+    ============================================================ */
+
+function safeRenderKatex(root = document.body) {
+    if (typeof renderMathInElement !== "function") {
+        console.log("⏳ KaTeX not ready yet, will retry...");
+        return;
+    }
+
+    renderMathInElement(root, {
+        delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "$", right: "$", display: false },
+            { left: "\\(", right: "\\)", display: false },
+            { left: "\\[", right: "\\]", display: true }
+        ],
+        throwOnError: false,
+        trust: true
+    });
+    console.log("✅ KaTeX rendered in module content");
+}
+
+/* Initial render after DOM loads */
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => safeRenderKatex(), 200);
+});
+
+/* Dynamic content observer for lesson changes */
+let katexRenderTimeout;
+const katexObserver = new MutationObserver((mutations) => {
+    clearTimeout(katexRenderTimeout);
+    katexRenderTimeout = setTimeout(() => {
+        const lessonContent = document.getElementById('lessonContent');
+        if (lessonContent) {
+            safeRenderKatex(lessonContent);
+        }
+    }, 150);
+});
+
+// Observe lesson content container
+setTimeout(() => {
+    const lessonContent = document.getElementById('lessonContent');
+    if (lessonContent) {
+        katexObserver.observe(lessonContent, { childList: true, subtree: true });
+        console.log("✅ KaTeX observer installed for module content");
+    }
+}, 500);
+
+/* Manual trigger if needed */
+window.renderModuleMath = () => {
+    safeRenderKatex(document.body);
+};
+
+function toggleMobileMenu() {
+    const mobileNav = document.getElementById('mobileNav');
+    mobileNav.classList.toggle('active');
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'auth.html';
+}
+
+// I-update ang pangalan at avatar sa navbar
+function loadUserInfo() {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+        const user = JSON.parse(userStr);
+        const name = user.firstName || 'Student';
+        document.getElementById('userName').textContent = name;
+        document.getElementById('userAvatar').textContent = name[0].toUpperCase();
+    }
+}
+
+// Tawagin ito sa pag-load ng page
+loadUserInfo();
+
+    </script>
+
+
+<!-- TTS FLOATING MODAL -->
+<div id="ttsModal" class="tts-floating-modal">
+    <div class="tts-modal-header">
+        <span style="font-size: 20px;">🔊</span>
+        <span style="font-weight: 600; font-size: 14px;">Text to Speech</span>
+        <button class="tts-close-btn" onclick="toggleTTSModal()" title="Minimize">
+            <span>−</span>
+        </button>
+    </div>
+    
+    <div class="tts-modal-content" id="ttsModalContent">
+        <div class="tts-button-group">
+            <button class="tts-btn tts-btn-play" id="ttsPlayBtn" onclick="playTTS()">
+                <span>▶️</span>
+            </button>
+            <button class="tts-btn tts-btn-pause" id="ttsPauseBtn" onclick="pauseTTS()" style="display: none;">
+                <span>⏸️</span>
+            </button>
+            <button class="tts-btn tts-btn-stop" id="ttsStopBtn" onclick="stopTTS()" disabled>
+                <span>⏹️</span>
+            </button>
+        </div>
+        
+        <div class="tts-status" id="ttsStatus">
+            <span>⚪</span>
+            <span>Ready</span>
+        </div>
+        
+        <div class="tts-settings">
+            <select class="tts-select" id="ttsSpeed" onchange="updateTTSSpeed()">
+                <option value="0.75">0.75x</option>
+                <option value="1" selected>1x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+            </select>
+            
+            <select class="tts-select" id="ttsVoice" onchange="updateTTSVoice()">
+                <option>Loading...</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- TTS FAB (Floating Action Button) -->
+<button id="ttsFab" class="tts-fab" onclick="toggleTTSModal()" title="Text to Speech">
+    🔊
+</button>
+
+</body>
+</html>

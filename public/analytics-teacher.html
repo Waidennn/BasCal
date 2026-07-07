@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Analytics - FlexCalc Teacher</title>
+    <link rel="stylesheet" href="flex-calc-design-system.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .analytics-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: var(--space-8);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-8);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-4);
+        }
+
+        .class-selector {
+            background: white;
+            color: var(--gray-900);
+            padding: var(--space-3) var(--space-5);
+            border-radius: var(--radius-lg);
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            min-width: 250px;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--space-6);
+            margin-bottom: var(--space-6);
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
+
+        .span-12 { grid-column: span 12; }
+        .span-8 { grid-column: span 8; }
+        .span-6 { grid-column: span 6; }
+        .span-4 { grid-column: span 4; }
+        .span-3 { grid-column: span 3; }
+
+        @media (max-width: 968px) {
+            .span-8, .span-6, .span-4, .span-3 {
+                grid-column: span 12;
+            }
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-5);
+            padding-bottom: var(--space-4);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gray-900);
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: var(--space-6);
+        }
+
+        .stat-value {
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1;
+            margin-bottom: var(--space-2);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray-600);
+            font-weight: 600;
+        }
+
+        .student-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .student-item {
+            padding: var(--space-4);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .student-item:hover {
+            background: var(--gray-100);
+            transform: translateX(4px);
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        .student-name {
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .student-score {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: var(--space-3);
+        }
+
+        .risk-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .risk-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .risk-low {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: var(--space-8);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            max-width: 1000px;
+            width: 100%;
+            box-shadow: var(--shadow-2xl);
+            margin: var(--space-8) 0;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-4);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gray-900);
+        }
+
+        .close-btn {
+            background: var(--gray-200);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        .close-btn:hover {
+            background: var(--gray-300);
+        }
+
+        .strand-comparison {
+            display: grid;
+            gap: var(--space-4);
+        }
+
+        .strand-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .strand-label {
+            flex: 0 0 180px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gray-700);
+        }
+
+        .strand-bar-container {
+            flex: 1;
+            height: 32px;
+            background: var(--gray-200);
+            border-radius: var(--radius-lg);
+            position: relative;
+        }
+
+        .strand-bar {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: var(--space-3);
+        }
+
+        .strand-value {
+            font-size: 14px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .activity-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            padding: var(--space-4);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .activity-correct {
+            border-left: 4px solid #10b981;
+        }
+
+        .activity-incorrect {
+            border-left: 4px solid #ef4444;
+        }
+
+        .cheating-alert {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            margin-top: var(--space-4);
+        }
+
+        .cheating-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #991b1b;
+            margin-bottom: var(--space-3);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .cheating-detail {
+            font-size: 14px;
+            color: #991b1b;
+            margin-bottom: var(--space-2);
+        }
+		
+/* ========================================
+   RESPONSIVE NAVBAR & GLOBAL FIXES
+   ======================================== */
+.navbar {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 64px;
+}
+
+.mobile-menu-toggle {
+    display: none; /* Hidden by default */
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #1e293b;
+}
+
+/* Mobile Nav Dropdown */
+.mobile-nav {
+    display: none;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    z-index: 999;
+    padding: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.mobile-nav.active {
+    display: block;
+}
+
+/* ========================================
+   RESPONSIVE BREAKPOINTS (Teacher Analytics)
+   ======================================== */
+@media (max-width: 968px) {
+    .nav-links, .user-menu, .logout-btn {
+        display: none; /* Hide desktop nav */
+    }
+
+    .mobile-menu-toggle {
+        display: block; /* Show hamburger */
+    }
+
+    .analytics-grid {
+        grid-template-columns: 1fr !important; /* Stack cards */
+    }
+
+    .span-3, .span-4, .span-6, .span-8, .span-12 {
+        grid-column: span 12 !important;
+    }
+
+    .header-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-4);
+    }
+
+    .class-selector {
+        width: 100%;
+        min-width: unset;
+    }
+}
+
+/* Table Responsiveness */
+.module-table {
+    width: 100%;
+    display: block;
+    overflow-x: auto;
+}
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="teacher-dashboard.html" class="nav-logo" style="text-decoration: none; display: flex; align-items: center; gap: 12px; color: #1e293b; font-weight: 800;">
+            <span style="font-size: 28px;">📐</span>
+            <span>BasCal Teacher</span>
+        </a>
+
+        <div class="nav-links">
+            <a href="teacher-dashboard.html" class="nav-link">Dashboard</a>
+            <a href="manage-modules.html" class="nav-link">Modules</a>
+            <a href="analytics-teacher.html" class="nav-link active">Analytics</a>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 16px;" class="desktop-only">
+            <div class="user-menu">
+                <div class="user-avatar" id="userAvatar">T</div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">Teacher</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+    </div>
+</nav>
+
+<div class="mobile-nav" id="mobileNav">
+    <a href="teacher-dashboard.html" class="nav-link" style="display: block; padding: 12px 0;">Dashboard</a>
+    <a href="manage-modules.html" class="nav-link" style="display: block; padding: 12px 0;">Modules</a>
+    <a href="analytics-teacher.html" class="nav-link active" style="display: block; padding: 12px 0;">Analytics</a>
+    <hr>
+    <button class="logout-btn" onclick="logout()" style="width: 100%; margin-top: 12px;">Logout</button>
+</div>
+
+    <!-- Main Container -->
+    <div class="container" style="padding-top: var(--space-8);">
+        <!-- Header -->
+        <div class="analytics-header">
+            <div class="header-top">
+                <div>
+                    <h1 style="font-size: 32px; font-weight: 900; margin-bottom: var(--space-2);">
+                        📊 Class Analytics
+                    </h1>
+                    <p style="font-size: 16px; opacity: 0.9;">
+                        Monitor student progress and identify learning challenges
+                    </p>
+                </div>
+                <select class="class-selector" id="classSelector" onchange="loadClassAnalytics()">
+                    <option value="">Select a class...</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Analytics Content -->
+        <div id="analyticsContent" style="display: none;">
+            <!-- Summary Stats -->
+            <div class="analytics-grid">
+                <div class="card span-3">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalStudents">0</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                </div>
+                <div class="card span-3">
+                    <div class="stat-card">
+                        <div class="stat-value" id="classAverage">0%</div>
+                        <div class="stat-label">Class Average</div>
+                    </div>
+                </div>
+                <div class="card span-3">
+                    <div class="stat-card">
+                        <div class="stat-value" id="atRiskCount">0</div>
+                        <div class="stat-label">At-Risk Students</div>
+                    </div>
+                </div>
+                <div class="card span-3">
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgCompletion">0%</div>
+                        <div class="stat-label">Avg Completion</div>
+                    </div>
+                </div>
+
+                <!-- Strand Averages Chart -->
+                <div class="card span-8">
+                    <div class="card-header">
+                        <div class="card-title">Five Strands Class Averages</div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="strandsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- At-Risk Students -->
+                <div class="card span-4">
+                    <div class="card-header">
+                        <div class="card-title">⚠️ At-Risk Students</div>
+                    </div>
+                    <div class="student-list" id="atRiskList">
+                        <p style="text-align: center; color: var(--gray-500); padding: var(--space-6);">
+                            No at-risk students
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Top Performers -->
+                <div class="card span-6">
+                    <div class="card-header">
+                        <div class="card-title">🏆 Top Performers</div>
+                    </div>
+                    <div class="student-list" id="topPerformersList">
+                        <p style="text-align: center; color: var(--gray-500); padding: var(--space-6);">
+                            Loading...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Module Completion -->
+                <div class="card span-6">
+                    <div class="card-header">
+                        <div class="card-title">📚 Module Completion Rates</div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="moduleCompletionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- All Students List -->
+                <div class="card span-12">
+                    <div class="card-header">
+                        <div class="card-title">👥 All Students (Click to view details)</div>
+                    </div>
+                    <div class="student-list" id="allStudentsList">
+                        <p style="text-align: center; color: var(--gray-500); padding: var(--space-6);">
+                            Select a class to view students
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Class Selected -->
+        <div id="noClassSelected" style="text-align: center; padding: var(--space-12); color: var(--gray-500);">
+            <div style="font-size: 64px; margin-bottom: var(--space-4);">📊</div>
+            <h2 style="font-size: 24px; font-weight: 800; margin-bottom: var(--space-2);">Select a Class</h2>
+            <p>Choose a class from the dropdown above to view analytics</p>
+        </div>
+    </div>
+
+    <!-- Student Detail Modal -->
+    <div class="modal" id="studentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="studentModalTitle">Student Analytics</h2>
+                <button class="close-btn" onclick="closeStudentModal()">×</button>
+            </div>
+
+            <div id="studentModalContent">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://farah-ungroupable-millicent.ngrok-free.dev';
+        const token = localStorage.getItem('token');
+        let strandsChart = null;
+        let moduleCompletionChart = null;
+        let currentClassId = null;
+        let allStudents = [];
+
+        // Check authentication
+        if (!token) {
+            window.location.href = 'auth.html';
+        }
+
+        // Load user info
+        function loadUserInfo() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (user) {
+                    document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
+                    const avatar = document.getElementById('userAvatar');
+                    if (avatar && user.firstName) {
+                        avatar.textContent = user.firstName[0].toUpperCase();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+
+        // Load teacher's classes
+        async function loadClasses() {
+            try {
+                const response = await fetch(`${API_BASE}/api/educator/dashboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load classes');
+
+                const data = await response.json();
+                const selector = document.getElementById('classSelector');
+
+                if (data.classes && data.classes.length > 0) {
+                    selector.innerHTML = '<option value="">Select a class...</option>' +
+                        data.classes.map(c => {
+                            const classId = c.class_id || c.classid;
+                            const className = c.class_name || c.classname;
+                            const section = c.section || 'No Section';
+                            const studentCount = c.student_count || c.studentcount || 0;
+                            
+                            return `<option value="${classId}">
+                                ${className} - ${section} (${studentCount} students)
+                            </option>`;
+                        }).join('');
+                } else {
+                    selector.innerHTML = '<option value="">No classes found</option>';
+                }
+            } catch (error) {
+                console.error('Error loading classes:', error);
+                alert('Failed to load classes. Error: ' + error.message);
+            }
+        }
+
+        // Load class analytics
+        async function loadClassAnalytics() {
+			const classId = document.getElementById('classSelector').value;
+    
+			if (!classId) {
+				document.getElementById('analyticsContent').style.display = 'none';
+				document.getElementById('noClassSelected').style.display = 'block';
+				return;
+			}
+
+			currentClassId = classId;
+			document.getElementById('noClassSelected').style.display = 'none';
+			document.getElementById('analyticsContent').style.display = 'block';
+
+			try {
+				const response = await fetch(`${API_BASE}/api/educator/classes/${classId}/analytics`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+						'Content-Type': 'application/json',
+						'ngrok-skip-browser-warning': 'true'  // Add this for ngrok
+					}
+				});
+
+				if (!response.ok) {
+					const errorText = await response.text();
+					console.error('Analytics error:', errorText);
+					throw new Error(`Failed to load analytics: ${response.status} ${response.statusText}`);
+				}
+
+				const data = await response.json();
+				console.log('📊 Analytics data received:', data);
+        
+				// DEBUG: Check at-risk students data structure
+				if (data.atRiskStudents && data.atRiskStudents.length > 0) {
+					console.log('🚨 At-Risk Students:', data.atRiskStudents);
+					console.log('Sample student:', data.atRiskStudents[0]);
+				} else {
+					console.log('✅ No at-risk students found');
+				}
+        
+				displayClassStats(data);
+				displayStrandsChart(data.strandAverages || []);
+				displayAtRiskStudents(data.atRiskStudents || []);
+				displayTopPerformers(data.topPerformers || []);
+				displayModuleCompletion(data.moduleCompletion || []);
+				await loadAllStudents(classId);
+
+			} catch (error) {
+				console.error('❌ Error loading analytics:', error);
+				alert(`Failed to load class analytics: ${error.message}\n\nPlease check the console for details.`);
+			}
+		}
+
+        // Display class stats
+		function displayClassStats(data) {
+			// Calculate total students from top performers or at-risk
+			const totalStudents = (data.topPerformers?.length || 0) + (data.atRiskStudents?.length || 0);
+			document.getElementById('totalStudents').textContent = totalStudents;
+
+			// Calculate class average from strand averages
+			const classAvg = data.strandAverages?.length > 0
+				? Math.round(data.strandAverages.reduce((sum, s) => {
+					return sum + (s.average_score || s.averagescore || 0);
+				}, 0) / data.strandAverages.length)
+				: 0;
+			document.getElementById('classAverage').textContent = classAvg + '%';
+
+			// At-risk count
+			document.getElementById('atRiskCount').textContent = data.atRiskStudents?.length || 0;
+		
+			// Average completion
+			const avgCompletion = data.moduleCompletion?.length > 0
+				? Math.round(data.moduleCompletion.reduce((sum, m) => {
+					return sum + parseFloat(m.completion_rate || m.completionrate || 0);
+				}, 0) / data.moduleCompletion.length)
+				: 0;
+			document.getElementById('avgCompletion').textContent = avgCompletion + '%';
+	}
+
+
+        // Display strands chart
+        function displayStrandsChart(strandAverages) {
+			const ctx = document.getElementById('strandsChart');
+    
+			if (strandsChart) {
+				strandsChart.destroy();
+			}
+
+			console.log('📊 Rendering strands chart:', strandAverages);
+
+			// Enhanced labels with icons
+			const labels = ['📊 Conceptual', '⚙️ Procedural', '🎯 Strategic', '🧩 Adaptive', '💡 Productive'];
+    
+			const strandMap = {
+				'conceptual': 0,
+				'procedural': 1,
+				'strategic': 2,
+				'adaptive': 3,
+				'productive': 4
+			};
+
+			const data = new Array(5).fill(0);
+			const studentCounts = new Array(5).fill(0);
+    
+			strandAverages.forEach(s => {
+				// Handle both snake_case and camelCase
+				const strandType = s.strand_type || s.strandtype;
+				const avgScore = s.average_score || s.averagescore;
+				const studentCount = s.studentcount || 0;
+        
+				const index = strandMap[strandType];
+				if (index !== undefined) {
+					data[index] = Math.round(avgScore);
+					studentCounts[index] = studentCount;
+					console.log(`  ${strandType}: ${Math.round(avgScore)}% (${studentCount} students)`);
+				}
+			});
+
+			strandsChart = new Chart(ctx, {
+				type: 'bar',
+				data: {
+					labels: labels,
+					datasets: [{
+						label: 'Class Average',
+						data: data,
+						backgroundColor: [
+							'rgba(99, 102, 241, 0.8)',   // Blue - Conceptual
+							'rgba(59, 130, 246, 0.8)',   // Sky - Procedural
+							'rgba(16, 185, 129, 0.8)',   // Green - Strategic
+							'rgba(245, 158, 11, 0.8)',   // Orange - Adaptive
+							'rgba(139, 92, 246, 0.8)'    // Purple - Productive
+						],
+						borderWidth: 0,
+						borderRadius: 8
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					scales: {
+						y: {
+							beginAtZero: true,
+							max: 100,
+							ticks: {
+								callback: function(value) {
+									return value + '%';
+								},
+								font: {
+									size: 12,
+									weight: 600
+								}
+							},
+							grid: {
+								display: true,
+								color: 'rgba(0, 0, 0, 0.05)'
+							}
+						},
+						x: {
+							ticks: {
+								font: {
+									size: 12,
+									weight: 700
+								}
+							},
+							grid: {
+								display: false
+							}
+						}
+					},
+					plugins: {
+						legend: {
+							display: false
+						},
+						tooltip: {
+							backgroundColor: 'rgba(0, 0, 0, 0.8)',
+							padding: 12,
+							titleFont: {
+								size: 14,
+								weight: 'bold'
+							},
+							bodyFont: {
+								size: 13
+							},
+							callbacks: {
+								title: function(context) {
+									return context[0].label;
+								},
+								label: function(context) {
+									const index = context.dataIndex;
+									const score = context.parsed.y;
+									const count = studentCounts[index];
+                            
+									if (count === 0 || score === 0) {
+										return 'No students have unlocked this strand yet';
+									}
+                            
+									return [
+										`Class Average: ${score}%`,
+										`Students Active: ${count}`,
+										''
+									];
+								}
+							}
+						}
+					}
+				}
+			});
+
+			console.log('✅ Strands chart rendered:', { data, studentCounts });
+		}
+
+
+        // Display at-risk students - FIXED
+		// ENHANCED: Display at-risk students with multiple risk factors
+		function displayAtRiskStudents(students) {
+			const container = document.getElementById('atRiskList');
+    
+			if (!students || students.length === 0) {
+				container.innerHTML = '<p style="text-align: center; color: var(--gray-500); padding: var(--space-6);">✅ No at-risk students detected</p>';
+				return;
+			}
+
+			console.log('🚨 Displaying at-risk students:', students.length);
+
+			container.innerHTML = students.map(s => {
+				// SAFETY CHECKS
+				const firstName = s.firstname || 'Unknown';
+				const lastName = s.lastname || 'Student';
+				const userId = s.userid || 0;
+				const gap = Math.round(s.gap || 0);
+				const overallScore = Math.round(s.overallscore || 0);
+				const avgQuizScore = Math.round(s.avgquizscore || 0);
+				const failedAttempts = s.failedattempts || 0;
+				const totalAttempts = s.totalattempts || 0;
+				const daysInactive = s.daysinactive || null;
+        
+				// Safe initials
+				const firstInitial = firstName && firstName.length > 0 ? firstName[0] : '?';
+				const lastInitial = lastName && lastName.length > 0 ? lastName[0] : '?';
+				const initials = `${firstInitial}${lastInitial}`;
+        
+				// Determine primary risk factor and level
+				let riskLevel = 'low';
+				let riskReason = '';
+				let riskIcon = '⚠️';
+        
+				if (gap > 30 || overallScore < 50 || failedAttempts >= 3) {
+					riskLevel = 'high';
+					riskIcon = '🚨';
+					if (gap > 30) {
+						riskReason = `Critical Gap: ${gap}%`;
+					} else if (overallScore < 50) {
+						riskReason = `Struggling: ${overallScore}% overall`;
+					} else {
+						riskReason = `${failedAttempts} failed quizzes`;
+					}
+				} else if (gap > 20 || overallScore < 60 || failedAttempts >= 2) {
+					riskLevel = 'medium';
+					riskIcon = '⚠️';
+					if (gap > 20) {
+						riskReason = `Moderate Gap: ${gap}%`;
+					} else if (overallScore < 60) {
+						riskReason = `Below Average: ${overallScore}%`;
+					} else {
+						riskReason = `${failedAttempts} failed quizzes`;
+					}
+				} else {
+					if (daysInactive !== null && daysInactive > 7) {
+						riskReason = `Inactive: ${daysInactive} days`;
+					} else if (totalAttempts > 0 && avgQuizScore < 70) {
+						riskReason = `Avg Quiz: ${avgQuizScore}%`;
+					} else {
+						riskReason = `Gap: ${gap}%`;
+					}
+				}
+        
+				return `
+					<div class="student-item" onclick="viewStudentDetails(${userId})">
+						<div class="student-info">
+							<div class="student-avatar">${initials}</div>
+							<div>
+								<div class="student-name">${firstName} ${lastName}</div>
+								<div style="font-size: 12px; color: var(--gray-600);">${riskReason}</div>
+							</div>
+						</div>
+						<div style="text-align: right;">
+							<span class="risk-badge risk-${riskLevel}">${riskIcon} ${riskLevel.toUpperCase()}</span>
+							${overallScore > 0 ? `<div style="font-size: 11px; color: var(--gray-500); margin-top: 4px;">Overall: ${overallScore}%</div>` : ''}
+						</div>
+					</div>
+				`;
+			}).join('');
+		}
+
+
+        // Display top performers
+        function displayTopPerformers(students) {
+			const container = document.getElementById('topPerformersList');
+    
+			if (!students || students.length === 0) {
+				container.innerHTML = '<p style="text-align: center; color: var(--gray-500); padding: var(--space-6);">No data yet</p>';
+				return;
+			}
+
+			container.innerHTML = students.map(s => {
+				// ✅ Add safety checks
+				const firstName = s.firstname || 'Unknown';
+				const lastName = s.lastname || 'Student';
+				const userId = s.userid || 0;
+				const avgScore = s.averagescore || 0;
+        
+				return `
+					<div class="student-item" onclick="viewStudentDetail(${userId})">
+						<div class="student-info">
+							<div class="student-avatar">${firstName[0]}${lastName[0]}</div>
+							<div class="student-name">${firstName} ${lastName}</div>
+							</div>
+						<div class="student-score">${Math.round(avgScore)}%</div>
+					</div>
+				`;
+			}).join('');
+		}
+
+
+        // Display module completion
+		function displayModuleCompletion(modules) {
+			const ctx = document.getElementById('moduleCompletionChart');
+    
+			if (moduleCompletionChart) {
+				moduleCompletionChart.destroy();
+			}
+
+			if (!modules || modules.length === 0) {
+				ctx.parentElement.innerHTML = '<p style="text-align: center; padding: var(--space-6); color: var(--gray-500);">No module data available</p>';
+				return;
+			}
+
+			console.log('📚 Module completion data:', modules);
+		
+			// Sort by completion rate (highest first) and take top 12
+			const sortedModules = modules
+				.sort((a, b) => {
+					const rateA = parseFloat(b.completion_rate || b.completionrate || 0);
+					const rateB = parseFloat(a.completion_rate || a.completionrate || 0);
+					return rateA - rateB;
+				})
+				.slice(0, 12);
+
+			// ✅ SAFETY CHECK - handle both naming conventions
+			const labels = sortedModules.map(m => {
+				const name = m.module_name || m.modulename || 'Unknown';
+				return name.length > 25 ? name.substring(0, 22) + '...' : name;
+			});
+    
+			const completionData = sortedModules.map(m => {
+				const rate = m.completion_rate || m.completionrate || 0;
+				return parseFloat(rate);
+			});
+
+			const attemptData = sortedModules.map(m => {
+				const rate = m.attempt_rate || m.attemptrate || 0;
+				return parseFloat(rate);
+			});
+
+			// Store details for tooltips
+			const moduleDetails = sortedModules.map(m => ({
+				fullName: m.module_name || m.modulename || 'Unknown',
+				category: m.category || 'Unknown',
+				completionRate: parseFloat(m.completion_rate || m.completionrate || 0),
+				attemptRate: parseFloat(m.attempt_rate || m.attemptrate || 0),
+				passed: m.students_passed || m.studentspassed || 0,
+				attempted: m.students_attempted || m.studentsattempted || 0,
+				total: m.total_students || m.totalstudents || 0,
+				avgScore: m.avg_score || m.avgscore || null
+			}));
+
+			moduleCompletionChart = new Chart(ctx, {
+				type: 'bar',
+				data: {
+					labels: labels,
+					datasets: [
+						{
+							label: 'Passed (≥75%)',
+							data: completionData,
+							backgroundColor: 'rgba(16, 185, 129, 0.8)',  // Green
+							borderWidth: 0,
+							borderRadius: 6
+						},
+						{
+							label: 'Attempted',
+							data: attemptData,
+							backgroundColor: 'rgba(59, 130, 246, 0.5)',  // Light blue
+							borderWidth: 0,
+							borderRadius: 6
+						}
+					]
+				},
+				options: {
+					indexAxis: 'y',
+					responsive: true,
+					maintainAspectRatio: false,
+					scales: {
+						x: {
+							beginAtZero: true,
+							max: 100,
+							ticks: {
+								callback: function(value) {
+									return value + '%';
+								},
+								font: {
+									size: 11,
+									weight: 600
+								}
+							},
+							grid: {
+								display: true,
+								color: 'rgba(0, 0, 0, 0.05)'
+							}
+						},
+						y: {
+							ticks: {
+								font: {
+									size: 11,
+									weight: 600
+								}
+							},
+							grid: {
+								display: false
+							}
+						}
+					},
+					plugins: {
+						legend: {
+							display: true,
+							position: 'top',
+							labels: {
+								font: {
+									size: 12,
+									weight: 600
+								},
+								padding: 12,
+								usePointStyle: true,
+								boxWidth: 12
+							}
+						},
+						tooltip: {
+							backgroundColor: 'rgba(0, 0, 0, 0.8)',
+							padding: 14,
+							titleFont: {
+								size: 14,
+								weight: 'bold'
+							},
+							bodyFont: {
+								size: 12
+							},
+							callbacks: {
+								title: function(context) {
+									const index = context[0].dataIndex;
+									return moduleDetails[index].fullName;
+								},
+								label: function(context) {
+									const index = context.dataIndex;
+									const detail = moduleDetails[index];
+									const datasetLabel = context.dataset.label;
+                            
+									if (datasetLabel.includes('Passed')) {
+										const lines = [
+											`✅ Completion: ${detail.completionRate}%`,
+											`   ${detail.passed} of ${detail.total} students passed`
+										];
+										if (detail.avgScore) {
+											lines.push(`   Average Score: ${Math.round(detail.avgScore)}%`);
+										}
+										return lines;
+									} else {
+										return [
+											`📝 Attempt Rate: ${detail.attemptRate}%`,
+											`   ${detail.attempted} of ${detail.total} students attempted`
+										];
+									}
+								},
+								afterLabel: function(context) {
+									const index = context.dataIndex;
+									const detail = moduleDetails[index];
+									return `\n📊 Strand: ${detail.category}`;
+								}
+							}
+						}
+					}
+				}
+			});
+		
+			console.log('✅ Module completion chart rendered:', sortedModules.length, 'modules');
+		}
+
+
+
+        // Load all students in class
+		async function loadAllStudents(classId) {
+			try {
+				const response = await fetch(`${API_BASE}/api/educator/classes/${classId}/students`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+						'Content-Type': 'application/json'
+					}
+				});
+
+				if (!response.ok) throw new Error('Failed to load students');
+
+				const data = await response.json();
+				console.log('Students loaded:', data);  // ✅ DEBUG: Check what data looks like
+        
+				allStudents = data.students || [];
+        
+				const container = document.getElementById('allStudentsList');
+        
+				if (allStudents.length === 0) {
+					container.innerHTML = '<p style="text-align: center; color: var(--gray-500); padding: var(--space-6);">No students enrolled</p>';
+					return;
+				}
+
+				container.innerHTML = allStudents.map(s => {
+					// ✅ Safety checks for names
+					const firstName = s.first_name || 'Unknown';
+					const lastName = s.last_name || 'Student';
+					const initials = `${firstName[0] || '?'}${lastName[0] || '?'}`;
+            
+					// ✅ Try multiple score fields
+					const score = s.average_score || s.overall_score || 0;
+            
+					return `
+						<div class="student-item" onclick="viewStudentDetail(${s.user_id})">
+							<div class="student-info">
+								<div class="student-avatar">${initials}</div>
+								<div class="student-name">${firstName} ${lastName}</div>
+							</div>
+							<div class="student-score">${Math.round(score)}%</div>
+						</div>
+					`;
+				}).join('');
+
+			} catch (error) {
+				console.error('Error loading students:', error);
+			}
+		}
+
+
+        // View student detail
+        async function viewStudentDetail(studentId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/educator/students/${studentId}/analytics`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load student analytics');
+
+                const data = await response.json();
+                displayStudentModal(data);
+
+            } catch (error) {
+                console.error('Error loading student details:', error);
+                alert('Failed to load student analytics');
+            }
+        }
+
+        // Display student modal
+		function displayStudentModal(data) {
+			const student = data.student;
+			const strands = data.strands;
+			const progress = data.progress;
+			const activity = data.activity;
+
+				document.getElementById('studentModalTitle').textContent = 
+				`${student.first_name} ${student.last_name} - Detailed Analytics`;
+
+			// Calculate cheating indicators
+			const suspiciousCount = activity.filter(a => a.response_time_seconds < 3).length;
+			const totalResponses = activity.length;
+			const cheatingRisk = totalResponses > 0 ? Math.round((suspiciousCount / totalResponses) * 100) : 0;
+
+			const strandLabels = {
+				'conceptual': '📊 Conceptual Understanding',
+				'procedural': '⚙️ Procedural Fluency',
+				'strategic': '🎯 Strategic Competence',
+				'adaptive': '🧩 Adaptive Reasoning',
+				'productive': '💡 Productive Disposition'
+			};
+
+			// UPDATED: Correct strand order based on your actual modules
+			const strandOrder = ['conceptual', 'procedural', 'strategic', 'adaptive', 'productive'];
+    
+			// Group modules by strand
+			const modulesByStrand = {};
+			strandOrder.forEach(strand => {
+				modulesByStrand[strand] = progress.filter(m => {
+					// Normalize category name (remove "ual", "al" suffixes if needed)
+					const category = (m.category || '').toLowerCase().trim();
+            
+					// Match variations: "Concept" -> "conceptual", "Proced" -> "procedural", etc.
+					if (strand === 'conceptual' && (category === 'conceptual' || category === 'concept')) return true;
+					if (strand === 'procedural' && (category === 'procedural' || category === 'proced')) return true;
+					if (strand === 'strategic' && (category === 'strategic' || category === 'strat')) return true;
+					if (strand === 'adaptive' && category === 'adaptive') return true;
+					if (strand === 'productive' && category === 'productive') return true;
+            
+					return false;
+				});
+			});
+
+			// Generate module progress HTML with strand grouping
+			let moduleProgressHTML = '';
+			strandOrder.forEach(strand => {
+				const modules = modulesByStrand[strand];
+					if (modules && modules.length > 0) {
+					moduleProgressHTML += `
+						<tr style="background: var(--gray-100)">
+							<td colspan="4" style="font-weight: 800; padding: var(--space-4); color: var(--gray-700)">
+								${strandLabels[strand]}
+							</td>
+						</tr>
+						${modules.map(m => `
+							<tr>
+								<td style="font-weight: 600; padding-left: var(--space-6)">${m.module_name}</td>
+								<td><span class="status-badge status-${m.status || 'locked'}">${m.status === 'locked' ? 'Not Started' : m.status}</span></td>
+								<td style="font-weight: 700; color: var(--primary)">${m.score || 0}%</td>
+								<td>${m.attempts || 0}</td>
+							</tr>
+						`).join('')}
+					`;
+				}
+			});
+
+			const content = `
+				<div class="analytics-grid">
+					<div class="card span-12">
+						<div class="card-header">
+							<div class="card-title">Five Strands Proficiency</div>
+						</div>
+						<div class="strand-comparison">
+							${strands.map(s => `
+								<div class="strand-item">
+									<div class="strand-label">${strandLabels[s.strand_type]}</div>
+									<div class="strand-bar-container">
+										<div class="strand-bar" style="width: ${s.current_score}%">
+											<div class="strand-value">${Math.round(s.current_score)}%</div>
+										</div>
+									</div>
+								</div>
+							`).join('')}
+						</div>
+					</div>
+					
+					${cheatingRisk > 30 ? `
+					<div class="card span-12">
+						<div class="cheating-alert">
+							<div class="cheating-title">⚠️ Possible Cheating Detected</div>
+							<div class="cheating-detail"><strong>${cheatingRisk}%</strong> of responses submitted in under 3 seconds</div>
+							<div class="cheating-detail">${suspiciousCount} out of ${totalResponses} recent responses flagged as suspicious</div>
+							<div style="margin-top: var(--space-3); font-size: 13px;"><strong>Recommendation:</strong> Review with student individually to verify understanding</div>
+						</div>
+					</div>
+					` : ''}
+            
+					<div class="card span-12">
+						<div class="card-header">
+							<div class="card-title">📚 Module Progress (Grouped by Strand)</div>
+						</div>
+						<table class="module-table">
+							<thead>
+								<tr>
+									<th>Module</th>
+									<th>Status</th>
+									<th>Score</th>
+									<th>Attempts</th>
+								</tr>
+							</thead>
+							<tbody>
+								${moduleProgressHTML}
+							</tbody>
+						</table>
+					</div>
+            
+					<div class="card span-12">
+						<div class="card-header">
+							<div class="card-title">Recent Activity</div>
+						</div>
+						<div class="activity-timeline">
+							${activity.slice(0, 10).map(a => `
+								<div class="activity-item ${a.is_correct ? 'activity-correct' : 'activity-incorrect'}">
+									<div>
+										<div style="font-weight: 600; margin-bottom: var(--space-1)">${a.module_name}</div>
+										<div style="font-size: 13px; color: var(--gray-600)">${a.question_text.substring(0, 60)}...</div>
+									</div>
+									<div style="text-align: right">
+										<div style="font-weight: 800; color: ${a.is_correct ? '#10b981' : '#ef4444'}">
+											${a.is_correct ? '✓' : '✗'}
+										</div>
+										<div style="font-size: 12px; color: var(--gray-600)">${a.response_time_seconds}s</div>
+									</div>
+								</div>
+							`).join('')}
+						</div>
+					</div>
+				</div>
+			`;
+
+			document.getElementById('studentModalContent').innerHTML = content;
+			document.getElementById('studentModal').classList.add('active');
+		}
+
+
+        // Close student modal
+        function closeStudentModal() {
+            document.getElementById('studentModal').classList.remove('active');
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'auth.html';
+        }
+		
+		// Function for Hamburger Menu
+		function toggleMobileMenu() {
+			const mobileNav = document.getElementById('mobileNav');
+			mobileNav.classList.toggle('active');
+		}
+
+		// Close mobile menu when clicking outside
+		document.addEventListener('click', (e) => {
+			const mobileNav = document.getElementById('mobileNav');
+			const toggleBtn = document.querySelector('.mobile-menu-toggle');
+			if (!mobileNav.contains(e.target) && e.target !== toggleBtn) {
+				mobileNav.classList.remove('active');
+			}
+		});
+
+		// Siguraduhin na ang loadUserInfo() ay tinatawag sa loob ng DOMContentLoaded
+		document.addEventListener('DOMContentLoaded', () => {
+			loadUserInfo();
+			loadClasses();
+		});
+
+    </script>
+</body>
+</html>

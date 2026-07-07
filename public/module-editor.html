@@ -1,0 +1,4663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Module Editor - FlexCalc</title>
+    <link rel="stylesheet" href="flex-calc-design-system.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    
+    <!-- KaTeX (Faster alternative to MathJax) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    
+    <style>
+        /* Module Info Edit */
+        .module-info-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            margin-bottom: var(--space-6);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .module-info-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .edit-hint {
+            font-size: 13px;
+            color: var(--gray-500);
+            margin-top: var(--space-2);
+        }
+
+        /* Tab System */
+        .editor-tabs {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-2);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            display: flex;
+            gap: var(--space-2);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            border: none;
+            background: transparent;
+            color: var(--gray-600);
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+        }
+
+        .tab-btn:hover {
+            background: var(--gray-50);
+            color: var(--gray-900);
+        }
+
+        .tab-btn.active {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            margin-bottom: var(--space-4);
+        }
+
+        .section-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: var(--space-4);
+			padding: var(--space-3) var(--space-4);
+			background: var(--gray-50); /* Katulad ng background sa item-card */
+			border: 2px solid var(--gray-200); /* Gaya ng border sa lessons list */
+			border-radius: var(--radius-lg);
+		}
+		
+		.save-action-btn {
+			background: var(--gradient-success);
+			color: white;
+			border: none;
+			padding: var(--space-2) var(--space-4);
+			border-radius: var(--radius-md);
+			font-weight: 700;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			gap: var(--space-2);
+			transition: transform 0.2s;
+		}
+		
+		.save-action-btn:hover {
+			transform: translateY(-2px);
+			box-shadow: var(--shadow-md);
+		}
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gray-900);
+        }
+
+        /* List Items */
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .item-card {
+            background: var(--gray-50);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--gray-200);
+            transition: all var(--transition-fast);
+        }
+
+        .item-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-2);
+        }
+
+        .item-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .item-actions {
+            display: flex;
+            gap: var(--space-2);
+        }
+
+        .btn-icon {
+            padding: var(--space-2);
+            background: white;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: 14px;
+        }
+
+        .btn-icon:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-icon.delete:hover {
+            border-color: var(--danger);
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Quiz Card Styles */
+        .question-card {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            margin-bottom: var(--space-4);
+            transition: all var(--transition-fast);
+        }
+
+        .question-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .question-number {
+            display: inline-block;
+            background: var(--gradient-primary);
+            color: white;
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-weight: 800;
+            font-size: 13px;
+            margin-bottom: var(--space-3);
+        }
+
+        .question-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-3);
+            line-height: 1.6;
+        }
+
+        .answer-preview {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: var(--radius-md);
+            padding: var(--space-3);
+            margin-top: var(--space-3);
+        }
+
+        .answer-label {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--success);
+            text-transform: uppercase;
+            margin-bottom: var(--space-1);
+        }
+
+        .answer-text {
+            font-size: 14px;
+            color: var(--gray-700);
+        }
+
+        .question-actions {
+            display: flex;
+            gap: var(--space-2);
+            margin-top: var(--space-3);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: var(--space-4);
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+            font-size: 14px;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: var(--space-3);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            font-size: 15px;
+            transition: all var(--transition-fast);
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Rich Text Editor Container */
+        .editor-container {
+            height: 300px;
+            margin-bottom: var(--space-4);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-6);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-2xl);
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .modal-header {
+            padding: var(--space-5);
+            border-bottom: 2px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            color: white;
+            transition: all var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            background: white;
+            color: var(--primary);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-6);
+        }
+
+        .modal-footer {
+            padding: var(--space-4);
+            border-top: 2px solid var(--gray-200);
+            display: flex;
+            gap: var(--space-3);
+        }
+
+        /* Save Indicator */
+        .save-indicator {
+            position: fixed;
+            top: 90px;
+            right: var(--space-6);
+            background: white;
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-full);
+            box-shadow: var(--shadow-lg);
+            display: none;
+            align-items: center;
+            gap: var(--space-2);
+            z-index: 1000;
+        }
+
+        .save-indicator.show {
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Floating Save Button */
+        /* 1. Default State ng Floating Button */
+		.floating-save {
+			position: fixed;
+			bottom: var(--space-6);
+			right: var(--space-6);
+			width: 64px;
+			height: 64px;
+			border-radius: 50%;
+			background: var(--gradient-success);
+			color: white;
+			border: none;
+			font-size: 28px;
+			cursor: pointer;
+			box-shadow: var(--shadow-2xl);
+			z-index: 1000;
+		
+			/* Smooth transition para hindi biglang naglalaho */
+			transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+			opacity: 1;
+			transform: translateX(0) scale(1);
+					pointer-events: auto; /* Siguradong napipindot pag lilitaw */
+		}
+
+		/* 2. Kapag nasa Materials Tab - FULL HIDE (Walang Peek) */
+		#tab-materials:hover ~ .floating-save {
+			opacity: 0;             /* Zero visibility */
+			transform: translateX(120px) scale(0.5); /* Usog palayo + pinaliit para sure na tago */
+			pointer-events: none;    /* Hindi haharang sa mouse kahit invisible */
+		}
+
+		/* 3. Force Show pag tinutukan mismo ang mouse sa button (Safety) */
+		.floating-save:hover {
+			opacity: 1 !important;
+			transform: translateX(0) scale(1.1) !important;
+			pointer-events: auto !important;
+		}
+
+        .floating-save:hover {
+            transform: scale(1.1);
+        }
+		
+		#tab-materials:hover ~ .floating-save,
+		.floating-save.hidden {
+			opacity: 0;
+			transform: translateX(100px);
+			pointer-events: none;
+		}
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: var(--space-12);
+            color: var(--gray-500);
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: var(--space-4);
+            opacity: 0.5;
+        }
+
+        /* AI Quiz Banner */
+        .ai-banner {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            padding: var(--space-5);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-5);
+        }
+		
+		/* Quiz Set Card Styles */
+		.quiz-set-card {
+			background: white;
+			border-radius: var(--radius-xl);
+			padding: var(--space-5);
+			margin-bottom: var(--space-4);
+			border: 2px solid var(--gray-200);
+			transition: all var(--transition-fast);
+		}
+
+		.quiz-set-card:hover {
+			border-color: var(--primary);
+			box-shadow: var(--shadow-md);
+		}
+
+		.quiz-set-card.draft {
+			border-left: 4px solid #fbbf24;
+		}
+
+		.quiz-set-card.approved {
+			border-left: 4px solid #10b981;
+		}
+
+		.quiz-set-card.assigned {
+			border-left: 4px solid #6366f1;
+		}
+
+		.quiz-set-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+			margin-bottom: var(--space-3);
+		}
+
+		.quiz-set-badge {
+			display: inline-block;
+			padding: var(--space-1) var(--space-3);
+			border-radius: var(--radius-full);
+			font-size: 11px;
+			font-weight: 800;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.quiz-set-badge.draft {
+			background: #fef3c7;
+			color: #92400e;
+		}
+
+		.quiz-set-badge.approved {
+			background: #d1fae5;
+			color: #065f46;
+		}
+
+		.quiz-set-badge.assigned {
+			background: #ddd6fe;
+			color: #5b21b6;
+		}
+
+		.quiz-set-meta {
+			display: flex;
+			gap: var(--space-4);
+			font-size: 13px;
+			color: var(--gray-600);
+			margin-bottom: var(--space-3);
+		}
+
+		.quiz-set-preview {
+			background: var(--gray-50);
+			border-radius: var(--radius-lg);
+			padding: var(--space-4);
+			margin-top: var(--space-3);
+			display: none;
+		}
+
+		.quiz-set-preview.active {
+			display: block;
+		}
+
+		.preview-question {
+			background: white;
+			padding: var(--space-3);
+			border-radius: var(--radius-md);
+			margin-bottom: var(--space-2);
+			border: 1px solid var(--gray-200);
+		}
+
+		.preview-option {
+			padding: var(--space-2);
+			background: var(--gray-50);
+			border-radius: var(--radius-sm);
+			margin: var(--space-1) 0;
+			font-size: 14px;
+		}
+
+		.preview-option.correct {
+			background: #d1fae5;
+			border: 1px solid #10b981;
+			font-weight: 600;
+		}
+
+/* Quiz Set Card Styles */
+.quiz-set-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+    margin-bottom: var(--space-4);
+    border: 2px solid var(--gray-200);
+    transition: all var(--transition-fast);
+}
+
+.quiz-set-card:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+}
+
+.quiz-set-card.draft {
+    border-left: 4px solid #fbbf24;
+}
+
+.quiz-set-card.approved {
+    border-left: 4px solid #10b981;
+}
+
+.quiz-set-card.assigned {
+    border-left: 4px solid #6366f1;
+}
+
+.quiz-set-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-3);
+}
+
+.quiz-set-badge {
+    display: inline-block;
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.quiz-set-badge.draft {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.quiz-set-badge.approved {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.quiz-set-badge.assigned {
+    background: #ddd6fe;
+    color: #5b21b6;
+}
+
+.quiz-set-meta {
+    display: flex;
+    gap: var(--space-4);
+    font-size: 13px;
+    color: var(--gray-600);
+    margin-bottom: var(--space-3);
+}
+
+/* Replace your .quiz-set-actions CSS with this */
+.quiz-set-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--gray-100);
+}
+
+.quiz-set-actions .btn, 
+.quiz-set-actions .btn-icon {
+    width: 100%; /* Make buttons fill their grid cell */
+    justify-content: center;
+    padding: 10px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+/* Specific styling for the Delete button to keep it distinct */
+.quiz-set-actions .delete {
+    background: #fff1f2;
+    color: #e11d48;
+    border: 1px solid #fecdd3;
+}
+
+.quiz-set-actions .delete:hover {
+    background: #e11d48;
+    color: white;
+}
+
+.quiz-set-preview {
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-top: var(--space-3);
+    display: none;
+}
+
+.quiz-set-preview.active {
+    display: block;
+}
+
+.preview-question {
+    background: white;
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
+    border: 1px solid var(--gray-200);
+}
+
+.preview-option {
+    padding: var(--space-2);
+    background: var(--gray-50);
+    border-radius: var(--radius-sm);
+    margin: var(--space-1) 0;
+    font-size: 14px;
+}
+
+.preview-option.correct {
+    background: #d1fae5;
+    border: 1px solid #10b981;
+    font-weight: 600;
+}
+
+
+        /* ========== CUSTOM ALERT SYSTEM ========== */
+        .custom-alert-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999999;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .custom-alert-overlay.active {
+            display: flex;
+        }
+
+        .custom-alert-box {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .custom-alert-header {
+            padding: var(--space-6);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .custom-alert-header.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .custom-alert-header.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .custom-alert-header.warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .custom-alert-header.info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .custom-alert-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .custom-alert-title {
+            font-size: 20px;
+            font-weight: 800;
+            flex: 1;
+        }
+
+        .custom-alert-body {
+            padding: var(--space-6);
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--gray-700);
+        }
+
+        .custom-alert-footer {
+            padding: var(--space-4) var(--space-6);
+            display: flex;
+            gap: var(--space-3);
+            justify-content: flex-end;
+            border-top: 2px solid var(--gray-100);
+            background: var(--gray-50);
+        }
+
+        .custom-alert-btn {
+            padding: var(--space-3) var(--space-6);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .custom-alert-btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .custom-alert-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .custom-alert-btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+        }
+
+        .custom-alert-btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+        }
+    
+        /* ========== LEARNING MATERIALS STYLES ========== */
+        .upload-area {
+            border: 3px dashed var(--gray-300);
+            border-radius: 16px;
+            padding: 48px;
+            text-align: center;
+            background: #f7fafc;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .material-item {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+        
+        .material-item:hover {
+            border-color: #6366f1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .material-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: #f7fafc;
+        }
+        
+        .material-icon.pdf { background: rgba(239, 68, 68, 0.1); }
+        .material-icon.image { background: rgba(16, 185, 129, 0.1); }
+        .material-icon.video { background: rgba(99, 102, 241, 0.1); }
+        
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        
+        .btn-view {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+        }
+        
+        .btn-view:hover {
+            background: #6366f1;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        
+        .btn-delete:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* ========================================
+           MOBILE HAMBURGER MENU
+           ======================================== */
+
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            color: var(--gray-900);
+        }
+
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-md);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            z-index: 999;
+        }
+
+        .mobile-nav.active {
+            max-height: 500px;
+        }
+
+        .mobile-nav-content {
+            padding: var(--space-4);
+        }
+
+        .mobile-nav .nav-link {
+            display: block;
+            padding: var(--space-3) var(--space-4);
+            margin-bottom: var(--space-1);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-fast);
+        }
+
+        .mobile-nav .nav-link:hover {
+            background: var(--gray-50);
+        }
+
+        .mobile-nav .user-menu {
+            margin: var(--space-3) 0;
+            padding: var(--space-3);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+        }
+
+        .mobile-nav .logout-btn {
+            width: 100%;
+            margin-top: var(--space-3);
+        }
+
+        /* ========================================
+           IMPROVED QUIZ CARDS UI
+           ======================================== */
+
+        .quiz-card {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            padding: var(--space-5);
+            margin-bottom: var(--space-4);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-fast);
+        }
+
+        .quiz-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .quiz-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+        }
+
+        .quiz-card-info {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .quiz-card-title {
+            margin: 0 0 var(--space-2) 0;
+            color: var(--gray-900);
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .quiz-card-meta {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+            margin-bottom: var(--space-2);
+        }
+
+        .quiz-meta-item {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+
+        .quiz-status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quiz-status-badge.assigned {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .quiz-status-badge.draft {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .quiz-status-badge.archived {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        .quiz-card-date {
+            font-size: 13px;
+            color: var(--gray-500);
+            margin-top: var(--space-1);
+        }
+
+        /* Quiz Card Buttons - Clean Design */
+        .quiz-card-buttons {
+            display: flex;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .quiz-card-buttons button {
+            padding: var(--space-2) var(--space-4);
+            border: 2px solid transparent;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .quiz-btn-preview {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .quiz-btn-preview:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .quiz-btn-delete {
+            background: white;
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .quiz-btn-delete:hover {
+            background: var(--danger);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ========================================
+           RESPONSIVE DESIGN - ALL SCREEN SIZES
+           ======================================== */
+
+        /* Fix Quiz Buttons Spacing */
+        .quiz-card-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-card-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .quiz-card-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* Tablet (968px and below) */
+        @media (max-width: 968px) {
+            /* Mobile Menu */
+            .nav-links,
+            .nav-user {
+                display: none;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .mobile-nav {
+                display: block;
+            }
+
+            .container {
+                padding: var(--space-4);
+            }
+
+            /* Tabs - Stack on mobile */
+            .editor-tabs {
+                flex-direction: column;
+                gap: var(--space-2);
+            }
+
+            .tab-btn {
+                width: 100%;
+                justify-content: flex-start;
+                padding: var(--space-3);
+            }
+
+            /* Section cards */
+            .section-card {
+                padding: var(--space-4);
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-2);
+            }
+
+            .section-header h3 {
+                font-size: 18px;
+            }
+
+            /* Form groups */
+            .form-group {
+                margin-bottom: var(--space-4);
+            }
+
+            .form-group label {
+                font-size: 14px;
+            }
+
+            /* Buttons */
+            .btn {
+                width: 100%;
+                padding: var(--space-3);
+                font-size: 14px;
+            }
+
+            /* Quiz generation form */
+            .quiz-generation-form {
+                grid-template-columns: 1fr;
+                gap: var(--space-3);
+            }
+
+            /* Quiz cards */
+            .quiz-card {
+                padding: var(--space-4);
+            }
+
+            .quiz-card-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .quiz-card-buttons button {
+                width: 100%;
+            }
+
+            /* Lesson items */
+            .lesson-item {
+                padding: var(--space-3);
+            }
+
+            /* Worked examples */
+            .example-item {
+                padding: var(--space-4);
+            }
+
+            /* Real world apps */
+            .real-world-item {
+                padding: var(--space-4);
+            }
+
+            /* Materials grid */
+            .materials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Resources grid */
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Mobile Portrait (640px and below) */
+        @media (max-width: 640px) {
+            .container {
+                padding: var(--space-3);
+            }
+
+            /* Module info card */
+            .module-info-card {
+                padding: var(--space-4);
+            }
+
+            .module-info-card h2 {
+                font-size: 20px;
+            }
+
+            .module-info-card p {
+                font-size: 14px;
+            }
+
+            /* Section cards */
+            .section-card {
+                padding: var(--space-3);
+                margin-bottom: var(--space-3);
+            }
+
+            .section-header h3 {
+                font-size: 16px;
+            }
+
+            /* Editor tabs */
+            .tab-btn {
+                font-size: 13px;
+                padding: var(--space-2);
+            }
+
+            /* Form inputs */
+            input[type="text"],
+            input[type="number"],
+            textarea,
+            select {
+                font-size: 14px;
+                padding: var(--space-2);
+            }
+
+            /* Buttons */
+            .btn {
+                padding: var(--space-2) var(--space-3);
+                font-size: 13px;
+            }
+
+            /* Quiz cards */
+            .quiz-card {
+                padding: var(--space-3);
+            }
+
+            .quiz-card h4 {
+                font-size: 16px;
+            }
+
+            .quiz-card p {
+                font-size: 13px;
+            }
+
+            .quiz-card-buttons button {
+                padding: var(--space-2) var(--space-3);
+                font-size: 13px;
+            }
+
+            /* Lesson items */
+            .lesson-item {
+                padding: var(--space-2);
+            }
+
+            .lesson-number {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+
+            .lesson-title {
+                font-size: 14px;
+            }
+
+            /* Modals */
+            .modal-content {
+                width: 95%;
+                max-height: 90vh;
+                padding: var(--space-4);
+            }
+
+            .modal-header h3 {
+                font-size: 18px;
+            }
+
+            .modal-body {
+                padding: var(--space-3);
+            }
+
+            /* Quill editor */
+            .ql-editor {
+                min-height: 150px;
+                font-size: 14px;
+            }
+
+            /* Preview modal */
+            #quizPreviewModal .modal-content {
+                padding: var(--space-3);
+            }
+
+            #quizPreviewModal h2 {
+                font-size: 18px;
+            }
+
+            #quizPreviewModal h4 {
+                font-size: 16px;
+            }
+
+            #quizPreviewModal p {
+                font-size: 14px;
+            }
+        }
+
+        /* Large Desktop (1400px+) */
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1600px;
+            }
+
+            .section-card {
+                padding: var(--space-8);
+            }
+
+            .quiz-generation-form {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .materials-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .resources-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .editor-tabs,
+            .section-header button,
+            .quiz-card-buttons,
+            .btn,
+            .modal-close {
+                display: none;
+            }
+
+            .section-card {
+                page-break-inside: avoid;
+            }
+
+            body {
+                background: white;
+            }
+        }
+		
+		/* Notification Animations */
+		@keyframes slideInRight {
+			from {
+				transform: translateX(400px);
+				opacity: 0;
+			}
+			to {
+				transform: translateX(0);
+				opacity: 1;
+			}
+		}
+
+		@keyframes slideOutRight {
+			from {
+				transform: translateX(0);
+				opacity: 1;
+			}
+			to {
+				transform: translateX(400px);
+				opacity: 0;
+			}
+		}
+
+
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="teacher-dashboard.html" class="logo">
+                <div class="logo-icon">BC</div>
+                <div class="logo-text">BasCal</div>
+            </a>
+            <div class="nav-links">
+                <a href="teacher-dashboard.html" class="nav-link">Dashboard</a>
+                <a href="manage-modules.html" class="nav-link active">Modules</a>
+                <button onclick="logout()" class="logout-btn">Logout</button>
+            </div>
+            
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                ☰
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation Menu -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-content">
+            <a href="teacher-dashboard.html" class="nav-link">Dashboard</a>
+            <a href="manage-modules.html" class="nav-link active">Modules</a>
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <!-- Save Indicator -->
+    <div class="save-indicator" id="saveIndicator">
+        <span style="color: var(--success); font-size: 20px;">✓</span>
+        <span style="font-weight: 600;">Saved!</span>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container" style="padding-top: 90px;">
+        <!-- Module Info (Editable) -->
+        <div class="module-info-card" onclick="editModuleInfo()">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                    <div style="font-size: 12px; font-weight: 800; color: var(--primary); margin-bottom: var(--space-2); text-transform: uppercase;" id="moduleCategoryDisplay">
+                        Loading...
+                    </div>
+                    <h1 style="font-size: 32px; font-weight: 800; margin-bottom: var(--space-2);" id="moduleTitle">
+                        Loading Module...
+                    </h1>
+                    <p style="color: var(--gray-600); line-height: 1.6;" id="moduleDescription">
+                        Please wait...
+                    </p>
+                    <div class="edit-hint">💡 Click to edit module name, category, and description</div>
+                </div>
+                <button class="btn-icon" style="font-size: 20px;">✏️</button>
+            </div>
+        </div>
+
+        <!-- Editor Tabs -->
+        <div class="editor-tabs">
+            <button class="tab-btn active" onclick="switchTab('content')">
+                📝 Content
+            </button>
+            <button class="tab-btn" onclick="switchTab('resources')">
+                🎮 Interactive Resources
+            </button>
+            <button class="tab-btn" onclick="switchTab('quizzes')">
+                📝 Quizzes
+            </button>
+        
+            <button class="tab-btn" onclick="switchTab('materials')">
+                <span>📚</span> Learning Materials
+            </button>
+        </div>
+
+        <!-- TAB 1: Content -->
+        <div id="tab-content" class="tab-content active">
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="section-title">📚 Lessons</h3>
+                    <button class="btn btn-primary" onclick="addLesson()">
+                        + Add Lesson
+                    </button>
+                </div>
+                <div id="lessonsList" class="item-list">
+                    <div style="text-align: center; padding: var(--space-8);">
+                        <div style="font-size: 48px; margin-bottom: var(--space-3);">⏳</div>
+                        <p>Loading lessons...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Interactive Resources -->
+        <div id="tab-resources" class="tab-content">
+            <div class="section-card">
+                <div class="section-header">
+                    <h3 class="section-title">🎮 Interactive Resources</h3>
+                    <button class="btn btn-primary" onclick="addResource()">
+                        + Add Resource
+                    </button>
+                </div>
+                <div id="resourcesList" class="item-list">
+                    <div style="text-align: center; padding: var(--space-8);">
+                        <div style="font-size: 48px; margin-bottom: var(--space-3);">⏳</div>
+                        <p>Loading resources...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Quiz Sets Management -->
+        <div id="tab-quizzes" class="tab-content">
+            
+            <!-- Quiz Creation Options -->
+            <div style="margin-bottom: var(--space-6); display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                <button class="btn btn-primary btn-large" onclick="openGenerateQuizSetModal()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: var(--space-2);">
+                    <span>🤖</span>
+                    <div style="text-align: left;">
+                        <div style="font-weight: 700;">AI Generate Quiz</div>
+                        <div style="font-size: 12px; opacity: 0.9;">Let AI create questions</div>
+                    </div>
+                </button>
+                
+                <button class="btn btn-secondary btn-large" onclick="openManualQuizModal()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: var(--space-2);">
+                    <span>✏️</span>
+                    <div style="text-align: left;">
+                        <div style="font-weight: 700;">Create Manually</div>
+                        <div style="font-size: 12px; opacity: 0.9;">Add questions yourself</div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Quiz Sets List -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">📚 Quiz Sets</h2>
+                    <div style="font-size: 14px; color: var(--gray-600);">
+                        <span id="quizSetsCount">0</span> sets
+                    </div>
+                </div>
+                
+                <div id="quizSetsList">
+                    <!-- Quiz sets will be rendered here -->
+                    <div class="empty-state">
+                        <div class="empty-icon">🎯</div>
+                        <h3 style="font-size: 20px; font-weight: 700; margin-bottom: var(--space-2);">No quiz sets yet</h3>
+                        <p>Choose "AI Generate Quiz" or "Create Manually" above to get started</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Edit Modal -->
+    
+        <!-- TAB 4: Learning Materials -->
+       <div id="tab-materials" class="tab-content">
+			<div class="section-card"> <div class="section-header">
+					<div>
+						<h2 class="section-title">📚 Learning Materials</h2>
+						<p style="font-size: 14px; color: var(--gray-600); margin-top: 4px;">
+							Upload and manage files for students (PDF, images, videos)
+						</p>
+					</div>
+					<button class="btn btn-primary" onclick="saveAllChanges()" style="display: flex; align-items: center; gap: 8px;">
+						<span>💾</span> Save All Changes
+					</button>
+				</div>
+
+				<div class="upload-area" id="uploadArea" onclick="document.getElementById('materialFileInput').click()">
+					<div style="font-size: 64px; opacity: 0.5;">📤</div>
+					<div style="font-size: 18px; font-weight: 600; margin: 16px 0 8px;">
+						Drop files here or click to upload
+					</div>
+					<div style="font-size: 14px; color: #718096;">
+						PDF, Images, Videos, Documents (Max 50MB)
+					</div>
+					<input type="file" id="materialFileInput" multiple hidden 
+						accept=".pdf,.jpg,.jpeg,.png,.gif,.mp4,.mp3,.doc,.docx,.ppt,.pptx">
+				</div>
+
+				<div id="uploadProgress" style="display: none; margin-top: 24px;"></div>
+
+				<div id="materialsList" style="margin-top: 32px;">
+					<div class="empty-state">
+						<div class="empty-icon">📭</div>
+						<p>No materials uploaded yet</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+<div id="editModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Edit</h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Form will load here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()" style="flex: 1;">Cancel</button>
+                <button class="btn btn-primary" onclick="saveModal()" style="flex: 2;">💾 Save</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Quiz Preview Modal -->
+    <div id="quizPreviewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; overflow-y: auto;">
+        <div style="background: white; max-width: 900px; margin: 50px auto; border-radius: 12px; padding: 30px; position: relative;">
+            <button onclick="closeQuizPreview()" style="position: absolute; top: 15px; right: 15px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; font-size: 20px; cursor: pointer;">×</button>
+            <h2 id="previewQuizTitle" style="margin-bottom: 20px; color: #2c3e50;">Quiz Preview</h2>
+            <div id="previewQuestionsContainer"></div>
+        </div>
+    </div>
+
+    <!-- Floating Save Button -->
+    <button class="floating-save" onclick="saveAllChanges()" title="Save All Changes">
+        💾
+    </button>
+
+    <script>
+        const API_BASE_URL = 'https://farah-ungroupable-millicent.ngrok-free.dev';
+        const token = localStorage.getItem('token');
+        const urlParams = new URLSearchParams(window.location.search);
+        const moduleId = urlParams.get('moduleId') || urlParams.get('id');
+
+        let moduleData = null;
+        let lessons = [];
+        let resources = [];
+        let manualQuestions = [];
+        let currentEditType = null;
+        let currentEditIndex = null;
+        let quillEditor = null;
+        let hasUnsavedChanges = false;
+        let quizMode = 'manual';
+
+        // Check auth
+        if (!token) {
+            alert('Not authenticated. Please login.');
+            window.location.href = 'auth.html';
+        } else if (!moduleId) {
+            alert('No module specified.');
+            window.location.href = 'manage-modules.html';
+        } else {
+            loadAllData();
+        }
+
+        async function loadAllData() {
+            try {
+                await loadModuleInfo();
+                await loadLessons();
+                await loadResources();
+                // await loadManualQuestions(); // Deprecated - using Quiz Sets system now
+				await loadQuizSets();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Failed to load module data: ' + error.message);
+            }
+        }
+
+        async function loadModuleInfo() {
+            const response = await fetch(`${API_BASE_URL}/api/educator/modules/${moduleId}/content`, {
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) throw new Error('Failed to load module');
+
+            const data = await response.json();
+            moduleData = data;
+            currentModule = data.module; // ✅ Store module for auto-strand detection
+            console.log('📚 Current Module:', currentModule);
+            console.log('🎯 Module Strand:', currentModule.proficiency_strand);
+
+            document.getElementById('moduleTitle').textContent = data.module.module_name;
+            document.getElementById('moduleDescription').textContent = data.module.description || 'Click to edit module description';
+            document.getElementById('moduleCategoryDisplay').textContent = (data.module.category || 'general').toUpperCase();
+        }
+
+        async function loadLessons() {
+            lessons = [];
+
+            if (moduleData.videos && moduleData.videos.length > 0) {
+                moduleData.videos.forEach(video => {
+                    lessons.push({
+                        id: video.video_id,
+                        type: 'video',
+                        title: video.title,
+                        duration: video.duration_minutes,
+                        videoUrl: video.url,
+                        description: video.description,
+                        topicsCovered: video.topics_covered
+                    });
+                });
+            }
+
+            if (moduleData.sections && moduleData.sections.length > 0) {
+                moduleData.sections.forEach(section => {
+                    lessons.push({
+                        id: section.section_id,
+                        type: 'section',
+                        title: section.title,
+                        duration: section.duration_minutes,
+                        explanation: section.explanation,
+                        examples: section.examples,
+                        practiceProblems: section.practice_problems
+                    });
+                });
+            }
+
+            renderLessons();
+        }
+
+        async function loadResources() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/modules/${moduleId}/interactive-resources`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    resources = data.resources || [];
+                } else {
+                    resources = [];
+                }
+            } catch (error) {
+                console.error('Error loading resources:', error);
+                resources = [];
+            }
+
+            renderResources();
+        }
+
+        async function loadManualQuestions() {
+            // NOTE: This loads old custom_problems data
+            // New system uses quiz_sets instead
+            // Kept for backward compatibility only
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/modules/${moduleId}/questions`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    manualQuestions = data.questions || [];
+                } else {
+                    manualQuestions = [];
+                }
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                manualQuestions = [];
+            }
+
+            renderManualQuestions();
+        }
+
+        function renderLessons() {
+            const container = document.getElementById('lessonsList');
+            
+            if (lessons.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📚</div>
+                        <h3 style="font-size: 20px; font-weight: 700; margin-bottom: var(--space-2);">No lessons yet</h3>
+                        <p>Click "+ Add Lesson" to create your first lesson</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = lessons.map((lesson, index) => `
+                <div class="item-card">
+                    <div class="item-header">
+                        <div>
+                            <div class="item-title">${index + 1}. ${lesson.title}</div>
+                            <div style="font-size: 13px; color: var(--gray-500); margin-top: var(--space-1);">
+                                ${lesson.type === 'video' ? '🎥 Video' : '📝 Text'} • ${lesson.duration || 10} min
+                            </div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn-icon" onclick="editLesson(${index})" title="Edit">✏️</button>
+                            <button class="btn-icon delete" onclick="deleteLesson(${index})" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderResources() {
+            const container = document.getElementById('resourcesList');
+            
+            if (resources.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🎮</div>
+                        <h3 style="font-size: 20px; font-weight: 700; margin-bottom: var(--space-2);">No resources yet</h3>
+                        <p>Click "+ Add Resource" to add PhET, Desmos, games, or tools</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = resources.map((resource, index) => `
+                <div class="item-card">
+                    <div class="item-header">
+                        <div>
+                            <div class="item-title">${resource.resource_name || resource.resourcename || 'Untitled'}</div>
+                            <div style="font-size: 13px; color: var(--gray-500); margin-top: var(--space-1);">
+                                ${(resource.resource_type || resource.resourcetype || 'tool').replace(/_/g, ' ')} • ${resource.estimated_time_minutes || resource.estimatedtimeminutes || 15} min
+                            </div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn-icon" onclick="editResource(${index})" title="Edit">✏️</button>
+                            <button class="btn-icon delete" onclick="deleteResource(${index})" title="Delete">🗑️</button>
+                        </div>
+                    </div>
+                    <p style="font-size: 14px; color: var(--gray-600); margin-top: var(--space-2);">
+                        ${resource.description || 'No description'}
+                    </p>
+                </div>
+            `).join('');
+        }
+
+        function renderManualQuestions() {
+            const container = document.getElementById('manualQuestionsList');
+            
+            // Skip if container doesn't exist (using new quiz sets system)
+            if (!container) {
+                console.log('⚠️ manualQuestionsList not found - using Quiz Sets system');
+                return;
+            }
+            
+            if (manualQuestions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <h3 style="font-size: 20px; font-weight: 700; margin-bottom: var(--space-2);">No questions yet</h3>
+                        <p>Click "+ Add Question" to create manually or use "AI Generate Quiz"</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = manualQuestions.map((q, index) => `
+                <div class="question-card">
+                    <div class="question-number">Question ${index + 1}</div>
+                    <div class="question-text">${q.question_text}</div>
+                    
+                    <div class="answer-preview">
+                        <div class="answer-label">✓ Correct Answer</div>
+                        <div class="answer-text">${q.correct_answer}</div>
+                    </div>
+                    
+                    ${q.explanation ? `
+                        <div style="margin-top: var(--space-3); padding: var(--space-3); background: var(--gray-50); border-radius: var(--radius-md);">
+                            <div style="font-size: 12px; font-weight: 800; color: var(--gray-600); margin-bottom: var(--space-1);">EXPLANATION</div>
+                            <div style="font-size: 14px; color: var(--gray-700);">${q.explanation}</div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="question-actions">
+                        <button class="btn-icon" onclick="editManualQuestion(${index})" title="Edit">✏️</button>
+                        <button class="btn-icon delete" onclick="deleteManualQuestion(${index})" title="Delete">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+			
+			if (tab === 'materials') {
+				loadMaterials();
+			}
+        }
+
+        // ============ MODULE INFO EDIT ============
+        function editModuleInfo() {
+            currentEditType = 'module-info';
+            
+            document.getElementById('modalTitle').textContent = 'Edit Module Information';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Module Name</label>
+                    <input type="text" class="form-input" id="editModuleName" value="${moduleData.module.module_name}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" id="editModuleCategory">
+                        <option value="conceptual" ${moduleData.module.category === 'conceptual' ? 'selected' : ''}>Conceptual</option>
+                        <option value="procedural" ${moduleData.module.category === 'procedural' ? 'selected' : ''}>Procedural</option>
+                        <option value="strategic" ${moduleData.module.category === 'strategic' ? 'selected' : ''}>Strategic</option>
+                        <option value="adaptive" ${moduleData.module.category === 'adaptive' ? 'selected' : ''}>Adaptive</option>
+                        <option value="productive" ${moduleData.module.category === 'productive' ? 'selected' : ''}>Productive</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="editModuleDescription">${moduleData.module.description || ''}</textarea>
+                </div>
+            `;
+            
+            openModal();
+        }
+
+        // ============ LESSON FUNCTIONS ============
+        function addLesson() {
+            currentEditType = 'lesson-add';
+            currentEditIndex = -1;
+            
+            document.getElementById('modalTitle').textContent = 'Add Lesson';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Lesson Title</label>
+                    <input type="text" class="form-input" id="editLessonTitle" placeholder="e.g., Introduction to Limits">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" id="editLessonType" onchange="toggleLessonFields()">
+                        <option value="video">Video Lesson</option>
+                        <option value="section">Text Content</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Duration (minutes)</label>
+                    <input type="number" class="form-input" id="editLessonDuration" value="10">
+                </div>
+                <div id="videoFields">
+                    <div class="form-group">
+                        <label class="form-label">YouTube URL</label>
+                        <input type="text" class="form-input" id="editVideoUrl" placeholder="https://www.youtube.com/watch?v=...">
+                    </div>
+                </div>
+                <div id="sectionFields" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Explanation</label>
+                        <div id="explanationEditor" class="editor-container"></div>
+                    </div>
+                </div>
+            `;
+            
+            openModal();
+            
+            setTimeout(() => {
+                if (document.getElementById('explanationEditor')) {
+                    quillEditor = new Quill('#explanationEditor', {
+                        theme: 'snow',
+                        modules: {
+                            toolbar: [
+                                ['bold', 'italic', 'underline'],
+                                [{ 'header': [1, 2, 3, false] }],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                ['link'],
+                                ['clean']
+                            ]
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        function toggleLessonFields() {
+            const type = document.getElementById('editLessonType').value;
+            document.getElementById('videoFields').style.display = type === 'video' ? 'block' : 'none';
+            document.getElementById('sectionFields').style.display = type === 'section' ? 'block' : 'none';
+        }
+
+        function editLesson(index) {
+            currentEditType = 'lesson-edit';
+            currentEditIndex = index;
+            const lesson = lessons[index];
+            
+            document.getElementById('modalTitle').textContent = 'Edit Lesson';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Lesson Title</label>
+                    <input type="text" class="form-input" id="editLessonTitle" value="${lesson.title}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" id="editLessonType" onchange="toggleLessonFields()">
+                        <option value="video" ${lesson.type === 'video' ? 'selected' : ''}>Video Lesson</option>
+                        <option value="section" ${lesson.type === 'section' ? 'selected' : ''}>Text Content</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Duration (minutes)</label>
+                    <input type="number" class="form-input" id="editLessonDuration" value="${lesson.duration || 10}">
+                </div>
+                <div id="videoFields" style="display: ${lesson.type === 'video' ? 'block' : 'none'};">
+                    <div class="form-group">
+                        <label class="form-label">YouTube URL</label>
+                        <input type="text" class="form-input" id="editVideoUrl" value="${lesson.videoUrl || ''}">
+                    </div>
+                </div>
+                <div id="sectionFields" style="display: ${lesson.type === 'section' ? 'block' : 'none'};">
+                    <div class="form-group">
+                        <label class="form-label">Explanation</label>
+                        <div id="explanationEditor" class="editor-container"></div>
+                    </div>
+                </div>
+            `;
+            
+            openModal();
+            
+            setTimeout(() => {
+                if (lesson.type === 'section' && document.getElementById('explanationEditor')) {
+                    quillEditor = new Quill('#explanationEditor', {
+                        theme: 'snow',
+                        modules: {
+                            toolbar: [
+                                ['bold', 'italic', 'underline'],
+                                [{ 'header': [1, 2, 3, false] }],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                ['link'],
+                                ['clean']
+                            ]
+                        }
+                    });
+                    quillEditor.root.innerHTML = lesson.explanation || '';
+                }
+            }, 100);
+        }
+
+        function deleteLesson(index) {
+            if (confirm('Delete this lesson? This cannot be undone.')) {
+                lessons.splice(index, 1);
+                renderLessons();
+                hasUnsavedChanges = true;
+            }
+        }
+		
+		function renderLessonSections(index) {
+			const container = document.getElementById(`sections-list-\${index}`);
+			const sections = lessonSections[index] || [];
+
+			if (sections.length === 0) {
+				container.innerHTML = `
+					<p style="text-align: center; color: var(--gray-500); padding: var(--space-3);">
+						No explanations yet. Click the button below to add one.
+					</p>
+				`;
+				return;
+			}
+
+			container.innerHTML = sections.map((section, sIdx) => `
+				<div class="section-item">
+					<div class="section-item-header">
+						<div class="section-item-title">\${section.section_title}</div>
+						<div style="display: flex; gap: var(--space-2);">
+							<button class="btn-icon" onclick="editLessonSection(\${index}, \${sIdx})" title="Edit">✏️</button>
+							<button class="btn-icon delete" onclick="deleteLessonSection(\${index}, \${sIdx})" title="Delete">🗑️</button>
+						</div>
+					</div>
+					<div class="section-item-content">\${section.section_content || 'No content'}</div>
+				</div>
+			`).join('');
+		}
+
+        // ============ RESOURCE FUNCTIONS ============
+        function addResource() {
+            currentEditType = 'resource-add';
+            currentEditIndex = -1;
+            
+            document.getElementById('modalTitle').textContent = 'Add Interactive Resource';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Resource Name</label>
+                    <input type="text" class="form-input" id="editResourceName" placeholder="e.g., PhET Calculus Grapher">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" id="editResourceType">
+                        <option value="phet_simulation">PhET Simulation</option>
+                        <option value="desmos">Desmos Calculator</option>
+                        <option value="game">Educational Game</option>
+                        <option value="interactive_tool">Interactive Tool</option>
+                        <option value="external_link">External Link</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">URL</label>
+                    <input type="text" class="form-input" id="editResourceUrl" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="editResourceDescription" placeholder="Describe what this resource teaches..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Embed Code (optional - for iframe)</label>
+                    <textarea class="form-textarea" id="editResourceEmbed" placeholder="<iframe src=..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Estimated Time (minutes)</label>
+                    <input type="number" class="form-input" id="editResourceTime" value="15">
+                </div>
+            `;
+            
+            openModal();
+        }
+
+        function editResource(index) {
+            currentEditType = 'resource-edit';
+            currentEditIndex = index;
+            const resource = resources[index];
+            
+            document.getElementById('modalTitle').textContent = 'Edit Resource';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Resource Name</label>
+                    <input type="text" class="form-input" id="editResourceName" value="${resource.resource_name || resource.resourcename || 'Untitled'}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" id="editResourceType">
+                        <option value="phet_simulation" ${resource.resource_type === 'phet_simulation' ? 'selected' : ''}>PhET Simulation</option>
+                        <option value="desmos" ${resource.resource_type === 'desmos' ? 'selected' : ''}>Desmos Calculator</option>
+                        <option value="game" ${resource.resource_type === 'game' ? 'selected' : ''}>Educational Game</option>
+                        <option value="interactive_tool" ${resource.resource_type === 'interactive_tool' ? 'selected' : ''}>Interactive Tool</option>
+                        <option value="external_link" ${resource.resource_type === 'external_link' ? 'selected' : ''}>External Link</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">URL</label>
+                    <input type="text" class="form-input" id="editResourceUrl" value="${resource.resource_url || ''}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="editResourceDescription">${resource.description || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Embed Code (optional)</label>
+                    <textarea class="form-textarea" id="editResourceEmbed">${resource.embed_code || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Estimated Time (minutes)</label>
+                    <input type="number" class="form-input" id="editResourceTime" value="${resource.estimated_time_minutes || 15}">
+                </div>
+            `;
+            
+            openModal();
+        }
+
+        function deleteResource(index) {
+            if (confirm('Delete this resource? This cannot be undone.')) {
+                resources.splice(index, 1);
+                renderResources();
+                hasUnsavedChanges = true;
+            }
+        }
+
+        // ============ QUIZ FUNCTIONS ============
+        function showAIQuizGenerator() {
+            document.getElementById('aiQuizSection').style.display = 'block';
+            document.getElementById('manualQuizSection').style.display = 'none';
+            quizMode = 'ai';
+        }
+
+        function hideAIQuizGenerator() {
+            document.getElementById('aiQuizSection').style.display = 'none';
+            document.getElementById('manualQuizSection').style.display = 'block';
+            quizMode = 'manual';
+        }
+
+        function showManualQuizMode() {
+            document.getElementById('aiQuizSection').style.display = 'none';
+            document.getElementById('manualQuizSection').style.display = 'block';
+            quizMode = 'manual';
+        }
+
+        
+        function addManualQuestion() {
+            currentEditType = 'question-add';
+            currentEditIndex = -1;
+            
+            document.getElementById('modalTitle').textContent = 'Add Question';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Question *</label>
+                    <textarea class="form-textarea" id="editQuestionText" placeholder="Enter the question..." style="min-height: 120px;"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Option A *</label>
+                    <input type="text" class="form-input" id="editOptionA" placeholder="First option">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Option B *</label>
+                    <input type="text" class="form-input" id="editOptionB" placeholder="Second option">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Option C *</label>
+                    <input type="text" class="form-input" id="editOptionC" placeholder="Third option">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Option D *</label>
+                    <input type="text" class="form-input" id="editOptionD" placeholder="Fourth option">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Correct Answer *</label>
+                    <select class="form-input" id="editCorrectOption">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Explanation (Optional)</label>
+                    <textarea class="form-textarea" id="editQuestionExplanation" placeholder="Explain why this is correct..." style="min-height: 80px;"></textarea>
+                </div>
+            `;
+            
+            openModal();
+        }
+
+        function editManualQuestion(index) {
+            currentEditType = 'question-edit';
+            currentEditIndex = index;
+            const question = manualQuestions[index];
+            
+            document.getElementById('modalTitle').textContent = 'Edit Question';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Question</label>
+                    <textarea class="form-textarea" id="editQuestionText" style="min-height: 120px;">${question.question_text}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Option A</label>
+                    <input type="text" class="form-input" id="editOptionA" value="${question.option_a || ''}">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Option B</label>
+                    <input type="text" class="form-input" id="editOptionB" value="${question.option_b || ''}">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Option C</label>
+                    <input type="text" class="form-input" id="editOptionC" value="${question.option_c || ''}">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Option D</label>
+                    <input type="text" class="form-input" id="editOptionD" value="${question.option_d || ''}">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Correct Answer</label>
+                    <select class="form-input" id="editCorrectOption">
+                        <option value="A" ${question.correct_answer === 'A' ? 'selected' : ''}>A</option>
+                        <option value="B" ${question.correct_answer === 'B' ? 'selected' : ''}>B</option>
+                        <option value="C" ${question.correct_answer === 'C' ? 'selected' : ''}>C</option>
+                        <option value="D" ${question.correct_answer === 'D' ? 'selected' : ''}>D</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Explanation</label>
+                    <textarea class="form-textarea" id="editQuestionExplanation" style="min-height: 80px;">${question.explanation || ''}</textarea>
+                </div>
+            `;
+            
+            openModal();
+        }
+
+        function deleteManualQuestion(index) {
+            if (confirm('Delete this question? This cannot be undone.')) {
+                manualQuestions.splice(index, 1);
+                renderManualQuestions();
+                hasUnsavedChanges = true;
+            }
+        }
+
+        // ============ MODAL SAVE ============
+        async function saveModal() {
+            if (currentEditType === 'module-info') {
+                moduleData.module.module_name = document.getElementById('editModuleName').value;
+                moduleData.module.category = document.getElementById('editModuleCategory').value;
+                moduleData.module.description = document.getElementById('editModuleDescription').value;
+                
+                document.getElementById('moduleTitle').textContent = moduleData.module.module_name;
+                document.getElementById('moduleDescription').textContent = moduleData.module.description;
+                document.getElementById('moduleCategoryDisplay').textContent = moduleData.module.category.toUpperCase();
+                
+            } else if (currentEditType === 'lesson-add' || currentEditType === 'lesson-edit') {
+                const lessonData = {
+                    id: currentEditIndex >= 0 ? lessons[currentEditIndex].id : Date.now(),
+                    type: document.getElementById('editLessonType').value,
+                    title: document.getElementById('editLessonTitle').value,
+                    duration: parseInt(document.getElementById('editLessonDuration').value)
+                };
+                
+                if (lessonData.type === 'video') {
+                    lessonData.videoUrl = document.getElementById('editVideoUrl').value;
+                } else if (lessonData.type === 'section' && quillEditor) {
+                    lessonData.explanation = quillEditor.root.innerHTML;
+                }
+                
+                if (currentEditIndex >= 0) {
+                    lessons[currentEditIndex] = lessonData;
+                } else {
+                    lessons.push(lessonData);
+                }
+                
+                renderLessons();
+                
+            } else if (currentEditType === 'resource-add' || currentEditType === 'resource-edit') {
+                const resourceData = {
+                    resource_id: currentEditIndex >= 0 ? resources[currentEditIndex].resource_id : Date.now(),
+                    resource_name: document.getElementById('editResourceName').value,
+                    resource_type: document.getElementById('editResourceType').value,
+                    resource_url: document.getElementById('editResourceUrl').value,
+                    description: document.getElementById('editResourceDescription').value,
+                    embed_code: document.getElementById('editResourceEmbed').value,
+                    estimated_time_minutes: parseInt(document.getElementById('editResourceTime').value)
+                };
+                
+                if (currentEditIndex >= 0) {
+                    resources[currentEditIndex] = resourceData;
+                } else {
+                    resources.push(resourceData);
+                }
+                
+                renderResources();
+                
+            } else if (currentEditType === 'question-add' || currentEditType === 'question-edit') {
+                const questionData = {
+                    question_id: currentEditIndex >= 0 ? manualQuestions[currentEditIndex].question_id : Date.now(),
+                    question_text: document.getElementById('editQuestionText').value,
+                    option_a: document.getElementById('editOptionA').value,
+                    option_b: document.getElementById('editOptionB').value,
+                    option_c: document.getElementById('editOptionC').value,
+                    option_d: document.getElementById('editOptionD').value,
+                    correct_answer: document.getElementById('editCorrectOption').value,
+                    explanation: document.getElementById('editQuestionExplanation').value
+                };
+                
+                if (currentEditIndex >= 0) {
+                    manualQuestions[currentEditIndex] = questionData;
+                } else {
+                    manualQuestions.push(questionData);
+                }
+                
+                renderManualQuestions();
+            }
+            
+            
+      // Handle lesson section save
+      else if (currentEditType === 'lesson-section-add' || currentEditType === 'lesson-section-edit') {
+          const lessonId = document.getElementById('editLessonId').value;
+          const lessonType = document.getElementById('editLessonType').value;
+          const sectionTitle = document.getElementById('editSectionTitle').value;
+          const sectionContent = quillEditor ? quillEditor.root.innerHTML : '';
+
+          if (!sectionTitle.trim()) {
+              alert('Please enter a section title');
+              return;
+          }
+
+          try {
+              let response;
+
+              if (currentEditType === 'lesson-section-add') {
+                  // Add new section
+                  response = await fetch(`\${API_BASE_URL}/api/educator/lessons/\${lessonId}/sections`, {
+                      method: 'POST',
+                      headers: {
+                          'Authorization': `Bearer \${token}`,
+                          'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({
+                          lessonType: lessonType,
+                          sectionTitle: sectionTitle,
+                          sectionContent: sectionContent
+                      })
+                  });
+              } else {
+                  // Update existing section
+                  const sectionId = document.getElementById('editSectionId').value;
+                  response = await fetch(`\${API_BASE_URL}/api/educator/lessons/\${lessonId}/sections/\${sectionId}`, {
+                      method: 'PUT',
+                      headers: {
+                          'Authorization': `Bearer \${token}`,
+                          'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({
+                          sectionTitle: sectionTitle,
+                          sectionContent: sectionContent
+                      })
+                  });
+              }
+
+              if (response.ok) {
+                  const lessonIndex = currentEditType === 'lesson-section-add' ? 
+                                      currentEditIndex : 
+                                      currentEditIndex.lessonIndex;
+
+                  await loadLessonSections(lessonId, lessonType, lessonIndex);
+                  closeModal();
+                  return; // Exit early, don't run the default behavior
+              } else {
+                  alert('Failed to save section');
+              }
+          } catch (error) {
+              console.error('Save section error:', error);
+              alert('Error saving section');
+          }
+      }
+			
+      hasUnsavedChanges = true;
+            closeModal();
+        }
+
+        // ============ SAVE ALL ============
+        async function saveAllChanges() {
+            if (!hasUnsavedChanges && !confirm('No changes detected. Save anyway?')) {
+                return;
+            }
+
+            try {
+                console.log('💾 Saving all changes...');
+
+                const saveContentResponse = await fetch(`${API_BASE_URL}/api/educator/modules/${moduleId}/save-content`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        module: moduleData.module,
+                        lessons: lessons
+                    })
+                });
+
+                if (!saveContentResponse.ok) {
+                    const error = await saveContentResponse.text();
+                    throw new Error(`Failed to save content: ${error}`);
+                }
+
+                const saveResourcesResponse = await fetch(`${API_BASE_URL}/api/educator/modules/${moduleId}/resources/bulk`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ resources })
+                });
+
+                if (!saveResourcesResponse.ok) {
+                    console.warn('Failed to save resources');
+                }
+
+                const saveQuestionsResponse = await fetch(`${API_BASE_URL}/api/educator/modules/${moduleId}/questions/bulk`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ questions: manualQuestions })
+                });
+
+                if (!saveQuestionsResponse.ok) {
+                    console.warn('Failed to save questions');
+                }
+
+                hasUnsavedChanges = false;
+                showSaveIndicator();
+                alert('✅ All changes saved successfully!');
+
+            } catch (error) {
+                console.error('Error saving:', error);
+                alert('Failed to save: ' + error.message);
+            }
+        }
+
+        // ============ UTILITY FUNCTIONS ============
+        function openModal() {
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('editModal').classList.remove('active');
+            quillEditor = null;
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => indicator.classList.remove('show'), 2000);
+        }
+
+        function logout() {
+            if (hasUnsavedChanges && !confirm('You have unsaved changes. Are you sure you want to logout?')) {
+                return;
+            }
+            localStorage.removeItem('token');
+            window.location.href = 'auth.html';
+        }
+
+        window.addEventListener('beforeunload', (e) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // ========================================
+        // AI QUIZ GENERATOR FUNCTIONS - COMPLETE
+        // ========================================
+        let allQuizzes = [];
+
+        async function generateAIQuiz(event) {
+            const count = document.getElementById('aiQuizCount').value;
+            const difficulty = document.getElementById('aiQuizDifficulty').value;
+            const timeLimit = document.getElementById('aiQuizTimeLimit').value;
+            const instructions = document.getElementById('aiQuizInstructions').value;
+
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Generating...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/educator/modules/${moduleId}/generate-quiz`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        num_questions: parseInt(count),
+                        difficulty: difficulty,
+                        time_limit_minutes: parseInt(timeLimit),
+                        ai_instructions: instructions,
+                        quiz_title: `AI Generated Quiz - ${moduleData.module.module_name}`
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success || data.questions) {
+                    // Auto-load the generated questions into manual questions
+                    const questions = data.questions || [];
+                    
+                    // 🔧 FIX: Ask if user wants to REPLACE or ADD to existing questions
+                    let shouldClear = false;
+                    if (manualQuestions.length > 0) {
+                        shouldClear = confirm(
+                            `You currently have ${manualQuestions.length} question(s).\n\n` +
+                            `Click OK to REPLACE them with ${questions.length} new AI-generated questions.\n` +
+                            `Click Cancel to ADD the new questions to existing ones.`
+                        );
+                    }
+                    
+                    // Clear existing questions if user chose to replace
+                    if (shouldClear) {
+                        manualQuestions = [];
+                    }
+                    
+                    // Add to manual questions array
+                    questions.forEach(q => {
+                        manualQuestions.push({
+                            question_id: Date.now() + Math.random(),
+                            question_text: q.question_text || q.question,
+                            question_type: 'multiple_choice',
+                            option_a: q.option_a || (q.options && q.options[0]?.text) || '',
+                            option_b: q.option_b || (q.options && q.options[1]?.text) || '',
+                            option_c: q.option_c || (q.options && q.options[2]?.text) || '',
+                            option_d: q.option_d || (q.options && q.options[3]?.text) || '',
+                            correct_option: q.correct_option || q.correct_answer || 'A',
+                            correct_answer: q.correct_option || q.correct_answer || 'A',
+                            explanation: q.explanation || ''
+                        });
+                    });
+                    
+                    // Render questions immediately
+                    renderManualQuestions();
+                    
+                    // Auto-save
+                    await saveAllChanges();
+                    
+                    alert(`✅ Quiz generated and saved!\n\n${questions.length} questions added to your quiz.`);
+					
+					// 🎯 ADD THIS IMMEDIATELY AFTER THE ALERT:
+					if (confirm('📤 Do you want to assign this quiz to a class now?')) {
+						const quizId = data.quizid; // Get the quiz ID from the response
+						openAssignQuizModal(quizId); // Open the assignment modal
+					}
+                
+				
+				} else {
+                    throw new Error(data.error || 'Generation failed');
+                }
+            } catch (error) {
+                alert('❌ Failed to generate quiz: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function loadQuizzesList() {
+            const container = document.getElementById('quizzesListContainer');
+            if (!container) {
+                console.warn('⚠️ quizzesListContainer not found');
+                return;
+            }
+
+            try {
+                // ✅ FIXED: Load quiz_sets instead of old quizzes
+                const response = await fetch(`${API_BASE_URL}/api/educator/modules/${moduleId}/quiz-sets`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                allQuizzes = data.quizSets || data.quiz_sets || [];
+                renderQuizzesList();
+            } catch (error) {
+                console.error('Load quizzes error:', error);
+                container.innerHTML = '<p style="color: #e74c3c;">Failed to load quizzes</p>';
+            }
+        }
+
+        function renderQuizzesList() {
+            const container = document.getElementById('quizzesListContainer');
+            if (!container) return;
+
+            if (allQuizzes.length === 0) {
+                container.innerHTML = '<p style="color: #7f8c8d; text-align: center; padding: 40px;">No quizzes yet. Generate one above! 🚀</p>';
+                return;
+            }
+
+            container.innerHTML = allQuizzes.map(quiz => `
+                <div class="quiz-card">
+                    <div class="quiz-card-header">
+                        <div class="quiz-card-info">
+                            <h4 class="quiz-card-title">${quiz.quiz_title}</h4>
+                            
+                            <div class="quiz-card-meta">
+                                <span class="quiz-meta-item">
+                                    📊 ${quiz.total_questions || quiz.question_count} questions
+                                </span>
+                                <span class="quiz-meta-item">
+                                    🎯 ${quiz.difficulty_level}
+                                </span>
+                                <span class="quiz-meta-item">
+                                    ${quiz.ai_generated ? '🤖 AI Generated' : '✍️ Manual'}
+                                </span>
+                                <span class="quiz-status-badge ${quiz.status || 'draft'}">
+                                    ${quiz.status || 'draft'}
+                                </span>
+                            </div>
+                            
+                            <div class="quiz-card-date">
+                                Created ${new Date(quiz.created_at).toLocaleDateString('en-US', { 
+                                    month: 'short', 
+                                    day: 'numeric', 
+                                    year: 'numeric' 
+                                })}
+                            </div>
+                        </div>
+                        
+                        <div class="quiz-card-buttons">
+                            <button class="quiz-btn-preview" onclick="previewQuiz(${quiz.quiz_set_id || quiz.quiz_id})">
+                                <span>👁️</span>
+                                <span>Preview</span>
+                            </button>
+                            <button class="quiz-btn-delete" onclick="deleteQuizSet(${quiz.quiz_set_id || quiz.quiz_id})">
+                                <span>🗑️</span>
+                                <span>Delete</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function previewQuiz(quizSetId) {
+            try {
+                // ✅ FIXED: Use quiz_sets endpoint instead of old quizzes
+                const response = await fetch(`${API_BASE_URL}/api/educator/quiz-sets/${quizSetId}/questions`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load quiz preview');
+                }
+                
+                const data = await response.json();
+
+                document.getElementById('previewQuizTitle').textContent = data.quizSet?.quiz_title || 'Quiz Preview';
+
+                const questionsHTML = data.questions.map((q, idx) => {
+                    // ✅ FALLBACK: Support both old and new data formats
+                    const options = q.options || [
+                        { option_letter: 'A', option_text: q.option_a, is_correct: q.correct_option === 'A' },
+                        { option_letter: 'B', option_text: q.option_b, is_correct: q.correct_option === 'B' },
+                        { option_letter: 'C', option_text: q.option_c, is_correct: q.correct_option === 'C' },
+                        { option_letter: 'D', option_text: q.option_d, is_correct: q.correct_option === 'D' }
+                    ];
+                    
+                    return `
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 15px 0; color: #2c3e50;">Question ${idx + 1}</h4>
+                        <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.6;">${q.question_text}</p>
+
+                        <div style="display: grid; gap: 10px;">
+                            ${options.map(opt => `
+                                <div style="padding: 12px; background: ${opt.is_correct ? '#d4edda' : 'white'}; border: 2px solid ${opt.is_correct ? '#28a745' : '#dee2e6'}; border-radius: 6px;">
+                                    <strong>${opt.option_letter}.</strong> ${opt.option_text}
+                                    ${opt.is_correct ? ' ✅' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <p style="margin: 15px 0 0 0; padding: 12px; background: #fff3cd; border-left: 4px solid #ffc107; font-size: 14px;">
+                            <strong>Explanation:</strong> ${q.explanation}
+                        </p>
+                    </div>
+                    `;
+                }).join('');
+
+                document.getElementById('previewQuestionsContainer').innerHTML = questionsHTML;
+                document.getElementById('quizPreviewModal').style.display = 'block';
+                
+                // ✅ CALL GLOBAL RENDER FUNCTION (Simple!)
+                console.log('🎬 Preview opened, calling renderPreviewMath()...');
+                setTimeout(() => {
+                    if (typeof window.renderPreviewMath === 'function') {
+                        window.renderPreviewMath();
+                    } else {
+                        console.error('❌ renderPreviewMath not found!');
+                    }
+                }, 200);
+
+            } catch (error) {
+                console.error('Preview error:', error);
+                alert('Failed to load quiz preview: ' + error.message);
+            }
+        }
+
+        function closeQuizPreview() {
+            document.getElementById('quizPreviewModal').style.display = 'none';
+        }
+
+        async function deleteQuizSet(quizSetId) {
+            if (!confirm('Are you sure you want to delete this quiz? This cannot be undone.')) {
+                return;
+            }
+
+            try {
+                // ✅ FIXED: Delete quiz_set instead of old quiz
+                const response = await fetch(`${API_BASE_URL}/api/educator/quiz-sets/${quizSetId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    alert('✅ Quiz deleted successfully!');
+                    loadQuizzesList();
+                } else {
+                    throw new Error('Delete failed');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                alert('❌ Failed to delete quiz');
+            }
+        }
+
+    
+// ============================================================
+// QUIZ ASSIGNMENT SYSTEM
+// ============================================================
+
+let teacherClasses = [];
+let quizAssignments = [];
+
+async function loadTeacherClasses() {
+    try {
+        console.log('🔍 Fetching classes from:', `${API_BASE_URL}/api/educator/my-classes`);
+        
+        const response = await fetch(`${API_BASE_URL}/api/educator/my-classes`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response ok:', response.ok);
+        
+        if (response.ok) {
+            const rawText = await response.text();
+            console.log('📦 RAW Response Text:', rawText);
+            
+            const data = JSON.parse(rawText);
+            console.log('📦 PARSED JSON:', data);
+            console.log('📦 data.classes type:', typeof data.classes);
+            console.log('📦 data.classes is array?', Array.isArray(data.classes));
+            console.log('📦 data.classes length:', data.classes?.length);
+            
+            teacherClasses = data.classes;
+            
+            console.log('📚 teacherClasses assigned:', teacherClasses);
+            console.log('📚 teacherClasses length:', teacherClasses.length);
+            
+            // Print each class individually
+            teacherClasses.forEach((cls, idx) => {
+                console.log(`📋 Class ${idx}:`, JSON.stringify(cls, null, 2));
+            });
+			
+			return teacherClasses;
+        } else {
+            console.error('❌ Response not ok:', response.status);
+            teacherClasses = [];
+			return [];
+        }
+    } catch (error) {
+        console.error('❌ Error loading classes:', error);
+        teacherClasses = [];
+		return [];
+    }
+}
+
+async function loadQuizAssignments() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/educator/modules/${moduleId}/assignments`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            quizAssignments = data.assignments || [];
+            renderAssignments();
+        }
+    } catch (error) {
+        console.error('Error loading assignments:', error);
+        quizAssignments = [];
+        renderAssignments();
+    }
+}
+
+function renderAssignments() {
+    const container = document.getElementById('assignmentsList');
+    const section = document.getElementById('assignmentsSection');
+    if (quizAssignments.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+    section.style.display = 'block';
+    container.innerHTML = quizAssignments.map(assignment => {
+        const dueDate = assignment.due_date ? new Date(assignment.due_date).toLocaleDateString() : 'No due date';
+        const rate = assignment.totalAttempts > 0 ? Math.round((assignment.completedAttempts / assignment.totalAttempts) * 100) : 0;
+        return `
+            <div class="item-card">
+                <div style="display: flex; justify-content: space-between;">
+                    <div style="flex: 1;">
+                        <div style="font-size: 16px; font-weight: 700; margin-bottom: var(--space-2);">${assignment.title}</div>
+                        <div style="display: flex; gap: var(--space-4); font-size: 13px; color: var(--gray-600); margin-bottom: var(--space-3);">
+                            <div>📚 ${assignment.classname}</div>
+                            <div>⏱️ ${assignment.time_limit_minutes} min</div>
+                            <div>📝 ${assignment.total_questions} questions</div>
+                            <div>📅 ${dueDate}</div>
+                        </div>
+                        <div style="background: var(--gray-50); padding: var(--space-3); border-radius: var(--radius-md);">
+                            <div style="font-size: 12px; font-weight: 800; color: var(--gray-600); margin-bottom: var(--space-2);">COMPLETION STATUS</div>
+                            <div style="display: flex; align-items: center; gap: var(--space-3);">
+                                <div style="flex: 1; background: var(--gray-200); height: 8px; border-radius: var(--radius-full);">
+                                    <div style="width: ${rate}%; height: 100%; background: linear-gradient(135deg, #10b981, #059669); border-radius: var(--radius-full);"></div>
+                                </div>
+                                <div style="font-size: 14px; font-weight: 700;">${assignment.completedAttempts || 0} / ${assignment.totalAttempts || 0}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: var(--space-2);">
+                        <button class="btn-icon" onclick="deleteAssignment(${assignment.assignment_id})" title="Delete">🗑️</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function openAssignQuizModal() {
+    if (manualQuestions.length === 0) {
+        alert('⚠️ Please create at least one question first!');
+        return;
+    }
+    loadTeacherClasses().then(() => {
+	
+		console.log('🔧 Inside openAssignQuizModal');
+        console.log('🔧 teacherClasses:', teacherClasses);
+        console.log('🔧 teacherClasses length:', teacherClasses?.length);
+	
+        const classSelect = document.getElementById('assignClassId');
+        classSelect.innerHTML = '<option value="">-- Choose a class --</option>';
+        teacherClasses.forEach(cls => {
+            const option = document.createElement('option');
+            option.value = cls.classid;
+            option.textContent = `${cls.classname} (${cls.studentcount || 0} students)`;
+            classSelect.appendChild(option);
+        });
+        document.getElementById('assignQuestionCount').textContent = manualQuestions.length;
+        document.getElementById('assignModuleName').textContent = moduleData.module.module_name;
+        document.getElementById('assignQuizTitle').value = `${moduleData.module.module_name} Quiz`;
+        document.getElementById('assignQuizModal').classList.add('active');
+    });
+}
+
+function closeAssignModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('assignQuizModal').classList.remove('active');
+}
+
+async function confirmAssignQuiz() {
+    const classId = document.getElementById('assignClassId').value;
+    const title = document.getElementById('assignQuizTitle').value;
+    const description = document.getElementById('assignQuizDescription').value;
+    const timeLimit = parseInt(document.getElementById('assignTimeLimit').value);
+    const difficulty = document.getElementById('assignDifficulty').value;
+    const startDate = document.getElementById('assignStartDate').value;
+    const dueDate = document.getElementById('assignDueDate').value;
+    if (!classId) { alert('⚠️ Please select a class!'); return; }
+    if (!title.trim()) { alert('⚠️ Please enter a quiz title!'); return; }
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = '⏳ Assigning...';
+    try {
+        await saveAllChanges();
+        const response = await fetch(`${API_BASE_URL}/api/educator/modules/${moduleId}/assign-quiz`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ classId, title, description, timeLimitMinutes: timeLimit, difficulty, startDate: startDate || null, dueDate: dueDate || null })
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to assign quiz');
+        }
+        const result = await response.json();
+        alert(`✅ Quiz assigned successfully!\n\n${result.totalQuestions} questions assigned.`);
+        closeAssignModal();
+        await loadQuizAssignments();
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Failed to assign: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '📤 Assign Quiz to Class';
+    }
+}
+
+async function deleteAssignment(assignmentId) {
+    if (!confirm('Delete this quiz assignment?')) return;
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/educator/assignments/${assignmentId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+            alert('✅ Assignment deleted!');
+            await loadQuizAssignments();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Failed to delete');
+    }
+}
+
+// Hook into loadAllData
+const originalLoadAllData = loadAllData;
+loadAllData = async function() {
+    await originalLoadAllData();
+    await loadTeacherClasses();
+    await loadQuizAssignments();
+};
+
+</script>
+
+    <!-- Quiz Assignment Modal -->
+    <div id="assignQuizModal" class="modal" onclick="closeAssignModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header" style="background: var(--gradient-primary); color: white;">
+                <h3 class="modal-title">📤 Assign Quiz to Class</h3>
+                <button class="modal-close" onclick="closeAssignModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="background: rgba(99, 102, 241, 0.1); padding: var(--space-4); border-radius: var(--radius-lg); margin-bottom: var(--space-4);">
+                    <div style="font-weight: 700; margin-bottom: var(--space-2);">📊 Quiz Summary</div>
+                    <div style="font-size: 14px; color: var(--gray-700);">
+                        <div>Questions: <strong id="assignQuestionCount">0</strong></div>
+                        <div>Module: <strong id="assignModuleName">Loading...</strong></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Select Class *</label>
+                    <select class="form-select" id="assignClassId" required>
+                        <option value="">-- Choose a class --</option>
+                    </select>
+                    <div style="font-size: 13px; color: var(--gray-500); margin-top: var(--space-1);">
+                        Quiz will be visible to all students in this class
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Quiz Title *</label>
+                    <input type="text" class="form-input" id="assignQuizTitle" placeholder="e.g., Module 1 Quiz" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description (Optional)</label>
+                    <textarea class="form-textarea" id="assignQuizDescription" placeholder="Instructions..." style="min-height: 80px;"></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                    <div class="form-group">
+                        <label class="form-label">Time Limit (minutes)</label>
+                        <input type="number" class="form-input" id="assignTimeLimit" value="30" min="5" max="180">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Difficulty</label>
+                        <select class="form-select" id="assignDifficulty">
+                            <option value="easy">Easy</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                    <div class="form-group">
+                        <label class="form-label">Start Date (Optional)</label>
+                        <input type="datetime-local" class="form-input" id="assignStartDate">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Due Date (Optional)</label>
+                        <input type="datetime-local" class="form-input" id="assignDueDate">
+                    </div>
+                </div>
+
+                <div style="background: rgba(251, 191, 36, 0.1); padding: var(--space-3); border-radius: var(--radius-md); border-left: 4px solid #f59e0b;">
+                    <div style="font-size: 13px; color: var(--gray-700);">
+                        ⚡ <strong>Note:</strong> Once assigned, students will see this quiz on their dashboard.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAssignModal()" style="flex: 1;">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmAssignQuiz()" style="flex: 2;">
+                    📤 Assign Quiz to Class
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Alert System -->
+    <div id="customAlertOverlay" class="custom-alert-overlay">
+        <div class="custom-alert-box">
+            <div id="customAlertHeader" class="custom-alert-header">
+                <span id="customAlertIcon" class="custom-alert-icon"></span>
+                <div id="customAlertTitle" class="custom-alert-title"></div>
+            </div>
+            <div id="customAlertBody" class="custom-alert-body"></div>
+            <div class="custom-alert-footer">
+                <button id="customAlertBtn" class="custom-alert-btn custom-alert-btn-primary" onclick="closeCustomAlert()">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Custom Alert Function
+        function customAlert(message, type = 'info', title = null) {
+            const overlay = document.getElementById('customAlertOverlay');
+            const header = document.getElementById('customAlertHeader');
+            const icon = document.getElementById('customAlertIcon');
+            const titleEl = document.getElementById('customAlertTitle');
+            const body = document.getElementById('customAlertBody');
+            
+            // Set type class
+            header.className = 'custom-alert-header ' + type;
+            
+            // Set icon and title based on type
+            const config = {
+                success: { icon: '✅', title: title || 'Success!' },
+                error: { icon: '❌', title: title || 'Error' },
+                warning: { icon: '⚠️', title: title || 'Warning' },
+                info: { icon: 'ℹ️', title: title || 'Information' }
+            };
+            
+            const typeConfig = config[type] || config.info;
+            icon.textContent = typeConfig.icon;
+            titleEl.textContent = typeConfig.title;
+            body.innerHTML = message;
+            
+            overlay.classList.add('active');
+        }
+        
+        function closeCustomAlert() {
+            document.getElementById('customAlertOverlay').classList.remove('active');
+        }
+        
+        // Close on overlay click
+        document.getElementById('customAlertOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCustomAlert();
+            }
+        });
+        
+        // Override default alert
+		// Replace your existing window.alert override with this "Safe" version
+		window.alert = function(message) {
+			// Determine type automatically
+			let type = 'info';
+			if (message.toLowerCase().includes('success') || message.includes('✅')) type = 'success';
+			if (message.toLowerCase().includes('error') || message.toLowerCase().includes('failed') || message.includes('❌')) type = 'error';
+    
+			customAlert(message, type);
+		};
+
+		// Add this "Safe Fetch" wrapper to your script to prevent crashes during defense
+		async function safeFetch(url, options) {
+			try {
+				const response = await fetch(url, options);
+				if (response.status === 401) {
+					window.location.href = 'auth.html'; // Redirect if session expired
+					return;
+				}
+				return response;
+			} catch (error) {
+				console.error("Network Error:", error);
+				customAlert("Network error. Please check your connection to the server.", "error", "Connection Failed");
+				throw error;
+			}
+		}
+    </script>
+
+	<script>
+	/* ============================================================
+	KATEX — SINGLE SOURCE OF TRUTH (FIXED)
+	============================================================ */
+
+	function safeRenderKatex(root = document.body) {
+		if (typeof renderMathInElement !== "function") return;
+
+		renderMathInElement(root, {
+			delimiters: [
+			{ left: "$$", right: "$$", display: true },
+			{ left: "$", right: "$", display: false },
+			{ left: "\\(", right: "\\)", display: false },
+			{ left: "\\[", right: "\\]", display: true }
+		],
+		throwOnError: false,
+		trust: true
+		});
+	}
+
+	/* Initial render */
+	document.addEventListener("DOMContentLoaded", () => {
+		safeRenderKatex();
+	});
+
+	/* Quiz preview hook */
+	if (window.openQuizPreview) {
+		const _openQuizPreview = window.openQuizPreview;
+		window.openQuizPreview = function (...args) {
+			_openQuizPreview.apply(this, args);
+			setTimeout(() => {
+				const preview = document.getElementById("previewQuestionsContainer");
+				if (preview) safeRenderKatex(preview);
+			}, 50);
+		};
+	}
+
+	/* Dynamic content observer (Quill, innerHTML, modals) */
+	const katexObserver = new MutationObserver(mutations => {
+		mutations.forEach(m => {
+			m.addedNodes.forEach(node => {
+				if (node.nodeType === 1) safeRenderKatex(node);
+			});
+		});
+	});
+
+	katexObserver.observe(document.body, {
+		childList: true,
+		subtree: true
+	});
+
+	/* Manual trigger if needed */
+	window.renderPreviewMath = () => {
+		const preview = document.getElementById("previewQuestionsContainer");
+		if (preview) safeRenderKatex(preview);
+	};
+	</script>
+
+</body>
+</html>
+<!-- ============================================================ -->
+<!-- QUIZ SET MANAGEMENT MODALS & JAVASCRIPT -->
+<!-- ============================================================ -->
+
+<!-- Modal: Generate Quiz Set -->
+<div id="generateQuizSetModal" class="modal" onclick="closeGenerateQuizSetModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3 class="modal-title">🤖 Generate AI Quiz Set</h3>
+            <button class="modal-close" onclick="closeGenerateQuizSetModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Quiz Title *</label>
+                <input type="text" class="form-input" id="genQuizTitle" placeholder="e.g., Module 12 Practice Quiz">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                <div class="form-group">
+                    <label class="form-label">Number of Questions</label>
+                    <input type="number" class="form-input" id="genNumQuestions" value="10" min="5" max="30">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Difficulty</label>
+                    <select class="form-select" id="genDifficulty">
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">AI Instructions (Optional)</label>
+                <textarea class="form-textarea" id="genInstructions" 
+                    placeholder="e.g., Focus on application problems, Include word problems, etc."
+                    style="min-height: 80px;"></textarea>
+            </div>
+
+            <div style="background: rgba(99, 102, 241, 0.1); padding: var(--space-4); border-radius: var(--radius-lg); border-left: 4px solid var(--primary);">
+                <div style="font-weight: 700; margin-bottom: var(--space-2);">ℹ️ How it works</div>
+                <div style="font-size: 13px; color: var(--gray-700);">
+                    • Quiz will be saved as <strong>DRAFT</strong><br>
+                    • You can preview and edit questions<br>
+                    • Approve to make it ready for assignment<br>
+                    • Then assign to your classes
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeGenerateQuizSetModal()" style="flex: 1;">Cancel</button>
+            <button class="btn btn-primary" onclick="generateQuizSet()" style="flex: 2;">
+                🤖 Generate Quiz Set
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Manual Quiz Creation -->
+<div id="manualQuizModal" class="modal" onclick="closeManualQuizModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+            <h3 class="modal-title">✏️ Create Manual Quiz</h3>
+            <button class="modal-close" onclick="closeManualQuizModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <!-- Quiz Info -->
+            <div class="form-group">
+                <label class="form-label">Quiz Title *</label>
+                <input type="text" class="form-input" id="manualQuizTitle" placeholder="e.g., Limits Practice Quiz">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description (Optional)</label>
+                <textarea class="form-textarea" id="manualQuizDescription" placeholder="Brief description..." style="min-height: 60px;"></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                <div class="form-group">
+                    <label class="form-label">Time Limit (minutes) *</label>
+                    <input type="number" class="form-input" id="manualQuizTimeLimit" value="30" min="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Passing Score (%) *</label>
+                    <input type="number" class="form-input" id="manualQuizPassingScore" value="70" min="0" max="100">
+                </div>
+            </div>
+
+            <!-- Questions Section -->
+            <div style="margin-top: var(--space-6); padding-top: var(--space-4); border-top: 2px solid var(--gray-200);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+                    <h4 style="font-size: 18px; font-weight: 700;">Questions</h4>
+                    <span id="manualQuizQuestionCount" style="color: var(--gray-600); font-weight: 600;">0 questions</span>
+                </div>
+
+                <div id="manualQuizQuestions">
+                    <div style="text-align: center; padding: var(--space-8); background: var(--gray-50); border-radius: var(--radius-lg); color: var(--gray-500);">
+                        No questions yet. Click "Add Question" below.
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary" onclick="addManualQuestion()" style="width: 100%; margin-top: var(--space-4);">
+                    ➕ Add Question
+                </button>
+            </div>
+        </div>
+        <div class="modal-footer" style="border-top: 2px solid var(--gray-200); padding-top: var(--space-4);">
+            <button class="btn btn-secondary" onclick="closeManualQuizModal()" style="flex: 1;">Cancel</button>
+            <button class="btn btn-primary" onclick="saveManualQuiz()" style="flex: 2;">
+                💾 Save Quiz
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Question to Manual Quiz -->
+
+<!-- Modal: Add Question to Manual Quiz - FIXED VERSION -->
+<div id="addQuestionModal" class="modal">
+    <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+            <h3 class="modal-title">➕ Add Question</h3>
+            <button class="modal-close" onclick="closeAddQuestionModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Question Text *</label>
+                <textarea class="form-textarea" id="newQuestionText" placeholder="Enter your question here..." style="min-height: 100px;" required></textarea>
+            </div>
+            
+            <!-- Hidden input that stores the actual strand value -->
+            <input type="hidden" id="newQuestionStrand" value="">
+
+            <div style="margin-top: var(--space-4); padding: var(--space-4); background: var(--gray-50); border-radius: var(--radius-lg);">
+                <label class="form-label" style="margin-bottom: var(--space-3);">Answer Options *</label>
+                
+                <div class="form-group">
+                    <div style="display: flex; gap: var(--space-2); align-items: center;">
+                        <input type="radio" name="correctAnswer" value="A" id="correctA" style="width: 20px; height: 20px; cursor: pointer;">
+                        <label for="correctA" style="margin: 0; cursor: pointer; font-weight: 600;">A)</label>
+                        <input type="text" class="form-input" id="optionA" placeholder="Option A" required style="flex: 1;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; gap: var(--space-2); align-items: center;">
+                        <input type="radio" name="correctAnswer" value="B" id="correctB" style="width: 20px; height: 20px; cursor: pointer;">
+                        <label for="correctB" style="margin: 0; cursor: pointer; font-weight: 600;">B)</label>
+                        <input type="text" class="form-input" id="optionB" placeholder="Option B" required style="flex: 1;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; gap: var(--space-2); align-items: center;">
+                        <input type="radio" name="correctAnswer" value="C" id="correctC" style="width: 20px; height: 20px; cursor: pointer;">
+                        <label for="correctC" style="margin: 0; cursor: pointer; font-weight: 600;">C)</label>
+                        <input type="text" class="form-input" id="optionC" placeholder="Option C" required style="flex: 1;">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <div style="display: flex; gap: var(--space-2); align-items: center;">
+                        <input type="radio" name="correctAnswer" value="D" id="correctD" style="width: 20px; height: 20px; cursor: pointer;">
+                        <label for="correctD" style="margin: 0; cursor: pointer; font-weight: 600;">D)</label>
+                        <input type="text" class="form-input" id="optionD" placeholder="Option D" required style="flex: 1;">
+                    </div>
+                </div>
+
+                <div style="margin-top: var(--space-3); padding: var(--space-2); background: #fef3c7; border-radius: var(--radius-md); font-size: 13px; color: #92400e;">
+                    💡 <strong>Tip:</strong> Click the radio button to mark the correct answer
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Explanation (Optional)</label>
+                <textarea class="form-textarea" id="newQuestionExplanation" placeholder="Explain why this is the correct answer..." style="min-height: 80px;"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeAddQuestionModal()" style="flex: 1;">Cancel</button>
+            <button class="btn btn-primary" onclick="saveNewQuestion()" style="flex: 2;">
+                ✅ Add Question
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal: Assign Quiz Set -->
+<div id="assignQuizSetModal" class="modal" onclick="closeAssignQuizSetModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3 class="modal-title">📤 Assign Quiz Set to Class</h3>
+            <button class="modal-close" onclick="closeAssignQuizSetModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="assignQuizSetId">
+            
+            <div style="background: rgba(99, 102, 241, 0.1); padding: var(--space-4); border-radius: var(--radius-lg); margin-bottom: var(--space-4);">
+                <div style="font-weight: 700;">📊 Quiz Set Info</div>
+                <div id="assignQuizSetInfo" style="font-size: 14px; color: var(--gray-700); margin-top: var(--space-2);"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Select Class *</label>
+                <select class="form-select" id="assignQuizSetClassId" required>
+                    <option value="">-- Choose a class --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Assignment Title *</label>
+                <input type="text" class="form-input" id="assignQuizSetTitle" placeholder="e.g., Week 3 Quiz" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Instructions (Optional)</label>
+                <textarea class="form-textarea" id="assignQuizSetInstructions" placeholder="Special instructions for students..." style="min-height: 80px;"></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                <div class="form-group">
+                    <label class="form-label">Time Limit (minutes)</label>
+                    <input type="number" class="form-input" id="assignQuizSetTimeLimit" value="30" min="5" max="180">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Due Date (Optional)</label>
+                    <input type="datetime-local" class="form-input" id="assignQuizSetDueDate">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer;">
+                    <input type="checkbox" id="assignQuizSetAllowRetakes">
+                    <span>Allow multiple attempts</span>
+                </label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeAssignQuizSetModal()" style="flex: 1;">Cancel</button>
+            <button class="btn btn-primary" onclick="confirmAssignQuizSet()" style="flex: 2;">
+                📤 Assign to Class
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// QUIZ SET MANAGEMENT JAVASCRIPT
+// ============================================================
+
+// Global variables for quiz sets
+let allQuizSets = [];
+let currentQuizSetId = null;
+
+// Load quiz sets for current module
+async function loadQuizSets() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/educator/modules/${moduleId}/quiz-sets`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('❌ Quiz sets load failed:', {
+                status: response.status,
+                statusText: response.statusText,
+                error: errorData
+            });
+            
+            if (response.status === 403) {
+                console.error('🔒 403 Forbidden - Possible causes:');
+                console.error('1. Token expired or invalid');
+                console.error('2. User role is not "educator"');
+                console.error('3. Server-side ownership filter blocking access');
+                console.error('Current token:', token);
+            }
+            
+            throw new Error(`Failed to load quiz sets: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Quiz sets loaded successfully:', data.quiz_sets?.length || 0, 'sets');
+        allQuizSets = data.quiz_sets || [];
+        
+        renderQuizSets();
+        
+    } catch (error) {
+        console.error('Load quiz sets error:', error);
+        // Still render empty state instead of breaking
+        allQuizSets = [];
+        renderQuizSets();
+    }
+}
+
+// Render quiz sets list
+function renderQuizSets() {
+    const container = document.getElementById('quizSetsList');
+    const countEl = document.getElementById('quizSetsCount');
+    
+    if (!container) {
+        console.error('quizSetsList container not found');
+        return;
+    }
+    
+    countEl.textContent = allQuizSets.length;
+
+    if (allQuizSets.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">🎯</div>
+                <h3 style="font-size: 20px; font-weight: 700; margin-bottom: var(--space-2);">No quiz sets yet</h3>
+                <p>Create an AI-generated quiz or manual quiz to get started</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = allQuizSets.map(set => {
+        const timeAgo = getTimeAgo(new Date(set.created_at));
+        const creatorName = `${set.first_name || ''} ${set.last_name || ''}`.trim() || 'Unknown';
+        
+        return `
+            <div class="quiz-set-card ${set.status}" data-quiz-set-id="${set.quiz_set_id}">
+                <div class="quiz-set-header">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+                            <span style="font-size: 24px; font-weight: 800; color: var(--primary);">Set #${set.set_number}</span>
+                            <span class="quiz-set-badge ${set.status}">${set.status.toUpperCase()}</span>
+                        </div>
+                        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: var(--space-2);">${set.quiz_title}</h3>
+                    </div>
+                </div>
+
+                <div class="quiz-set-meta">
+                    <div>📊 ${set.total_questions} questions</div>
+                    <div>⚡ ${set.difficulty_level}</div>
+                    <div style="background: ${set.ai_generated ? 'rgba(59, 130, 246, 0.1)' : 'rgba(139, 92, 246, 0.1)'}; padding: 4px 12px; border-radius: 12px; font-weight: 600; color: ${set.ai_generated ? '#2563eb' : '#7c3aed'};">
+                        ${set.ai_generated ? '🤖 AI Generated' : '✍️ Manual Quiz'}
+                    </div>
+                    <div>⏰ ${timeAgo}</div>
+                </div>
+
+                ${set.status === 'assigned' && set.assignment_count > 0 ? `
+                    <div style="background: rgba(99, 102, 241, 0.1); padding: var(--space-3); border-radius: var(--radius-md); margin-bottom: var(--space-3);">
+                        <div style="font-size: 13px; font-weight: 700; color: var(--primary);">
+                            📍 Assigned to ${set.classes_assigned} class${set.classes_assigned > 1 ? 'es' : ''}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="quiz-set-actions">
+                    <button class="btn-icon" onclick="togglePreview(${set.quiz_set_id})" title="Preview Questions">
+                        👁️ Preview
+                    </button>
+                    
+                    ${set.status === 'draft' ? `
+                        <button class="btn btn-success btn-small" onclick="approveQuizSet(${set.quiz_set_id})">
+                            ✅ Approve
+                        </button>
+                    ` : ''}
+                    
+                    ${set.status === 'approved' || set.status === 'assigned' ? `
+                        <button class="btn btn-primary btn-small" onclick="openAssignQuizSetModal(${set.quiz_set_id})">
+                            📤 Assign to Class
+                        </button>
+                    ` : ''}
+                    
+                    <!-- Delete button for ALL statuses -->
+                    <button class="btn-icon delete" onclick="deleteQuizSet(${set.quiz_set_id})" title="Delete Quiz Set">
+                        🗑️ Delete
+                    </button>
+                </div>
+
+                <div id="preview-${set.quiz_set_id}" class="quiz-set-preview">
+                    <div style="text-align: center; padding: var(--space-4); color: var(--gray-500);">
+                        Loading questions...
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Open generate modal
+function openGenerateQuizSetModal() {
+    document.getElementById('genQuizTitle').value = `${moduleData.module.module_name} Quiz`;
+    document.getElementById('generateQuizSetModal').classList.add('active');
+}
+
+// Close generate modal
+function closeGenerateQuizSetModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('generateQuizSetModal').classList.remove('active');
+}
+
+// Generate quiz set
+async function generateQuizSet() {
+    const title = document.getElementById('genQuizTitle').value.trim();
+    const numQuestions = parseInt(document.getElementById('genNumQuestions').value);
+    const difficulty = document.getElementById('genDifficulty').value;
+    const instructions = document.getElementById('genInstructions').value.trim();
+
+    if (!title) {
+        alert('⚠️ Please enter a quiz title');
+        return;
+    }
+
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '⏳ Generating...';
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/educator/modules/${moduleId}/quiz-sets/generate`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                quiz_title: title,
+                num_questions: numQuestions,
+                difficulty: difficulty,
+                ai_instructions: instructions
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.details || data.error || 'Generation failed');
+        }
+
+        alert(`✅ ${data.message}\n\nQuiz Set #${data.set_number} created with ${data.total_questions} questions.\n\nGeneration time: ${(data.generation_time_ms / 1000).toFixed(1)}s`);
+        
+        closeGenerateQuizSetModal();
+        await loadQuizSets();
+
+    } catch (error) {
+        console.error('Generate error:', error);
+        alert('❌ Failed to generate quiz set:\n\n' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+}
+
+// ============================================================
+// MANUAL QUIZ CREATION FUNCTIONS
+// ============================================================
+
+let manualQuizQuestions = [];
+let currentModule = null; // ✅ Store module info for auto-strand detection
+
+function openManualQuizModal() {
+    manualQuizQuestions = [];
+    document.getElementById('manualQuizTitle').value = `${moduleData.module.module_name} Quiz`;
+    document.getElementById('manualQuizDescription').value = '';
+    document.getElementById('manualQuizTimeLimit').value = '30';
+    document.getElementById('manualQuizPassingScore').value = '70';
+    updateManualQuizDisplay();
+    document.getElementById('manualQuizModal').classList.add('active');
+}
+
+function closeManualQuizModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('manualQuizModal').classList.remove('active');
+    manualQuizQuestions = [];
+}
+
+function updateManualQuizDisplay() {
+    const container = document.getElementById('manualQuizQuestions');
+    const countSpan = document.getElementById('manualQuizQuestionCount');
+    
+    countSpan.textContent = `${manualQuizQuestions.length} question${manualQuizQuestions.length !== 1 ? 's' : ''}`;
+    
+    if (manualQuizQuestions.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: var(--space-8); background: var(--gray-50); border-radius: var(--radius-lg); color: var(--gray-500);">
+                No questions yet. Click "Add Question" below.
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = manualQuizQuestions.map((q, idx) => `
+        <div style="background: white; border: 2px solid var(--gray-200); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-3);">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-3);">
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; color: var(--primary); margin-bottom: var(--space-2);">Question ${idx + 1}</div>
+                    <div style="font-size: 15px; margin-bottom: var(--space-2);">${q.question_text}</div>
+                    <div style="font-size: 13px; color: var(--gray-600);">
+                        <span style="background: var(--gray-100); padding: 2px 8px; border-radius: 12px; margin-right: var(--space-2);">
+                            ${q.strand_type}
+                        </span>
+                        <span>${q.points} point${q.points !== 1 ? 's' : ''}</span>
+                    </div>
+                </div>
+                <button onclick="removeManualQuestion(${idx})" class="btn-icon delete" style="margin-left: var(--space-2);">🗑️</button>
+            </div>
+            <div style="font-size: 14px; margin-top: var(--space-3);">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2);">
+                    <div style="padding: var(--space-2); background: ${q.correct_answer === 'A' ? '#d1fae5' : 'var(--gray-50)'}; border-radius: var(--radius-md);">
+                        <strong>A)</strong> ${q.options[0].text}
+                    </div>
+                    <div style="padding: var(--space-2); background: ${q.correct_answer === 'B' ? '#d1fae5' : 'var(--gray-50)'}; border-radius: var(--radius-md);">
+                        <strong>B)</strong> ${q.options[1].text}
+                    </div>
+                    <div style="padding: var(--space-2); background: ${q.correct_answer === 'C' ? '#d1fae5' : 'var(--gray-50)'}; border-radius: var(--radius-md);">
+                        <strong>C)</strong> ${q.options[2].text}
+                    </div>
+                    <div style="padding: var(--space-2); background: ${q.correct_answer === 'D' ? '#d1fae5' : 'var(--gray-50)'}; border-radius: var(--radius-md);">
+                        <strong>D)</strong> ${q.options[3].text}
+                    </div>
+                </div>
+            </div>
+            ${q.explanation ? `
+                <div style="margin-top: var(--space-3); padding: var(--space-2); background: #fffbeb; border-left: 3px solid #f59e0b; font-size: 13px;">
+                    <strong>Explanation:</strong> ${q.explanation}
+                </div>
+            ` : ''}
+        </div>
+    `).join('');
+}
+// ✅ Helper function to get readable strand labels
+function getStrandLabel(strand) {
+    const labels = {
+        'conceptual': '💡 Conceptual Understanding',
+        'procedural': '🔧 Procedural Fluency',
+        'strategic': '🎯 Strategic Competence',
+        'adaptive': '🔄 Adaptive Reasoning',
+        'productive': '✨ Productive Disposition'
+    };
+    return labels[strand] || strand;
+}
+
+
+function addManualQuestion() {
+    // Open the add question modal
+    document.getElementById('addQuestionModal').classList.add('active');
+    
+    // Clear form
+    document.getElementById('newQuestionText').value = '';
+    document.getElementById('newQuestionPoints').value = '1';
+    document.getElementById('optionA').value = '';
+    document.getElementById('optionB').value = '';
+    document.getElementById('optionC').value = '';
+    document.getElementById('optionD').value = '';
+    document.getElementById('newQuestionExplanation').value = '';
+    
+    // ✅ AUTO-SET STRAND based on current module
+    const strandSelect = document.getElementById('newQuestionStrand');
+    const strandFormGroup = strandSelect?.closest('.form-group');
+    
+    // Remove any existing hint
+    const existingHint = strandFormGroup?.querySelector('.strand-auto-hint');
+    if (existingHint) {
+        existingHint.remove();
+    }
+    
+    if (currentModule && currentModule.proficiency_strand) {
+        // Auto-set the strand value
+        strandSelect.value = currentModule.proficiency_strand;
+        
+        // ✅ Update visual display
+        const strandDisplay = document.getElementById("displayStrand");
+        if (strandDisplay) {
+            strandDisplay.textContent = getStrandLabel(currentModule.proficiency_strand);
+            strandDisplay.style.color = "#1e3a8a";
+        }
+        
+        // Make it readonly
+        strandSelect.disabled = true;
+        
+        // Add helpful hint message
+        const hint = document.createElement('div');
+        hint.className = 'strand-auto-hint';
+        hint.style.cssText = 'margin-top: 8px; padding: 12px; background: linear-gradient(135deg, #dbeafe, #e0e7ff); border-left: 4px solid #3b82f6; border-radius: 8px; font-size: 13px; color: #1e40af;';
+        hint.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 18px;">🎯</span>
+                <div>
+                    <strong>Auto-detected:</strong> ${getStrandLabel(currentModule.proficiency_strand)}
+                    <br>
+                    <span style="font-size: 12px; opacity: 0.8;">All questions in this module use this strand</span>
+                </div>
+            </div>
+        `;
+        if (strandFormGroup) {
+            strandFormGroup.appendChild(hint);
+        }
+        
+        console.log('✅ Auto-set strand to:', currentModule.proficiency_strand);
+    } else {
+        // If no module strand, enable manual selection
+        strandSelect.disabled = false;
+        strandSelect.value = '';
+        console.log('⚠️ No module strand found - manual selection enabled');
+    }
+    
+    // Uncheck all radio buttons
+    document.querySelectorAll('input[name="correctAnswer"]').forEach(radio => radio.checked = false);
+}
+
+
+function closeAddQuestionModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('addQuestionModal').classList.remove('active');
+}
+
+function saveNewQuestion() {
+    const text = document.getElementById('newQuestionText').value.trim();
+    const strand = document.getElementById('newQuestionStrand').value;
+    const correct = document.querySelector('input[name="correctAnswer"]:checked');
+
+    if (!text || !correct) {
+        customAlert('Please fill in the question and select a correct answer.', 'warning');
+        return;
+    }
+
+    // MATCH BACKEND EXPECTATIONS
+    manualQuizQuestions.push({
+        questiontext: text, // No underscore
+        strandtype: strand,
+        points: 1,
+        options: [
+            { letter: 'A', text: document.getElementById('optionA').value },
+            { letter: 'B', text: document.getElementById('optionB').value },
+            { letter: 'C', text: document.getElementById('optionC').value },
+            { letter: 'D', text: document.getElementById('optionD').value }
+        ],
+        correctanswer: correct.value,
+        explanation: document.getElementById('newQuestionExplanation').value
+    });
+
+    updateManualQuizDisplay();
+    closeAddQuestionModal();
+}
+
+
+function removeManualQuestion(index) {
+    const questionNum = index + 1;
+    if (confirm(`Remove Question ${questionNum}? This action cannot be undone.`)) {
+        manualQuizQuestions.splice(index, 1);
+        // Renumber questions
+        manualQuizQuestions.forEach((q, idx) => {
+            q.question_number = idx + 1;
+        });
+        updateManualQuizDisplay();
+        customAlert(`Question ${questionNum} removed`, 'info', 'Question Removed');
+    }
+}
+
+async function saveManualQuiz() {
+    const title = document.getElementById('manualQuizTitle').value.trim();
+    const description = document.getElementById('manualQuizDescription').value.trim();
+    const timeLimit = parseInt(document.getElementById('manualQuizTimeLimit').value);
+    const passingScore = parseFloat(document.getElementById('manualQuizPassingScore').value);
+    
+    if (!title) {
+        customAlert('Please enter a quiz title', 'warning', 'Missing Title');
+        return;
+    }
+    
+    if (manualQuizQuestions.length === 0) {
+        customAlert('Please add at least one question', 'warning', 'No Questions');
+        return;
+    }
+    
+    if (!timeLimit || timeLimit < 1) {
+        customAlert('Please enter a valid time limit', 'warning', 'Invalid Time');
+        return;
+    }
+    
+    if (!passingScore || passingScore < 0 || passingScore > 100) {
+        customAlert('Please enter a valid passing score (0-100)', 'warning', 'Invalid Score');
+        return;
+    }
+    
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    
+    // ✅ DETAILED DEBUG LOGS
+    console.log('🔍 BEFORE MAPPING - manualQuizQuestions:', manualQuizQuestions);
+    console.log('🔍 First question FULL object:', JSON.stringify(manualQuizQuestions[0], null, 2));
+    console.log('🔍 First question.questiontext:', manualQuizQuestions[0]?.questiontext);
+    console.log('🔍 First question.options:', manualQuizQuestions[0]?.options);
+    
+    // ✅ Test the mapping separately with detailed logs
+    const mappedQuestions = manualQuizQuestions.map((q, index) => {
+        console.log(`🔍 Mapping question ${index + 1}:`, q);
+        console.log(`   - questiontext: "${q.questiontext}"`);
+        console.log(`   - strandtype: "${q.strandtype}"`);
+        console.log(`   - options:`, q.options);
+        console.log(`   - correctanswer: "${q.correctanswer}"`);
+        
+        const mapped = {
+            questiontext: q.questiontext,
+            strandtype: q.strandtype,
+            difficulty: 'medium',
+            points: q.points || 1,
+            optiona: q.options[0].text,
+            optionb: q.options[1].text,
+            optionc: q.options[2].text,
+            optiond: q.options[3].text,
+            correctoption: q.correctanswer,
+            explanation: q.explanation || ''
+        };
+        
+        console.log(`   ✅ Mapped result:`, mapped);
+        return mapped;
+    });
+    
+    console.log('🔍 FINAL mappedQuestions:', mappedQuestions);
+    console.log('🔍 Sending to server:', JSON.stringify({
+        quiztitle: title,
+        description: description,
+        difficulty: 'medium',
+        questions: mappedQuestions
+    }, null, 2));
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/educator/modules/${moduleId}/quiz-sets/manual`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                quiztitle: title,
+                description: description,
+                difficulty: 'medium',
+                questions: mappedQuestions
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to create quiz set');
+        }
+        
+        customAlert(`Quiz set created successfully! ${data.totalquestions} questions saved.`, 'success', 'Quiz Created');
+        closeManualQuizModal();
+        
+        // Reset the questions array
+        manualQuizQuestions = [];
+        
+        // Reload quiz sets
+        await loadQuizSets();
+        
+    } catch (error) {
+        console.error('Save manual quiz error:', error);
+        customAlert('Failed to save quiz: ' + error.message, 'error', 'Save Failed');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+}
+
+
+
+// Toggle preview
+async function togglePreview(quizSetId) {
+    const previewDiv = document.getElementById(`preview-${quizSetId}`);
+    
+    if (previewDiv.classList.contains('active')) {
+        previewDiv.classList.remove('active');
+        return;
+    }
+
+    previewDiv.innerHTML = '<div style="text-align: center; padding: var(--space-4);">Loading...</div>';
+    previewDiv.classList.add('active');
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/educator/quiz-sets/${quizSetId}/questions`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+        const questions = data.questions;
+
+        previewDiv.innerHTML = questions.map((q, idx) => `
+            <div class="preview-question">
+                <div style="font-weight: 700; margin-bottom: var(--space-2);">
+                    Question ${idx + 1}
+                    <span style="font-size: 11px; background: var(--gray-200); padding: 2px 8px; border-radius: 12px; margin-left: var(--space-2);">
+                        ${q.difficulty}
+                    </span>
+                </div>
+                <div style="margin-bottom: var(--space-3);">${q.question_text}</div>
+                <div>
+                    <div class="preview-option ${q.correct_option === 'A' ? 'correct' : ''}">A) ${q.option_a}</div>
+                    <div class="preview-option ${q.correct_option === 'B' ? 'correct' : ''}">B) ${q.option_b}</div>
+                    <div class="preview-option ${q.correct_option === 'C' ? 'correct' : ''}">C) ${q.option_c}</div>
+                    <div class="preview-option ${q.correct_option === 'D' ? 'correct' : ''}">D) ${q.option_d}</div>
+                </div>
+                ${q.explanation ? `
+                    <div style="margin-top: var(--space-2); padding: var(--space-2); background: #fffbeb; border-left: 3px solid #f59e0b; font-size: 13px;">
+                        <strong>Explanation:</strong> ${q.explanation}
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+
+    } catch (error) {
+        console.error('Load questions error:', error);
+        previewDiv.innerHTML = '<div style="color: #ef4444; padding: var(--space-4);">Failed to load questions</div>';
+    }
+}
+
+// HELPER: Custom Confirmation Box (Defense Ready & Anti-Loop)
+function customConfirm(message, type, title, onConfirm) {
+    customAlert(message, type, title); 
+    
+    const btn = document.getElementById('customAlertBtn');
+    
+    // ✅ ANTI-LOOP: I-clone ang button para mabura ang lahat ng dating event listeners
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    newBtn.textContent = "Yes, Proceed";
+    
+    newBtn.onclick = () => {
+        newBtn.textContent = "OK"; // Ibalik sa default text
+        closeCustomAlert();
+        
+        // Siguraduhin na isang beses lang tatawagin ang callback
+        if (typeof onConfirm === 'function') {
+            const callback = onConfirm;
+            onConfirm = null; // I-null para hindi na maulit
+            callback();
+        }
+    };
+}
+
+async function approveQuizSet(quizSetId) {
+    customConfirm(
+        "✅ Approve this quiz set? Once approved, it will be ready to assign to classes.",
+        "success",
+        "Confirm Approval",
+        async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/educator/quiz-sets/${quizSetId}/approve`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    // ✅ SUCCESS: Isang beses lang dapat itong lalabas
+                    customAlert('✅ Quiz set approved successfully!', 'success');
+                    
+                    // I-load ang sets pero wag lagyan ng alert sa loob ng loadQuizSets()
+                    await loadQuizSets(); 
+                } else {
+                    throw new Error('Failed to approve');
+                }
+            } catch (error) {
+                console.error('Approve error:', error);
+                customAlert('❌ Failed to approve quiz set', 'error');
+            }
+        }
+    );
+}
+
+// Delete quiz set
+async function deleteQuizSet(quizSetId) {
+    if (!confirm('🗑️ Delete this quiz set?\n\nThis action cannot be undone.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/educator/quiz-sets/${quizSetId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to delete');
+
+        const data = await response.json();
+        alert('✅ ' + data.message);
+        await loadQuizSets();
+
+    } catch (error) {
+        console.error('Delete error:', error);
+        alert('❌ Failed to delete quiz set');
+    }
+}
+
+async function openAssignQuizSetModal(quizSetId) {
+    currentQuizSetId = quizSetId;
+    
+    // 1. Open modal FIRST
+    document.getElementById('assignQuizSetModal').classList.add('active');
+    
+    // 2. Set quiz set info
+    document.getElementById('assignQuizSetId').value = quizSetId;
+    const quizSet = allQuizSets.find(s => s.quiz_set_id === quizSetId);
+    document.getElementById('assignQuizSetInfo').innerHTML = `
+        <strong>Set #${quizSet.set_number}:</strong> ${quizSet.quiz_title}<br>
+        ${quizSet.total_questions} questions • ${quizSet.difficulty_level} difficulty
+    `;
+    document.getElementById('assignQuizSetTitle').value = `${quizSet.quiz_title} - Assignment`;
+    
+    // 3. Load and populate classes AFTER modal is visible
+    await loadTeacherClasses();
+    
+    const classSelect = document.getElementById('assignQuizSetClassId');
+    classSelect.innerHTML = '<option value="">-- Choose a class --</option>';
+    teacherClasses.forEach(cls => {
+        const option = document.createElement('option');
+        option.value = cls.classid;
+        option.textContent = `${cls.classname} (${cls.studentcount || 0} students)`;
+        classSelect.appendChild(option);
+    });
+}
+
+
+
+// Close assign modal
+function closeAssignQuizSetModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('assignQuizSetModal').classList.remove('active');
+}
+
+// Confirm assignment
+async function confirmAssignQuizSet() {
+    const quizSetId = document.getElementById('assignQuizSetId').value;
+    const classId = document.getElementById('assignQuizSetClassId').value;
+    const title = document.getElementById('assignQuizSetTitle').value.trim();
+    const instructions = document.getElementById('assignQuizSetInstructions').value.trim();
+    const timeLimit = parseInt(document.getElementById('assignQuizSetTimeLimit').value);
+    const dueDate = document.getElementById('assignQuizSetDueDate').value;
+    const allowRetakes = document.getElementById('assignQuizSetAllowRetakes').checked;
+
+    if (!classId) {
+        alert('⚠️ Please select a class');
+        return;
+    }
+
+    if (!title) {
+        alert('⚠️ Please enter an assignment title');
+        return;
+    }
+
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '⏳ Assigning...';
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/educator/quiz-sets/${quizSetId}/assign`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                class_id: parseInt(classId),
+                assignment_title: title,
+                instructions: instructions,
+                time_limit_minutes: timeLimit,
+                due_date: dueDate || null,
+                allow_retakes: allowRetakes,
+                max_attempts: allowRetakes ? 3 : 1
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Assignment failed');
+        }
+
+        alert('✅ ' + data.message);
+        closeAssignQuizSetModal();
+        await loadQuizSets();
+
+    } catch (error) {
+        console.error('Assign error:', error);
+        alert('❌ Failed to assign: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }// HELPER: Custom Confirm para sa Defense
+function customConfirm(message, type, title, onConfirm) {
+    customAlert(message, type, title);
+    const btn = document.getElementById('customAlertBtn');
+    const originalText = btn.textContent;
+    btn.textContent = "Yes, Proceed";
+    btn.onclick = () => {
+        btn.textContent = originalText;
+        closeCustomAlert();
+        if (onConfirm) onConfirm();
+    };
+}
+
+// 1. FIXED APPROVE
+async function approveQuizSet(quizSetId) {
+    customConfirm(
+        "✅ Approve this quiz set? It will be ready to assign to classes.",
+        "success",
+        "Confirm Approval",
+        async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/educator/quiz-sets/${quizSetId}/approve`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error('Failed to approve');
+                customAlert('✅ Quiz set approved successfully!', 'success');
+                await loadQuizSets();
+            } catch (error) {
+                customAlert('❌ Failed to approve quiz set', 'error');
+            }
+        }
+    );
+}
+
+// 2. FIXED DELETE
+async function deleteQuizSet(quizSetId) {
+    customConfirm(
+        "⚠️ Delete this quiz set? This action cannot be undone.",
+        "error",
+        "Confirm Delete",
+        async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/educator/quiz-sets/${quizSetId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error('Delete failed');
+                customAlert('✅ Quiz set deleted!', 'success');
+                await loadQuizSets();
+            } catch (error) {
+                customAlert('❌ Failed to delete quiz set', 'error');
+            }
+        }
+    );
+}
+
+// 3. FIXED ASSIGNMENT CONFIRMATION
+async function confirmAssignQuizSet() {
+    const quizSetId = document.getElementById('assignQuizSetId').value;
+    const classId = document.getElementById('assignQuizSetClassId').value;
+    const title = document.getElementById('assignQuizSetTitle').value.trim();
+
+    if (!classId || !title) {
+        customAlert('⚠️ Please select a class and enter a title.', 'warning');
+        return;
+    }
+
+    customConfirm(
+        `📤 Assign "${title}" to the selected class?`,
+        "info",
+        "Confirm Assignment",
+        async () => {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '⏳ Assigning...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/educator/quiz-sets/${quizSetId}/assign`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        class_id: parseInt(classId),
+                        assignment_title: title,
+                        instructions: document.getElementById('assignQuizSetInstructions').value.trim(),
+                        time_limit_minutes: parseInt(document.getElementById('assignQuizSetTimeLimit').value),
+                        due_date: document.getElementById('assignQuizSetDueDate').value || null,
+                        allow_retakes: document.getElementById('assignQuizSetAllowRetakes').checked,
+                        max_attempts: document.getElementById('assignQuizSetAllowRetakes').checked ? 3 : 1
+                    })
+                });
+
+                if (!response.ok) throw new Error('Assignment failed');
+
+                customAlert('✅ Assigned successfully!', 'success');
+                closeAssignQuizSetModal();
+                await loadQuizSets();
+            } catch (error) {
+                customAlert('❌ Failed to assign: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+    );
+}
+
+// 4. FIXED SAVE ALL CHANGES
+async function saveAllChanges() {
+    if (!hasUnsavedChanges) {
+        customAlert("ℹ️ No changes detected. Your progress is already up to date.", "info", "Nothing to Save");
+        return;
+    }
+
+    customConfirm(
+        "💾 Save all changes made to lessons, resources, and modules?",
+        "info",
+        "Save Progress",
+        async () => {
+            try {
+                const saveContentResponse = await fetch(`${API_BASE_URL}/api/educator/modules/${moduleId}/save-content`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ module: moduleData.module, lessons: lessons })
+                });
+
+                if (!saveContentResponse.ok) throw new Error('Failed to save module content');
+
+                hasUnsavedChanges = false;
+                showSaveIndicator();
+                customAlert('✅ All changes saved successfully!', 'success');
+            } catch (error) {
+                customAlert('❌ Failed to save: ' + error.message, 'error');
+            }
+        }
+    );
+}
+}
+
+// Utility: Get time ago
+function getTimeAgo(date) {
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+    if (seconds < 2592000) return `${Math.floor(seconds / 86400)} days ago`;
+    return date.toLocaleDateString();
+}
+
+// Hook into existing loadAllData
+if (typeof loadAllData !== 'undefined') {
+    const originalLoadAllDataForQuizSets = loadAllData;
+    loadAllData = async function() {
+        await originalLoadAllDataForQuizSets();
+        await loadQuizSets();
+    };
+}
+
+console.log('✅ Quiz Set Management UI loaded');
+
+
+// ========================================
+// LEARNING MATERIALS FUNCTIONS
+// ========================================
+
+// Setup file upload handlers
+const materialFileInput = document.getElementById('materialFileInput');
+const uploadArea = document.getElementById('uploadArea');
+
+if (uploadArea && materialFileInput) {
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#6366f1';
+        uploadArea.style.background = 'rgba(99, 102, 241, 0.1)';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = '';
+        uploadArea.style.background = '';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '';
+        uploadArea.style.background = '';
+        handleMaterialFiles(e.dataTransfer.files);
+    });
+
+    materialFileInput.addEventListener('change', (e) => {
+        handleMaterialFiles(e.target.files);
+    });
+}
+
+async function handleMaterialFiles(files) {
+    if (!moduleId) {
+        alert('Please save the module first');
+        return;
+    }
+
+    const progressDiv = document.getElementById('uploadProgress');
+    progressDiv.style.display = 'block';
+    progressDiv.innerHTML = '';
+
+    for (let file of files) {
+        await uploadMaterialFile(file, progressDiv);
+    }
+
+    loadMaterials();
+}
+
+async function uploadMaterialFile(file, progressDiv) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('moduleId', moduleId);
+    formData.append('title', file.name);
+    formData.append('description', '');
+
+    const progressItem = document.createElement('div');
+    progressItem.style.cssText = 'display: flex; gap: 12px; margin-bottom: 12px; padding: 12px; background: #f7fafc; border-radius: 8px;';
+    progressItem.innerHTML = `
+        <span style="flex: 1;">${file.name}</span>
+        <span class="progress-percent">0%</span>
+    `;
+    progressDiv.appendChild(progressItem);
+
+    const progressPercent = progressItem.querySelector('.progress-percent');
+
+    try {
+        const token = localStorage.getItem('token');
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+                const percent = Math.round((e.loaded / e.total) * 100);
+                progressPercent.textContent = percent + '%';
+            }
+        });
+
+        xhr.addEventListener('load', () => {
+            if (xhr.status === 200) {
+                progressItem.innerHTML = `<span style="color: #10b981;">✅ ${file.name} uploaded!</span>`;
+                setTimeout(() => progressItem.remove(), 3000);
+            } else {
+                progressItem.innerHTML = `<span style="color: #ef4444;">❌ ${file.name} failed</span>`;
+            }
+        });
+
+        xhr.open('POST', `${API_BASE_URL}/api/teacher/materials/upload`);
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.send(formData);
+
+    } catch (error) {
+        console.error('Upload error:', error);
+    }
+}
+
+async function loadMaterials() {
+    if (!moduleId) return;
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE_URL}/api/modules/${moduleId}/materials`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+        renderMaterials(data.materials || []);
+    } catch (error) {
+        console.error('Load materials error:', error);
+    }
+}
+
+function renderMaterials(materials) {
+    const listDiv = document.getElementById('materialsList');
+    
+    if (materials.length === 0) {
+        listDiv.innerHTML = `
+            <div style="text-align: center; padding: 48px; color: #718096;">
+                <div style="font-size: 48px;">📭</div>
+                <div>No materials uploaded yet</div>
+            </div>
+        `;
+        return;
+    }
+
+    listDiv.innerHTML = materials.map(m => {
+        const icon = getMaterialIcon(m.file_type);
+        const iconClass = getMaterialIconClass(m.file_type);
+        const size = formatFileSize(m.file_size);
+        const date = new Date(m.created_at).toLocaleDateString();
+
+        return `
+            <div class="material-item">
+                <div class="material-icon ${iconClass}">${icon}</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; margin-bottom: 4px;">${m.title}</div>
+                    <div style="font-size: 13px; color: #718096;">
+                        ${size} • ${date} • ${m.file_type}
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-icon btn-view" onclick="viewMaterial(${m.material_id})" title="View">👁️</button>
+                    <button class="btn-icon btn-delete" onclick="deleteMaterial(${m.material_id})" title="Delete">🗑️</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function getMaterialIcon(type) {
+    if (type.includes('pdf')) return '📄';
+    if (type.includes('image')) return '🖼️';
+    if (type.includes('video')) return '🎥';
+    if (type.includes('audio')) return '🎵';
+    if (type.includes('word')) return '📝';
+    if (type.includes('powerpoint')) return '📊';
+    return '📎';
+}
+
+function getMaterialIconClass(type) {
+    if (type.includes('pdf')) return 'pdf';
+    if (type.includes('image')) return 'image';
+    if (type.includes('video')) return 'video';
+    return '';
+}
+
+function formatFileSize(bytes) {
+    if (!bytes) return '0 B';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function viewMaterial(materialId) {
+    window.open(`material-viewer.html?id=${materialId}`, '_blank');
+}
+
+function showNotification(message, type = 'success') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 24px;
+        background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 
+                      type === 'error' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 
+                      'linear-gradient(135deg, #3b82f6, #2563eb)'};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        font-weight: 600;
+        font-size: 15px;
+        z-index: 10000;
+        animation: slideInRight 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        max-width: 400px;
+    `;
+    
+    // Add icon based on type
+    const icon = type === 'success' ? '✓' : 
+                 type === 'error' ? '✕' : 
+                 'ℹ';
+    
+    notification.innerHTML = `
+        <span style="font-size: 20px;">${icon}</span>
+        <span>${message}</span>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+async function deleteMaterial(materialId) {
+    if (!confirm('Delete this material?')) return;
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE_URL}/api/teacher/materials/${materialId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            showNotification('Material deleted', 'success');
+            loadMaterials();
+        }
+    } catch (error) {
+        console.error('Delete error:', error);
+        showNotification('Failed to delete', 'error');
+    }
+}
+
+        // ========================================
+        // MOBILE MENU TOGGLE
+        // ========================================
+        function toggleMobileMenu() {
+            const mobileNav = document.getElementById('mobileNav');
+            mobileNav.classList.toggle('active');
+        }
+
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('.mobile-nav .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('mobileNav').classList.remove('active');
+            });
+        });
+
+    </script>

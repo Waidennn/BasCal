@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Analytics - BasCal Student</title>
+    <link rel="stylesheet" href="flex-calc-design-system.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ========================================
+           NAVBAR - RESPONSIVE & PROFESSIONAL
+           ======================================== */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* Navbar Container */
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        /* Logo */
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        .nav-logo-icon {
+            font-size: 28px;
+        }
+
+        /* Navigation Links */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* User Menu */
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .user-menu:hover {
+            background: #f1f5f9;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #1e293b;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #ef4444;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            color: #1e293b;
+        }
+
+        /* Mobile Menu */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .mobile-nav.active {
+            max-height: 400px;
+        }
+
+        .mobile-nav-content {
+            padding: 16px;
+        }
+
+        .mobile-nav .nav-link {
+            display: block;
+            padding: 12px 16px;
+            margin-bottom: 4px;
+        }
+
+        .mobile-nav .user-menu {
+            margin: 12px 0;
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .mobile-nav .logout-btn {
+            width: 100%;
+            padding: 12px;
+        }
+
+        /* ========================================
+           RESPONSIVE BREAKPOINTS
+           ======================================== */
+
+        /* Tablet & Mobile */
+        @media (max-width: 968px) {
+            .nav-links {
+                display: none;
+            }
+
+            .nav-user {
+                display: none;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .mobile-nav {
+                display: block;
+            }
+
+            .analytics-header h1 {
+                font-size: 28px !important;
+            }
+
+            .analytics-header p {
+                font-size: 14px !important;
+            }
+
+            .stat-value {
+                font-size: 32px !important;
+            }
+
+            .card-title {
+                font-size: 16px !important;
+            }
+
+            .strand-icon {
+                font-size: 24px !important;
+                width: 40px !important;
+                height: 40px !important;
+            }
+
+            .strand-name {
+                font-size: 13px !important;
+            }
+
+            .strand-score {
+                font-size: 20px !important;
+            }
+
+            .prediction-value {
+                font-size: 36px !important;
+            }
+
+            .analytics-container {
+                padding: var(--space-4) !important;
+            }
+
+            .analytics-header {
+                padding: var(--space-6) !important;
+            }
+        }
+
+        /* Mobile Portrait */
+        @media (max-width: 640px) {
+            .nav-container {
+                padding: 0 16px;
+            }
+
+            .nav-logo {
+                font-size: 18px;
+            }
+
+            .analytics-header h1 {
+                font-size: 24px !important;
+            }
+
+            .analytics-header p {
+                font-size: 13px !important;
+            }
+
+            .stat-value {
+                font-size: 28px !important;
+            }
+
+            .stat-label {
+                font-size: 12px !important;
+            }
+
+            .card {
+                padding: var(--space-4) !important;
+            }
+
+            .strand-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-3);
+            }
+
+            .strand-header {
+                width: 100%;
+            }
+
+            .prediction-value {
+                font-size: 32px !important;
+            }
+
+            .correlation-name {
+                font-size: 12px !important;
+            }
+
+            .correlation-value {
+                font-size: 14px !important;
+            }
+        }
+
+        /* Large Screens */
+        @media (min-width: 1400px) {
+            .analytics-container {
+                max-width: 1600px;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .navbar {
+                display: none;
+            }
+
+            .logout-btn {
+                display: none;
+            }
+
+            .analytics-container {
+                max-width: 100%;
+                padding: 0;
+            }
+        }
+
+        /* ========================================
+           ANALYTICS STYLES
+           ======================================== */
+        
+        /* CLEAN PROFESSIONAL DESIGN - MATCHING TEACHER ANALYTICS */
+        
+        /* Header - Beautiful Gradient */
+        .analytics-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: var(--space-8);
+            border-radius: var(--radius-2xl);
+            margin-bottom: var(--space-8);
+        }
+
+        .header-content h1 {
+            font-size: 36px;
+            font-weight: 900;
+            margin: 0 0 var(--space-2) 0;
+        }
+
+        .header-content p {
+            font-size: 16px;
+            opacity: 0.95;
+            margin: 0;
+        }
+
+        /* Grid System - Same as Teacher */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--space-6);
+            margin-bottom: var(--space-6);
+        }
+
+        .span-12 { grid-column: span 12; }
+        .span-8 { grid-column: span 8; }
+        .span-6 { grid-column: span 6; }
+        .span-4 { grid-column: span 4; }
+        .span-3 { grid-column: span 3; }
+
+        @media (max-width: 968px) {
+            .span-8, .span-6, .span-4, .span-3 {
+                grid-column: span 12;
+            }
+        }
+
+        /* Clean White Cards */
+        .card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-5);
+            padding-bottom: var(--space-4);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gray-900);
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            text-align: center;
+            padding: var(--space-6);
+        }
+
+        .stat-value {
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1;
+            margin-bottom: var(--space-2);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray-600);
+            font-weight: 600;
+        }
+
+        /* Performance Alert */
+        .performance-alert {
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--space-6);
+            display: none;
+        }
+
+        .performance-alert.success {
+            background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+            color: #1e6b3e;
+        }
+
+        .performance-alert.warning {
+            background: linear-gradient(135deg, #fdeb71 0%, #f8d800 100%);
+            color: #7c6700;
+        }
+
+        .performance-alert.danger {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            color: #7c1d1d;
+        }
+
+        .alert-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: var(--space-2);
+        }
+
+        .alert-message {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .module-list {
+			display: grid;
+			/* Binago: minimum width ay 300px at 2 columns lang muna para hindi siksikan */
+			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+			gap: var(--space-6); /* Dinagdagan ang gap */
+		}
+
+        .module-card {
+			/* Dinagdagan ang padding para hindi dikit ang text sa border */
+			padding: var(--space-6);
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			min-height: 220px; /* Para pantay-pantay ang height kahit mahaba ang title */
+		}		
+
+        .module-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-6);
+        }
+
+        .module-info h3 {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin: 0 0 var(--space-1) 0;
+        }
+
+        .module-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border-radius: var(--radius-md);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .module-score {
+            text-align: right;
+        }
+
+        .module-score-value {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .module-score-label {
+            font-size: 11px;
+            color: var(--gray-600);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .module-stats {
+			display: flex;
+			justify-content: space-between;
+			gap: var(--space-2);
+			padding-top: var(--space-4);
+			border-top: 1px solid var(--gray-200);
+			flex-wrap: wrap; /* Para kusa silang bababa kapag wala nang space */
+		}
+
+        .module-stat {
+			flex: 1;
+			min-width: 70px; /* Siguradong may sapat na space bawat stat */
+			text-align: center;
+		}
+
+        .module-stat-value {
+			font-size: 18px; /* Binabaan nang konti mula 20px */
+			font-weight: 800;
+		}
+
+        .module-stat-label {
+			font-size: 10px; /* Mas maliit na label para hindi agaw-pansin */
+			white-space: nowrap; /* Iwasan ang pag-break ng text */
+		}
+
+        /* Insights */
+        .insight-card {
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-3);
+            border-left: 4px solid;
+        }
+
+        .insight-card.strength {
+            background: #d4fc7910;
+            border-left-color: #96e6a1;
+        }
+
+        .insight-card.weakness {
+            background: #ff9a9e10;
+            border-left-color: #ff9a9e;
+        }
+
+        .insight-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-2);
+        }
+
+        .insight-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--gray-900);
+        }
+
+        .insight-score {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .insight-text {
+            font-size: 13px;
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+
+        /* Recommendations */
+        .recommendation {
+            padding: var(--space-4);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-3);
+        }
+
+        .recommendation-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+
+        .recommendation-text {
+            font-size: 13px;
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+
+        /* Container */
+        .analytics-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-6);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: var(--space-12);
+            color: var(--gray-600);
+        }
+
+        /* ✅ NEW: Strand Progress Styles */
+        .strand-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-3);
+            background: var(--gray-50);
+            transition: all var(--transition-fast);
+        }
+
+        .strand-item:hover {
+            background: var(--gray-100);
+            transform: translateX(4px);
+        }
+
+        .strand-icon {
+            font-size: 32px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-lg);
+            flex-shrink: 0;
+        }
+
+        .strand-icon.conceptual { background: #dbeafe; }
+        .strand-icon.procedural { background: #d1fae5; }
+        .strand-icon.strategic { background: #fef3c7; }
+        .strand-icon.adaptive { background: #fed7aa; }
+        .strand-icon.productive { background: #fecaca; }
+
+        .strand-content {
+            flex: 1;
+        }
+
+        .strand-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-2);
+        }
+
+        .strand-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--gray-900);
+        }
+
+        .strand-score {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .strand-bar-container {
+            position: relative;
+            height: 12px;
+            background: var(--gray-200);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .strand-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width 0.8s ease;
+            background: var(--gradient-primary);
+        }
+
+        .strand-bar-baseline {
+            position: absolute;
+            top: 0;
+            left: 76.3%;
+            width: 2px;
+            height: 100%;
+            background: #ef4444;
+            z-index: 1;
+        }
+
+        .strand-bar-baseline::after {
+            content: 'Baseline';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #ef4444;
+        }
+
+        .strand-meta {
+            display: flex;
+            gap: var(--space-4);
+            margin-top: var(--space-2);
+            font-size: 12px;
+            color: var(--gray-600);
+        }
+
+        .strand-badge {
+            padding: 2px 8px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 11px;
+        }
+
+        .strand-badge.above { background: #d1fae5; color: #065f46; }
+        .strand-badge.below { background: #fecaca; color: #991b1b; }
+        .strand-badge.at { background: #fef3c7; color: #92400e; }
+
+        /* Research Insights */
+        .prediction-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--space-4);
+        }
+
+        .prediction-value {
+            font-size: 48px;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: var(--space-2);
+        }
+
+        .prediction-label {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+
+        .prediction-detail {
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .research-note {
+            background: var(--gray-50);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--primary);
+            font-size: 13px;
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        .research-note strong {
+            color: var(--gray-900);
+            font-weight: 800;
+        }
+
+        .correlation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-3);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-2);
+        }
+
+        .correlation-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .correlation-value {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .correlation-bar {
+            height: 6px;
+            background: var(--gray-200);
+            border-radius: 99px;
+            margin-top: var(--space-2);
+            overflow: hidden;
+        }
+
+        .correlation-bar-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 99px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ========================================
+         RESPONSIVE NAVBAR
+         ======================================== -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Logo -->
+            <a href="student-dashboard.html" class="nav-logo">
+                <span class="nav-logo-icon">📐</span>
+                <span>BasCal</span>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <div class="nav-links">
+                <a href="student-dashboard.html" class="nav-link">Dashboard</a>
+                <a href="module-browser.html" class="nav-link">Modules</a>
+                <a href="analytics-student.html" class="nav-link active">Analytics</a>
+            </div>
+
+            <!-- Desktop User Menu -->
+            <div class="nav-user">
+                <div class="user-menu">
+                    <div class="user-avatar" id="userAvatar">ST</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Student</div>
+                        <div class="user-role">Student</div>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                ☰
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation Menu -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-content">
+            <a href="student-dashboard.html" class="nav-link">Dashboard</a>
+            <a href="module-browser.html" class="nav-link">Modules</a>
+            <a href="analytics-student.html" class="nav-link active">Analytics</a>
+            
+            <div class="user-menu">
+                <div class="user-avatar" id="mobileUserAvatar">ST</div>
+                <div class="user-info">
+                    <div class="user-name" id="mobileUserName">Student</div>
+                    <div class="user-role">Student</div>
+                </div>
+            </div>
+            
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- ========================================
+         ANALYTICS CONTENT
+         ======================================== -->
+    <div class="analytics-container">
+        <!-- Beautiful Header -->
+        <div class="analytics-header">
+            <div class="header-content">
+                <h1>📊 My Analytics</h1>
+                <p>Track your progress and identify areas for improvement</p>
+            </div>
+        </div>
+
+        <!-- Performance Alert -->
+        <div class="performance-alert" id="performanceAlert" style="display: none;">
+            <div class="alert-title">Alert Title</div>
+            <div class="alert-message">Alert message goes here</div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="analytics-grid">
+            <div class="card stat-card span-3">
+                <div class="stat-value" id="avgScore">0%</div>
+                <div class="stat-label">Overall Average</div>
+            </div>
+            <div class="card stat-card span-3">
+                <div class="stat-value" id="passingRate">0%</div>
+                <div class="stat-label">Passing Rate</div>
+            </div>
+            <div class="card stat-card span-3">
+                <div class="stat-value" id="totalAttempts">0</div>
+                <div class="stat-label">Total Quizzes</div>
+            </div>
+            <div class="card stat-card span-3">
+                <div class="stat-value" id="moduleProgress">0/12</div>
+                <div class="stat-label">Modules Completed</div>
+            </div>
+        </div>
+		
+
+
+        <!-- ✅ NEW: 5-STRAND PROFICIENCY DASHBOARD -->
+        <div class="analytics-grid">
+            <div class="card span-12">
+                <div class="card-header">
+                    <h2 class="card-title">🎯 Your Proficiency Strands </h2>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <div style="font-size: 12px; color: var(--gray-600); font-weight: 600;">
+                        </div>
+                    </div>
+                </div>
+                <div id="strandProgress"></div>
+            </div>
+        </div>
+
+
+
+        <!-- Module Performance -->
+        <div class="analytics-grid">
+            <div class="card span-12">
+                <div class="card-header">
+                    <h2 class="card-title">📚 Module Performance</h2>
+                </div>
+                <div class="module-list" id="moduleBreakdown"></div>
+            </div>
+        </div>
+
+        <!-- Insights Grid -->
+        <div class="analytics-grid">
+            <!-- Strengths -->
+            <div class="card span-6">
+                <div class="card-header">
+                    <h2 class="card-title">💪 Your Strengths</h2>
+                </div>
+                <div id="strengthsList"></div>
+            </div>
+
+            <!-- Weaknesses -->
+            <div class="card span-6">
+                <div class="card-header">
+                    <h2 class="card-title">🎯 Need Improvement</h2>
+                </div>
+                <div id="weaknessesList"></div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="analytics-grid">
+            <div class="card span-12">
+                <div class="card-header">
+                    <h2 class="card-title">💡 Recommendations</h2>
+                </div>
+                <div id="recommendationsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://farah-ungroupable-millicent.ngrok-free.dev';
+        const PASSING_SCORE = 70;
+
+		async function loadAnalytics() {
+			try {
+				const token = localStorage.getItem('token');
+				if (!token) {
+					window.location.href = 'login.html';
+					return;
+				}
+
+				const response = await fetch(`${API_BASE_URL}/api/student/analytics`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+						'Content-Type': 'application/json'
+					}
+				});
+
+				if (!response.ok) {
+					throw new Error('Failed to load analytics');
+				}
+
+				const data = await response.json();
+				console.log('✅ Analytics data:', data);
+				console.log('📊 Summary from API:', data.summary);
+        
+				// Load strand progress
+				const strandResponse = await fetch(`${API_BASE_URL}/api/student/strand-progress`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+						'Content-Type': 'application/json'
+					}
+				});
+			
+				let strandData = null;
+				if (strandResponse.ok) {
+					strandData = await strandResponse.json();
+					console.log('✅ Strand progress:', strandData);
+				}
+        
+				// ✅ FIXED: Use summary directly from API (already has correct format)
+				if (data.summary && (data.summary.totalAttempts > 0 || data.moduleProgress?.length > 0)) {
+					console.log('📊 Displaying analytics with summary:', data.summary);
+				
+					displayPerformanceAlert(data);
+					displaySummary(data.summary);  // ✅ Pass API summary directly
+            
+					// Display strand progress
+					if (strandData && strandData.strandProgress) {
+						displayStrandProgress(strandData.strandProgress);
+					}
+            
+					displayModuleBreakdown(data.moduleProgress || []);
+					displayStrengthsAndWeaknesses(data.moduleProgress || []);
+					displayRecommendations(data.moduleProgress || [], data.summary);
+				} else {
+					console.log('⚠️ No analytics data yet');
+					document.querySelector('.analytics-grid').innerHTML = `
+						<div class="card span-12" style="text-align: center; padding: 60px;">
+							<div style="font-size: 64px; margin-bottom: 20px;">📊</div>
+							<h3 style="font-size: 24px; font-weight: 800; margin-bottom: 12px;">No analytics data yet</h3>
+							<p style="color: var(--gray-600);">Complete some quizzes to see your performance analytics!</p>
+						</div>
+					`;
+				}
+
+			} catch (error) {
+				console.error('❌ Error loading analytics:', error);
+				document.querySelector('.analytics-container').innerHTML = `
+					<div class="card" style="text-align: center; padding: 60px;">
+						<div style="font-size: 64px; margin-bottom: 20px;">⚠️</div>
+						<h3>Failed to load analytics</h3>
+						<p>${error.message}</p>
+					</div>
+				`;
+			}
+		}
+
+				function displayPerformanceAlert(data) {
+					const alert = document.getElementById('performanceAlert');
+    
+					// ✅ Get values from summary object (primary) or fallback to data.overallScore
+					const summary = data.summary || {};
+					const avgScore = summary.overallAverage || summary.averagescore || data.overallScore || 0;
+					const modulesCompleted = summary.modulesCompleted || summary.completedmodules || 0;
+					const totalModules = summary.totalModules || summary.totalmodules || 12;
+					const totalAttempts = summary.totalAttempts || summary.totalattempts || 0;
+    
+					console.log('🚨 Performance Alert:', { avgScore, modulesCompleted, totalModules, totalAttempts });
+    
+					// Don't show alert if no attempts yet
+					if (totalAttempts === 0) {
+						alert.style.display = 'none';
+						return;
+					}
+
+					let alertClass = 'danger';
+					let icon = '⚠️';
+					let title = 'Needs Improvement';
+					let message = `Your current average is ${avgScore}%, which is below the passing grade of 75%. Review the recommendations below to improve your scores.`;
+
+					if (avgScore >= 85) {
+						alertClass = 'success';
+						icon = '🎉';
+						title = 'Excellent Performance!';
+						message = `You're doing amazing! Your average score of ${avgScore}% shows strong understanding. Keep up the great work!`;
+					} else if (avgScore >= 75) {
+						alertClass = 'warning';
+						icon = '👍';
+						title = 'Good Job!';
+						const remaining = totalModules - modulesCompleted;
+						message = `You're passing with an average of ${avgScore}%. ${remaining > 0 ? `Complete ${remaining} more module${remaining > 1 ? 's' : ''} to boost your performance.` : 'Keep maintaining this level!'}`;
+					}
+
+					alert.className = `performance-alert ${alertClass}`;
+					alert.style.display = 'block';
+					alert.innerHTML = `
+						<div class="alert-title">${icon} ${title}</div>
+						<div class="alert-message">${message}</div>
+					`;
+				}
+
+
+        function displaySummary(summary) {
+			console.log('🎨 displaySummary received:', summary);
+    
+			// ✅ Handle BOTH naming conventions (camelCase from API, snake_case fallback)
+			const avgScore = summary.overallAverage || summary.averagescore || summary.average_score || 0;
+			const totalAttempts = summary.totalAttempts || summary.totalattempts || summary.total_attempts || 0;
+			const modulesCompleted = summary.modulesCompleted || summary.completedmodules || summary.completed_modules || 0;
+			const totalModules = summary.totalModules || summary.totalmodules || summary.total_modules || 12;
+			const passingRate = summary.passingRate || summary.passingrate || summary.passing_rate || 0;
+    
+			console.log('📊 Parsed values:', {
+				avgScore,
+				totalAttempts,
+				modulesCompleted,
+				totalModules,
+				passingRate
+			});
+    
+			// Update DOM
+			document.getElementById('avgScore').textContent = avgScore + '%';
+			document.getElementById('totalAttempts').textContent = totalAttempts;
+			document.getElementById('moduleProgress').textContent = `${modulesCompleted}/${totalModules}`;
+			document.getElementById('passingRate').textContent = passingRate + '%';
+    
+			console.log('✅ Summary displayed successfully');
+		}
+
+
+        function displayModuleBreakdown(moduleProgress) {
+            const container = document.getElementById('moduleBreakdown');
+            
+            if (!moduleProgress || moduleProgress.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--gray-600);">No module data available</p>';
+                return;
+            }
+
+            const html = moduleProgress.map((mod, index) => {
+                const avgScore = Math.round(mod.average_score || mod.score || 0);
+                const highScore = Math.round(mod.highest_score || mod.score || 0);
+                const attempts = mod.attempts || 0;
+                const isPassing = highScore >= PASSING_SCORE;
+                const isCompleted = mod.completed || isPassing;
+                
+                // 🆕 Determine if next module is unlocked
+                const moduleNumber = mod.module_id || (index + 1);
+                const isFirstModule = moduleNumber === 1;
+                const previousModuleCompleted = index === 0 || (moduleProgress[index - 1]?.completed || (moduleProgress[index - 1]?.highest_score || 0) >= PASSING_SCORE);
+                const isUnlocked = isFirstModule || previousModuleCompleted;
+                
+                // Visual indicators
+                const statusIcon = isCompleted ? '✅' : (isUnlocked ? '🔓' : '🔒');
+                const statusText = isCompleted ? 'Completed' : (isUnlocked ? 'Unlocked' : 'Locked');
+                const statusColor = isCompleted ? '#10b981' : (isUnlocked ? '#f59e0b' : '#ef4444');
+
+                return `
+                    <div class="module-card" style="position: relative; ${!isUnlocked ? 'opacity: 0.7; border: 2px solid #fee2e2;' : ''}">
+                        ${!isUnlocked ? `
+                            <div style="position: absolute; top: 12px; right: 12px; background: #fef2f2; color: #dc2626; 
+                                        padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                                🔒 Locked
+                            </div>
+                        ` : ''}
+                        ${isCompleted ? `
+                            <div style="position: absolute; top: 12px; right: 12px; background: #d1fae5; color: #065f46; 
+                                        padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                                ✅ Completed
+                            </div>
+                        ` : ''}
+                        <div class="module-header">
+                            <div class="module-info">
+                                <h3>${statusIcon} ${mod.module_name || mod.name}</h3>
+                                <span class="module-badge">${mod.strand_type || mod.category || 'calculus'}</span>
+                            </div>
+                            <div class="module-score">
+                                <div class="module-score-value">${highScore}%</div>
+                                <div class="module-score-label">Highest</div>
+                            </div>
+                        </div>
+                        <div class="module-stats">
+                            <div class="module-stat">
+                                <div class="module-stat-value">${attempts}</div>
+                                <div class="module-stat-label">Attempts</div>
+                            </div>
+                            <div class="module-stat">
+                                <div class="module-stat-value">${avgScore}%</div>
+                                <div class="module-stat-label">Average</div>
+                            </div>
+                            <div class="module-stat">
+                                <div class="module-stat-value" style="color: ${statusColor};">${statusIcon}</div>
+                                <div class="module-stat-label" style="color: ${statusColor};">${statusText}</div>
+                            </div>
+                        </div>
+                        ${!isUnlocked && !isFirstModule ? `
+                            <div style="margin-top: 12px; padding: 12px; background: #fef3c7; border-radius: 8px; font-size: 13px; color: #78350f;">
+                                <strong>⚠️ Complete Module ${moduleNumber - 1} with 70%+ to unlock</strong>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        function displayStrengthsAndWeaknesses(moduleProgress) {
+            if (!moduleProgress || moduleProgress.length === 0) return;
+
+            // Strengths
+            const strengths = [...moduleProgress]
+                .sort((a, b) => (b.highest_score || b.score || 0) - (a.highest_score || a.score || 0))
+                .slice(0, 3);
+
+            const strengthsHtml = strengths.map(mod => `
+                <div class="insight-card strength">
+                    <div class="insight-header">
+                        <div class="insight-title">${mod.module_name || mod.name}</div>
+                        <div class="insight-score">${Math.round(mod.highest_score || mod.score || 0)}%</div>
+                    </div>
+                    <div class="insight-text">
+                        Excellent work! You scored ${Math.round(mod.highest_score || mod.score || 0)}% on your best attempt.
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('strengthsList').innerHTML = strengthsHtml || '<p style="color: var(--gray-600);">Complete some quizzes to see your strengths!</p>';
+
+            // Weaknesses
+            const weaknesses = [...moduleProgress]
+                .filter(m => (m.highest_score || m.score || 0) < PASSING_SCORE)
+                .sort((a, b) => (a.highest_score || a.score || 0) - (b.highest_score || b.score || 0))
+                .slice(0, 3);
+
+            if (weaknesses.length > 0) {
+                const weaknessesHtml = weaknesses.map(mod => `
+                    <div class="insight-card weakness">
+                        <div class="insight-header">
+                            <div class="insight-title">${mod.module_name || mod.name}</div>
+                            <div class="insight-score">${Math.round(mod.highest_score || mod.score || 0)}%</div>
+                        </div>
+                        <div class="insight-text">
+                            Current score: ${Math.round(mod.highest_score || mod.score || 0)}%. 
+                            You need ${PASSING_SCORE - Math.round(mod.highest_score || mod.score || 0)}% more to pass.
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('weaknessesList').innerHTML = weaknessesHtml;
+            } else {
+                document.getElementById('weaknessesList').innerHTML = `
+                    <div class="insight-card strength">
+                        <div class="insight-title">🎉 All Modules Passing!</div>
+                        <div class="insight-text">Great job! You're passing all modules you've attempted.</div>
+                    </div>
+                `;
+            }
+        }
+
+        function displayRecommendations(moduleProgress, summary) {
+            const container = document.getElementById('recommendationsList');
+            const recommendations = [];
+
+            const avgScore = Math.round(summary.average_score || 0);
+
+            if (avgScore < PASSING_SCORE) {
+                recommendations.push({
+                    title: '📚 Review Your Materials',
+                    text: 'Your overall average is below passing. Spend more time reviewing module content before taking quizzes.'
+                });
+            }
+
+            const failingModules = moduleProgress.filter(m => (m.highest_score || m.score || 0) < PASSING_SCORE);
+            if (failingModules.length > 0) {
+                recommendations.push({
+                    title: '🎯 Focus on Weak Areas',
+                    text: `You have ${failingModules.length} module(s) below passing. Prioritize these for improvement.`
+                });
+            }
+
+            if (recommendations.length === 0) {
+                recommendations.push({
+                    title: '🎉 Keep Up the Great Work!',
+                    text: 'You\'re doing well! Continue practicing to maintain and improve your performance.'
+                });
+            }
+
+            const html = recommendations.map(rec => `
+                <div class="recommendation">
+                    <div class="recommendation-title">${rec.title}</div>
+                    <div class="recommendation-text">${rec.text}</div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        // Load on page ready
+        // ✅ NEW: Display Strand Progress
+        function displayStrandProgress(strandProgress) {
+			console.log('🔍 Inside displayStrandProgress, data:', strandProgress);
+    
+			const container = document.getElementById('strandProgress');
+    
+			if (!container) {
+				console.error('❌ strandProgress container not found!');
+				return;
+			}
+    
+			const baseline = 76.3;
+    
+			const strandIcons = {
+				conceptual: '🧠',
+				procedural: '📐',
+				strategic: '🎯',
+				adaptive: '🔄',
+				productive: '🎨'
+			};
+    
+			const strandNames = {
+				conceptual: 'Conceptual Understanding',
+				procedural: 'Procedural Fluency',
+				strategic: 'Strategic Competence',
+				adaptive: 'Adaptive Reasoning',
+				productive: 'Productive Disposition'
+			};
+    
+			container.innerHTML = strandProgress.map(strand => {
+				// ✅ FIXED: Use camelCase field names
+				const score = Math.round(strand.averagescore || 0);
+				const status = score === 0 ? 'not_started' : strand.strandstatus;
+				const diff = score - baseline;
+				const badgeClass = diff > 5 ? 'above' : diff < -5 ? 'below' : 'at';
+				const badgeText = diff > 5 ? `+${diff.toFixed(1)}% above baseline` : 
+								diff < -5 ? `${diff.toFixed(1)}% below baseline` : 
+								'At baseline';
+        
+				return `
+					<div class="strand-item">
+						<div class="strand-icon ${strand.strand_type}">
+							${strandIcons[strand.strand_type] || '📊'}
+						</div>
+						<div class="strand-content">
+							<div class="strand-header">
+								<div class="strand-name">${strandNames[strand.strand_type] || strand.strand_type}</div>
+								<div class="strand-score">${score}%</div>
+							</div>
+							<div class="strand-bar-container">
+								<div class="strand-bar-baseline"></div>
+								<div class="strand-bar-fill" style="width: ${score}%"></div>
+							</div>
+							<div class="strand-meta">
+								<span><strong>${strand.completedmodules}/${strand.totalmodules}</strong> modules complete</span>
+								<span>•</span>
+								<span><strong>${strand.totalattempts || 0}</strong> attempts</span>
+								${score > 0 ? `
+									<span>•</span>
+									<span class="strand-badge ${badgeClass}">${badgeText}</span>
+								` : ''}
+							</div>
+						</div>
+					</div>
+				`;
+			}).join('');
+    
+			console.log('✅ Strand progress HTML rendered');
+		}
+
+
+        // ✅ NEW: Display Research Insights
+        function displayResearchInsights(data, strandProgress) {
+            const insightsContainer = document.getElementById('researchInsights');
+            const correlationsContainer = document.getElementById('correlationsList');
+            
+            // Research constants from thesis
+            const RESEARCH_CONSTANTS = {
+                baseline: 76.3,
+                correlations: {
+                    procedural: 0.226,   // Highest
+                    productive: 0.205,
+                    adaptive: 0.191,
+                    conceptual: 0.184,
+                    strategic: 0.156     // Lowest
+                },
+                rSquared: 0.068,
+                fValue: 3.497,
+                pValue: 0.005
+            };
+            
+            // Calculate predicted performance
+            let prediction = RESEARCH_CONSTANTS.baseline;
+            strandProgress.forEach(strand => {
+                const score = strand.average_score || 0;
+                const correlation = RESEARCH_CONSTANTS.correlations[strand.strand_type] || 0;
+                const deviation = score - RESEARCH_CONSTANTS.baseline;
+                prediction += deviation * correlation;
+            });
+            prediction = Math.max(0, Math.min(100, Math.round(prediction)));
+            
+            const avgScore = data.overallScore || 0;
+            const vsBaseline = avgScore >= RESEARCH_CONSTANTS.baseline ? 'above' : 'below';
+            const vsBaselineDiff = Math.abs(avgScore - RESEARCH_CONSTANTS.baseline).toFixed(1);
+            
+            // Display prediction
+            insightsContainer.innerHTML = `
+                <div class="prediction-card">
+                    <div class="prediction-label">Research-Based Performance Prediction</div>
+                    <div class="prediction-value">${prediction}%</div>
+                    <div class="prediction-detail">
+                        Based on your proficiency across all five strands and validated 
+                        correlation coefficients from educational research.
+                    </div>
+                </div>
+                
+                <div class="research-note">
+                    <strong>Your Performance vs Research Baseline:</strong><br>
+                    Current average: <strong>${Math.round(avgScore)}%</strong> 
+                    (${vsBaselineDiff}% ${vsBaseline} the research baseline of ${RESEARCH_CONSTANTS.baseline}%)
+                    <br><br>
+                    <strong>Key Finding:</strong> Individual proficiency strands are not significant predictors 
+                    alone, but their <em>combined effect is significant</em>. This demonstrates 
+                    that mathematical proficiency develops synergistically across all five areas.
+                </div>
+            `;
+            
+            // Display correlations sorted by strength
+            const sortedCorrelations = Object.entries(RESEARCH_CONSTANTS.correlations)
+                .sort((a, b) => b[1] - a[1]);
+            
+            const strandNames = {
+                conceptual: 'Conceptual',
+                procedural: 'Procedural',
+                strategic: 'Strategic',
+                adaptive: 'Adaptive',
+                productive: 'Productive'
+            };
+            
+            correlationsContainer.innerHTML = sortedCorrelations.map(([strand, corr]) => {
+                const percentage = (corr * 100).toFixed(1);
+                return `
+                    <div class="correlation-item">
+                        <div>
+                            <div class="correlation-name">${strandNames[strand]}</div>
+                            <div class="correlation-bar">
+                                <div class="correlation-bar-fill" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                        <div class="correlation-value">${corr.toFixed(3)}</div>
+                    </div>
+                `;
+            }).join('') + `
+                <div style="margin-top: 16px; padding: 12px; background: #fef3c7; border-radius: 8px; font-size: 11px; color: #78350f; line-height: 1.5;">
+                    <strong>Note:</strong> Higher correlation = stronger impact on overall performance. 
+                    Procedural fluency shows the strongest correlation (r=0.226).
+                </div>
+            `;
+        }
+
+        // ========================================
+        // MOBILE MENU TOGGLE
+        // ========================================
+        function toggleMobileMenu() {
+            const mobileNav = document.getElementById('mobileNav');
+            mobileNav.classList.toggle('active');
+        }
+
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('.mobile-nav .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('mobileNav').classList.remove('active');
+            });
+        });
+
+        // ========================================
+        // LOGOUT FUNCTION
+        // ========================================
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = 'auth.html';
+        }
+
+        // ========================================
+        // LOAD USER INFO
+        // ========================================
+        function loadUserInfo() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const userName = payload.firstName || 'Student';
+                    const initials = userName.substring(0, 2).toUpperCase();
+                    
+                    // Desktop
+                    document.getElementById('userName').textContent = userName;
+                    document.getElementById('userAvatar').textContent = initials;
+                    
+                    // Mobile
+                    document.getElementById('mobileUserName').textContent = userName;
+                    document.getElementById('mobileUserAvatar').textContent = initials;
+                } catch (error) {
+                    console.error('Error parsing token:', error);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserInfo();
+            loadAnalytics();
+        });
+    </script>
+</body>
+</html>
